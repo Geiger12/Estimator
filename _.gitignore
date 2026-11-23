@@ -1,0 +1,13 @@
+# Estimates and workbooks hold rates and client data. Never commit them.
+*.xlsx
+*.xlsm
+*.xls
+*.xlsb
+*.csv
+*.json
+*.pdf
+~$*
+
+# Operating system files
+.DS_Store
+Thumbs.db
