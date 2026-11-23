@@ -220,6 +220,78 @@ footer { padding: 0 32px 28px; color: var(--muted); font-size: 12.5px; display: 
 .field small { color: var(--muted); font-size: 12px; }
 .btn:disabled { opacity: .35; cursor: default; }
 
+/* ---------- v2: worksheets, status line, expenses ---------- */
+.wsbar { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 14px 16px; margin-bottom: 16px; }
+.wstabs { display: flex; gap: 6px; flex-wrap: wrap; }
+.wstab { border: 1px solid var(--rule); background: var(--paper); color: var(--ink); border-radius: 999px; padding: 6px 14px; cursor: pointer; font-weight: 600; font-size: 13px; display: inline-flex; gap: 8px; align-items: baseline; }
+.wstab small { font-weight: 400; color: var(--muted); font-size: 11.5px; }
+.wstab[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: #fff; }
+.wstab[aria-pressed="true"] small { color: rgba(255,255,255,.75); }
+.wstab.add { background: transparent; border-style: dashed; color: var(--blue); }
+.wsset { display: flex; gap: 12px 18px; align-items: flex-end; flex-wrap: wrap; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--rule-soft); }
+label.mini { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+label.mini input { border: 1px solid var(--field-line); background: var(--field); color: var(--ink); border-radius: 6px; padding: 6px 9px; width: 110px; }
+label.mini.grow input { width: 220px; }
+label.mini .sfx { position: relative; }
+label.mini .sfx::after, td .sfx::after { content: attr(data-sfx); position: absolute; right: 9px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 12.5px; }
+td .sfx { position: relative; display: block; }
+td .sfx input { padding-right: 24px; }
+label.check { display: inline-flex; gap: 8px; align-items: center; font-size: 13px; padding-bottom: 7px; }
+label.check input { width: 16px; height: 16px; accent-color: var(--blue); }
+.statusline { position: sticky; bottom: 0; z-index: 15; display: flex; flex-wrap: wrap; gap: 6px 26px; align-items: baseline; background: var(--card); border-top: 1px solid var(--rule); padding: 10px 32px; box-shadow: 0 -6px 18px rgba(15,76,117,.06); font-size: 13px; }
+.statusline .sl-label { font-family: var(--head); font-weight: 800; color: var(--navy); }
+@media (prefers-color-scheme: dark) { .statusline .sl-label { color: var(--blue); } }
+.statusline span { display: inline-flex; gap: 8px; align-items: baseline; }
+.statusline small { color: var(--muted); font-size: 12px; }
+.statusline b { font-variant-numeric: tabular-nums; }
+.statusline .sl-m { color: var(--orange); }
+.statusline .sl-note { margin-left: auto; color: var(--muted); font-size: 12px; }
+.linkish { background: none; border: 0; padding: 0; color: var(--blue); font-weight: 600; cursor: pointer; font: inherit; font-weight: 600; text-align: left; }
+.tag { font-size: 12px; color: var(--muted); font-weight: 400; }
+table.t tr.off td { color: var(--muted); }
+table.t tr.cur td { background: var(--tint); font-weight: 700; }
+table.t tr.wsrow td { font-family: var(--head); font-weight: 800; font-size: 15px; padding-top: 22px; border-bottom: 2px solid var(--rule); }
+table.t .c-inc { width: 70px; text-align: center; }
+table.t td.c-inc input, table.t td.c-pmb input { width: 16px; height: 16px; accent-color: var(--blue); }
+table.t .c-pmb { width: 72px; text-align: center; }
+table.t .c-unit { width: 120px; }
+.sub-h { font-size: 14px; margin: 18px 0 10px; }
+.tablist { margin: 6px 0 8px; padding-left: 18px; }
+@media (max-width: 640px) { .statusline { padding: 10px 16px; gap: 4px 16px; } .statusline .sl-note { margin-left: 0; } label.mini.grow input { width: 100%; } }
+@media print { .statusline, .wsbar .wstab.add, .wsset .btn { display: none !important; } }
+
+/* ---------- v3: combined price breakdown and complexity matrix ---------- */
+table.pb .o { color: var(--ink); }
+table.pb .pr, table.cxl .pr { font-weight: 700; }
+table.t tr.cxrow td { background: var(--tint); }
+table.t tr.cxrow td small { display: block; color: var(--muted); font-size: 12px; }
+table.t tr.auto.strong td { color: var(--ink); font-weight: 700; }
+table.t .empty-row { color: var(--muted); padding: 16px 8px; }
+.linkish.small { font-size: 12.5px; margin-left: 10px; font-family: var(--body); }
+table.t tr.phase .linkish.small { font-weight: 600; }
+.filters { display: flex; gap: 12px 16px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 14px; }
+.filters select { border: 1px solid var(--field-line); background: var(--field); color: var(--ink); border-radius: 6px; padding: 6px 9px; min-width: 160px; }
+table.matrix .c-cx { width: 64px; }
+table.matrix input.cx { min-width: 54px; }
+table.matrix input.ovr { border-color: var(--orange); font-weight: 700; }
+table.matrix input::placeholder, table.cxl input::placeholder { color: var(--muted); opacity: .9; }
+.stage-sum { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.stage-sum .hrs-in input { width: 90px; }
+table.t.inner { width: auto; min-width: 380px; margin: 4px 0 10px; }
+table.t tr.stages > td { background: var(--tint); }
+table.cxl .c-area { min-width: 130px; } table.cxl .c-type { min-width: 120px; } table.cxl .c-task { min-width: 180px; }
+table.t.compact td, table.t.compact th { padding: 6px 8px; }
+.tablist.checks-list { list-style: none; padding-left: 0; display: grid; gap: 6px; }
+.tablist.checks-list label.check { padding-bottom: 0; align-items: flex-start; }
+.tablist.checks-list label.check input { margin-top: 2px; }
+table.pb .c-phase { min-width: 110px; width: 11%; } table.pb .c-task { min-width: 190px; } table.pb .c-level { min-width: 120px; width: 11%; }
+table.pb .c-num { width: 72px; min-width: 64px; } table.pb .c-notes { min-width: 90px; width: 9%; } table.pb .c-act { width: 112px; }
+table.pb td, table.pb th { padding-left: 5px; padding-right: 5px; }
+table.pb .row-act .btn { padding: 6px 5px; }
+table.matrix th.c-num, table.matrix td:nth-child(3) { width: 110px; }
+table.matrix td:nth-child(3) input { max-width: 100px; }
+table.cxl .c-num { width: 90px; }
+
 </style>
 </head>
 <body>
@@ -232,6 +304,7 @@ footer { padding: 0 32px 28px; color: var(--muted); font-size: 12.5px; display: 
 </header>
 <section class="hero" id="hero" hidden></section>
 <main id="main"></main>
+<div class="statusline" id="statusline" role="status" aria-label="Estimate totals" hidden></div>
 <footer>
   <span>Draft estimate. A qualified person reviews hours, rates and margin before anything is sent. Data stays in this browser and in the Excel files you save.</span>
   <span id="status" role="status" aria-live="polite"></span>
@@ -239,14 +312,696 @@ footer { padding: 0 32px 28px; color: var(--muted); font-size: 12.5px; display: 
 <dialog id="xl-dialog" aria-labelledby="xl-title">
   <h2 id="xl-title">Open an Excel workbook</h2>
   <p class="file" id="xl-name"></p>
-  <label class="field" id="xl-tab-field">Tab to import<select id="xl-tab"></select></label>
+  
   <div id="xl-msg"></div>
   <p class="hint" id="xl-replace" hidden>Opening replaces the estimate in this browser. Use Save as Excel first if you need it.</p>
   <div class="row"><button class="btn" data-act="xlCancel">Cancel</button><button class="btn primary" id="xl-go" data-act="xlImport" disabled>Open</button></div>
 </dialog>
 <datalist id="phase-list"></datalist>
+<datalist id="area-list"></datalist>
 <input type="file" id="xl-file" accept=".xlsx,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12" hidden>
 <script>
+'use strict';
+/* GrayMatter Estimator (simple). One file, no libraries, nothing leaves the browser. */
+const KEY = 'gm-simple-estimator:v1';
+const $ = (s, e = document) => e.querySelector(s);
+const $$ = (s, e = document) => [...e.querySelectorAll(s)];
+const isNum = v => typeof v === 'number' && isFinite(v);
+const num = v => (isNum(v) ? v : (v === '' || v == null ? 0 : (isFinite(+v) ? +v : 0)));
+const up = x => (!isNum(x) || x === 0 ? 0 : Math.sign(x) * Math.ceil(Math.abs(x) - 1e-9));     // Excel ROUNDUP(x,0)
+const down = x => (!isNum(x) || x === 0 ? 0 : Math.sign(x) * Math.floor(Math.abs(x) + 1e-9)); // Excel ROUNDDOWN(x,0)
+const uid = p => p + Math.random().toString(36).slice(2, 9);
+const h = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const parseNum = s => +String(s).replace(/[$,%\s]/g, '');
+const pctIn = v => (isNum(v) ? String(+(v * 100).toFixed(4)) : '');
+const numIn = v => (isNum(v) ? String(+v.toFixed(4)) : '');
+
+const F0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0, minimumFractionDigits: 0 });
+const F2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, minimumFractionDigits: 2 });
+const money = (x, dp = 0) => (isNum(x) ? (dp ? F2 : F0).format(Math.abs(x) < 0.005 ? 0 : x) : '—');
+const hrs = x => (isNum(x) ? (Math.round(x * 10) / 10).toLocaleString('en-US') : '—'); // popups run in half hours
+const pct = (x, dp = 1) => (isNum(x) ? (x * 100).toFixed(dp) + '%' : '—');
+function fmt(v, f) {
+  switch (f) {
+    case 'm0': return money(v, 0);
+    case 'm2': return money(v, 2);
+    case 'h': return hrs(v);
+    case 'p': return pct(v);
+    case 'n1': return isNum(v) ? (Math.round(v * 10) / 10).toLocaleString('en-US') : '—';
+    default: return v == null ? '' : String(v);
+  }
+}
+const walk = (o, p) => p.split('.').reduce((a, k) => (a == null ? undefined : a[k]), o);
+
+/* ---------- Data ---------- */
+const FRIENDLY = { IA_ENGR_I: 'Eng I', IA_ENGR_II: 'Eng II', IA_ENGR_SR: 'Eng Sr', IA_CONSULT: 'Consultant', PROJ_MGR: 'Project manager', PROJ_MGR_SR: 'Sr project manager', IOPS: 'iOPS partner' };
+const blankWorksheet = name => ({ id: uid('w'), name, include: true, pmPct: null, contPct: null, expContPct: null });
+function blankEstimate() {
+  const ws = blankWorksheet('Worksheet 1');
+  return {
+    app: 'gm-simple-estimator', version: 2,
+    project: { name: '', customer: '', number: '', rev: '0', preparedBy: '', notes: '' },
+    settings: { margin: 0, pmPct: 0, contPct: 0, escPct: 0, pmLevel: 'PM', expMargin: 0, expEscPct: 0, pmRule: 'all' },
+    levels: [
+      { id: 'ENG_I', name: 'Eng I', code: 'ENG_I', cost: 0, margin: null },
+      { id: 'ENG_II', name: 'Eng II', code: 'ENG_II', cost: 0, margin: null },
+      { id: 'ENG_SR', name: 'Eng Sr', code: 'ENG_SR', cost: 0, margin: null },
+      { id: 'PM', name: 'Project manager', code: 'PROJ_MGR', cost: 0, margin: null }
+    ],
+    setpoints: [['Airfare', 'trip'], ['Lodging', 'night'], ['Meals', 'day'], ['Miscellaneous', 'day'], ['Rental car', 'day'], ['Private automobile', 'mile'], ['Per diem', 'day'], ['Per week', 'week']]
+      .map(([name, unit]) => ({ id: uid('s'), name, unit, cost: 0 })),
+    approval: null,
+    worksheets: [ws], tasks: [], expenses: [], source: null,
+    matrix: blankMatrix()
+  };
+}
+/* Complexity matrix: hours per item by type and complexity 0-6. A blank cell uses hours per point × complexity. */
+const CX_LEVELS = [0, 1, 2, 3, 4, 5, 6];
+function blankMatrix() {
+  return { types: [
+    { id: 'graphic', name: 'Graphic', basis: 'scale', perPoint: null, hours: [null, null, null, null, null, null, null], stages: [], fixed: null },
+    { id: 'popup', name: 'Popup', basis: 'scale', perPoint: null, hours: [null, null, null, null, null, null, null], stages: [], fixed: null },
+    { id: 'dashboard', name: 'Dashboard', basis: 'fixed', perPoint: null, hours: [null, null, null, null, null, null, null], stages: [], fixed: null }
+  ], mix: [], lines: [] };
+}
+function typeHours(t, cx) {
+  if (!t) return 0;
+  if (t.basis === 'fixed') return t.stages && t.stages.length ? t.stages.reduce((a, x) => a + num(x.hrs), 0) : num(t.fixed);
+  const i = Math.trunc(num(cx)); if (i < 0 || i > 6) return 0;
+  const v = (t.hours || [])[i]; return isNum(v) ? v : num(t.perPoint) * i;
+}
+/* Accepts v1 (single worksheet) and v2 data, fills anything missing */
+function normalize(q) {
+  if (!q || typeof q !== 'object' || !Array.isArray(q.tasks) || !Array.isArray(q.levels)) throw new Error('This is not an estimate from this app.');
+  const b = blankEstimate();
+  q.app = b.app; q.version = 2;
+  q.project = Object.assign({}, b.project, q.project || {});
+  q.settings = Object.assign({}, b.settings, q.settings || {});
+  if (!Array.isArray(q.setpoints)) q.setpoints = b.setpoints;
+  if (!Array.isArray(q.expenses)) q.expenses = [];
+  if (q.approval === undefined) q.approval = null;
+  q.levels.forEach(l => { if (!l.id) l.id = uid('L'); if (l.margin === undefined) l.margin = null; });
+  if (!Array.isArray(q.worksheets) || !q.worksheets.length) {
+    const ws = blankWorksheet((q.source && q.source.sheet) || 'Worksheet 1');
+    q.worksheets = [ws];
+    q.tasks.forEach(t => { t.ws = ws.id; });
+    if (q.source && !q.source.final) q.source = null;
+  }
+  q.worksheets.forEach(w => { if (!w.id) w.id = uid('w'); ['pmPct', 'contPct', 'expContPct'].forEach(k => { if (w[k] === undefined) w[k] = null; }); if (w.include === undefined) w.include = true; });
+  const first = q.worksheets[0].id; const ids = new Set(q.worksheets.map(w => w.id));
+  q.tasks.forEach(t => { if (!t.id) t.id = uid('t'); if (!ids.has(t.ws)) t.ws = first; if (t.pmBase === undefined) t.pmBase = true; });
+  q.expenses.forEach(x => { if (!x.id) x.id = uid('x'); if (!ids.has(x.ws)) x.ws = first; });
+  if (q.source === undefined) q.source = null;
+  if (!q.matrix || typeof q.matrix !== 'object') q.matrix = blankMatrix();
+  const M = q.matrix; if (!Array.isArray(M.types)) M.types = blankMatrix().types; if (!Array.isArray(M.mix)) M.mix = []; if (!Array.isArray(M.lines)) M.lines = [];
+  M.types.forEach(t => { if (!t.id) t.id = uid('k'); if (!Array.isArray(t.hours)) t.hours = []; while (t.hours.length < 7) t.hours.push(null); if (!Array.isArray(t.stages)) t.stages = []; if (!t.basis) t.basis = 'scale'; });
+  M.lines.forEach(l => { if (!l.id) l.id = uid('c'); if (!ids.has(l.ws)) l.ws = first; if (!l.level) l.level = 'mix'; });
+  return q;
+}
+
+/* ---------- Calculation: mirrors an estimating tab plus the Financial roll-up ---------- */
+function calc(st, opt = {}) {
+  const lv = {}; st.levels.forEach(l => { lv[l.id] = l; });
+  const sp = {}; st.setpoints.forEach(x => { sp[x.id] = x; });
+  const s = st.settings;
+  const mDef = isNum(opt.margin) ? opt.margin : num(s.margin);
+  const e = num(s.escPct), eE = num(s.expEscPct), mE = num(s.expMargin);
+  const gross = (c, m, esc) => (m < 1 ? c * (1 + esc) / (1 - m) : NaN);
+  const levelM = L => (L && isNum(L.margin) ? L.margin : mDef);
+  const out = { tasks: {}, exp: {}, ws: {}, m: mDef, e, eE, mE };
+  const zero = () => ({ hrs: 0, cost: 0, price: 0 });
+  const byL = {}, byP = {}, order = [];
+  const addL = (id, name, hh, c, p) => { const k = id || '_none'; byL[k] = byL[k] || { id: k, name, hrs: 0, cost: 0, price: 0 }; byL[k].hrs += hh; byL[k].cost += c; byL[k].price += p; };
+  const Q = { hrs: 0, cost: 0, price: 0, taskHrs: 0, taskCost: 0, taskPrice: 0, pmCost: 0, pmPrice: 0, pmHrs: 0, contCost: 0, contPrice: 0, contHrs: 0, laborEsc: 0, expCost: 0, expEsc: 0, expPrice: 0, laborCost: 0, laborPrice: 0, expTotal: 0 };
+
+  // Complexity matrix: blended rates for the skill mix
+  const MX = st.matrix || blankMatrix(); const ty = {}; MX.types.forEach(t => { ty[t.id] = t; });
+  const mixParts = (MX.mix || []).filter(p => lv[p.level] && num(p.pct)).map(p => { const L = lv[p.level]; const m = levelM(L); return { id: L.id, name: L.name, pct: num(p.pct), cost: num(L.cost), m, pr: m < 1 ? num(L.cost) / (1 - m) : NaN }; });
+  out.mixPct = (MX.mix || []).reduce((a, p) => a + num(p.pct), 0);
+  out.mixCost = mixParts.reduce((a, p) => a + p.pct * p.cost, 0); out.mixPrice = mixParts.reduce((a, p) => a + p.pct * p.pr, 0);
+  out.cx = {}; out.cxType = {}; out.cxArea = {};
+  for (const l of MX.lines) {
+    const t = ty[l.type]; const hh = num(l.qty) * typeHours(t, l.cx); let c, p, rate, m;
+    if (l.level === 'mix') { rate = out.mixCost; c = hh * out.mixCost; p = hh * out.mixPrice * (1 + e); m = p ? 1 - (c * (1 + e)) / p : null; }
+    else { const L = lv[l.level]; rate = L ? num(L.cost) : 0; m = levelM(L); c = hh * rate; p = gross(c, m, e); }
+    out.cx[l.id] = { hrs: hh, unit: typeHours(t, l.cx), rate, cost: c, price: p, m };
+  }
+
+  for (const w of st.worksheets) {
+    const W = { taskHrs: 0, taskCost: 0, taskPrice: 0, pmBase: 0 };
+    const tasks = st.tasks.filter(t => t.ws === w.id);
+    for (const t of tasks) {
+      const L = lv[t.level]; const rate = L ? num(L.cost) : 0; const m = levelM(L);
+      const hh = up(num(t.qty) * num(t.hours)); const c = hh * rate; const p = gross(c, m, e);
+      out.tasks[t.id] = { hrs: hh, rate, cost: c, price: p, m };
+      W.taskHrs += hh; W.taskCost += c; W.taskPrice += p;
+      if (s.pmRule !== 'workbook' || t.pmBase !== false) W.pmBase += hh;
+      if (w.include !== false) {
+        addL(t.level, L ? L.name : 'No level', hh, c, p);
+        const ph = (t.phase || '').trim() || 'No phase';
+        if (!byP[ph]) { byP[ph] = { phase: ph, hrs: 0, cost: 0, price: 0, n: 0 }; order.push(ph); }
+        byP[ph].hrs += hh; byP[ph].cost += c; byP[ph].price += p; byP[ph].n++;
+      }
+    }
+    // Phase subtotals for the tasks on this worksheet (order of first appearance)
+    W.phases = []; const phIdx = {};
+    for (const t of tasks) { const ph = (t.phase || '').trim() || 'No phase'; if (!(ph in phIdx)) { phIdx[ph] = W.phases.length; W.phases.push({ phase: ph, hrs: 0, cost: 0, price: 0, n: 0 }); } const g = W.phases[phIdx[ph]], r = out.tasks[t.id]; g.hrs += r.hrs; g.cost += r.cost; g.price += r.price; g.n++; }
+    W.tHrs = W.taskHrs; W.tCost = W.taskCost; W.tPrice = W.taskPrice;
+    // Complexity lines on this worksheet, grouped by area and type
+    W.cx = []; const cxIdx = {}; W.cxHrs = 0; W.cxCost = 0; W.cxPrice = 0;
+    for (const l of MX.lines.filter(x => x.ws === w.id)) {
+      const r = out.cx[l.id]; const t = ty[l.type]; const area = (l.area || '').trim() || 'No area'; const key = area + '\u0000' + l.type;
+      if (!(key in cxIdx)) { cxIdx[key] = W.cx.length; W.cx.push({ area, type: l.type, typeName: t ? t.name : 'Unknown type', n: 0, hrs: 0, cost: 0, price: 0, levels: new Set() }); }
+      const g = W.cx[cxIdx[key]]; g.n++; g.hrs += r.hrs; g.cost += r.cost; g.price += r.price; g.levels.add(l.level);
+      W.cxHrs += r.hrs; W.cxCost += r.cost; W.cxPrice += r.price;
+      W.taskHrs += r.hrs; W.taskCost += r.cost; W.taskPrice += r.price; W.pmBase += r.hrs;
+      if (w.include !== false) {
+        const tn = t ? t.name : 'Unknown type';
+        out.cxType[l.type] = out.cxType[l.type] || { name: tn, n: 0, hrs: 0, price: 0 }; out.cxType[l.type].n++; out.cxType[l.type].hrs += r.hrs; out.cxType[l.type].price += r.price;
+        if (!byP[tn]) { byP[tn] = { phase: tn, hrs: 0, cost: 0, price: 0, n: 0 }; order.push(tn); }
+        byP[tn].hrs += r.hrs; byP[tn].cost += r.cost; byP[tn].price += r.price; byP[tn].n++;
+        if (l.level === 'mix') mixParts.forEach(p => addL(p.id, p.name, r.hrs * p.pct, r.hrs * p.pct * p.cost, r.hrs * p.pct * p.pr * (1 + e)));
+        else { const L = lv[l.level]; addL(l.level, L ? L.name : 'No level', r.hrs, r.cost, r.price); }
+      }
+    }
+    W.cx.forEach(g => { g.rate = g.hrs ? g.cost / g.hrs : null; g.m = g.price ? 1 - g.cost * (1 + e) / g.price : null; g.level = g.levels.size === 1 ? [...g.levels][0] : 'several'; delete g.levels; });
+    const PL = lv[s.pmLevel]; const pmPct = isNum(w.pmPct) ? w.pmPct : num(s.pmPct);
+    W.pm = { pct: pmPct, base: W.pmBase, rate: PL ? num(PL.cost) : 0, name: PL ? PL.name : 'No level', m: levelM(PL) };
+    W.pm.hrs = up(pmPct * W.pmBase); W.pm.cost = W.pm.hrs * W.pm.rate; W.pm.price = gross(W.pm.cost, W.pm.m, e);
+    W.pm.excluded = tasks.filter(t => t.pmBase === false).length;
+    const cp = isNum(w.contPct) ? w.contPct : num(s.contPct);
+    W.cont = { pct: cp, hrs: down(cp * (W.taskHrs + W.pm.hrs)), cost: cp * (W.taskCost + W.pm.cost) };
+    W.cont.price = gross(W.cont.cost, mDef, e);
+    W.laborCost = W.taskCost + W.pm.cost + W.cont.cost; W.laborEsc = W.laborCost * e;
+    W.laborPrice = W.taskPrice + W.pm.price + W.cont.price;
+    // Expenses
+    W.expCost = 0;
+    for (const x of st.expenses.filter(x => x.ws === w.id)) {
+      const unit = isNum(x.unit) ? x.unit : (x.sp && sp[x.sp] ? num(sp[x.sp].cost) : 0);
+      const c = num(x.qty) * unit * (isNum(x.mult) ? x.mult : 1);
+      out.exp[x.id] = { unit, cost: c, price: gross(c, mE, eE) };
+      W.expCost += c;
+    }
+    const ecp = num(w.expContPct);
+    W.expCont = { pct: ecp, cost: ecp * W.expCost };
+    W.expEsc = (W.expCost + W.expCont.cost) * eE;
+    W.expPrice = gross(W.expCost + W.expCont.cost, mE, eE);
+    W.expCont.price = gross(W.expCont.cost, mE, eE);
+    W.expCostTotal = W.expCost + W.expCont.cost + W.expEsc;
+    W.hrs = W.taskHrs + W.pm.hrs + W.cont.hrs;
+    W.cost = W.laborCost + W.laborEsc + W.expCost + W.expCont.cost + W.expEsc;
+    W.price = W.laborPrice + W.expPrice;
+    W.gp = W.price - W.cost; W.margin = W.price ? W.gp / W.price : null;
+    out.ws[w.id] = W;
+    if (w.include !== false) {
+      if (W.pm.hrs) addL(s.pmLevel, W.pm.name, W.pm.hrs, W.pm.cost, W.pm.price);
+      if (W.cont.hrs || W.cont.cost) addL('_cont', 'Contingency', W.cont.hrs, W.cont.cost, W.cont.price);
+      Q.hrs += W.hrs; Q.cost += W.cost; Q.price += W.price;
+      Q.taskHrs += W.taskHrs; Q.taskCost += W.taskCost; Q.taskPrice += W.taskPrice;
+      Q.pmHrs += W.pm.hrs; Q.pmCost += W.pm.cost; Q.pmPrice += W.pm.price;
+      Q.contHrs += W.cont.hrs; Q.contCost += W.cont.cost; Q.contPrice += W.cont.price;
+      Q.laborEsc += W.laborEsc; Q.laborCost += W.laborCost + W.laborEsc; Q.laborPrice += W.laborPrice;
+      Q.expCost += W.expCost + W.expCont.cost; Q.expEsc += W.expEsc; Q.expPrice += W.expPrice;
+    }
+  }
+  Q.esc = Q.laborEsc + Q.expEsc; Q.expTotal = Q.expCost + Q.expEsc;
+  Q.gp = Q.price - Q.cost; Q.margin = Q.price ? Q.gp / Q.price : null; Q.perHr = Q.hrs ? Q.price / Q.hrs : null;
+  Q.laborMargin = Q.laborPrice ? (Q.laborPrice - Q.laborCost) / Q.laborPrice : null;
+  Q.expMargin = Q.expPrice ? (Q.expPrice - Q.expTotal) / Q.expPrice : null;
+  Q.included = st.worksheets.filter(w => w.include !== false).length;
+  Object.assign(out, Q);
+  out.byLevel = Object.values(byL).filter(x => x.hrs || x.cost).sort((a, b) => b.hrs - a.hrs);
+  out.byPhase = order.map(p => byP[p]);
+  out.approval = approve(out, st.approval);
+  out.approver = out.approval ? out.approval.name : 'Not set';
+  return out;
+}
+
+/* Delegation of authority: same tests as the DOA tab. Each test picks the first tier it passes; the highest tier wins. */
+function approve(Q, a) {
+  if (!a || !Array.isArray(a.tiers) || !a.tiers.length) return null;
+  const last = a.tiers.length - 1;
+  let price = last;
+  for (let i = 0; i < (a.priceMax || []).length; i++) if (isNum(a.priceMax[i]) && Q.price <= a.priceMax[i] + 1e-6) { price = i; break; }
+  const test = (p, m, mins, floor) => {
+    if (!(p > 0) || !Array.isArray(mins)) return 0;
+    for (let i = 0; i < mins.length; i++) if (isNum(mins[i]) && m >= mins[i] - 1e-9) return i;
+    return Math.min(isNum(floor) ? floor : mins.length, last);
+  };
+  const f = a.floors || {};
+  const labor = test(Q.laborPrice, Q.laborMargin, a.labor, f.labor);
+  const expense = test(Q.expPrice, Q.expMargin, a.expense, f.expense);
+  const o = a.overall || {};
+  let overall = 0;
+  if (isNum(o.minGP) && Q.price > 0 && Q.margin < o.minGP - 1e-9) overall = isNum(o.splitPrice) && Q.price <= o.splitPrice ? num(o.below) : num(o.above);
+  const by = { price, labor, expense, overall };
+  const idx = Math.min(Math.max(...Object.values(by)), last);
+  return { idx, name: a.tiers[idx], by, names: Object.fromEntries(Object.entries(by).map(([k, v]) => [k, a.tiers[Math.min(v, last)]])) };
+}
+
+/* Labor margin that hits a target price. Price is linear in 1/(1 − m) for everything on the default margin. */
+function solveMargin(st, targetPrice) {
+  const p0 = calc(st, { margin: 0 }).price, p5 = calc(st, { margin: 0.5 }).price;
+  const A = p5 - p0, B = p0 - A;
+  if (!(A > 1e-9)) return { ok: false, why: 'No priced labor uses the default margin.' };
+  if (!(targetPrice > B)) return { ok: false, why: `That is below what the fixed-margin items alone cost (${money(B)}).` };
+  const m = 1 - A / (targetPrice - B);
+  return m < 1 ? { ok: true, m } : { ok: false, why: 'No margin below 100% reaches that price.' };
+}
+
+/* ---------- Excel reader: the browser's own unzip plus XML parsing ---------- */
+async function openZip(buf) {
+  const dv = new DataView(buf); const u8 = new Uint8Array(buf); const dec = new TextDecoder();
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65600); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('This file is not an Excel workbook (.xlsx or .xlsm).');
+  const count = dv.getUint16(eocd + 10, true); let p = dv.getUint32(eocd + 16, true);
+  const entries = {};
+  for (let n = 0; n < count; n++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+    const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+    entries[dec.decode(u8.subarray(p + 46, p + 46 + nlen))] = { method, csize, off };
+    p += 46 + nlen + xlen + clen;
+  }
+  return async name => {
+    const e = entries[name]; if (!e) return null;
+    const start = e.off + 30 + dv.getUint16(e.off + 26, true) + dv.getUint16(e.off + 28, true);
+    const data = u8.subarray(start, start + e.csize);
+    if (e.method === 0) return dec.decode(data);
+    if (e.method !== 8) throw new Error('This workbook uses a compression this page cannot read.');
+    if (typeof DecompressionStream === 'undefined') throw new Error('This browser cannot read Excel files. Use a current version of Edge, Chrome, Firefox or Safari.');
+    const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return dec.decode(await new Response(stream).arrayBuffer());
+  };
+}
+async function readWorkbook(buf) {
+  const file = await openZip(buf);
+  const xml = s => new DOMParser().parseFromString(s, 'application/xml');
+  const all = (node, tag) => [...node.getElementsByTagNameNS('*', tag)];
+  const wbXml = await file('xl/workbook.xml'); if (!wbXml) throw new Error('This file is not an Excel workbook.');
+  const wb = xml(wbXml); const rels = xml(await file('xl/_rels/workbook.xml.rels'));
+  const target = {}; all(rels, 'Relationship').forEach(r => { target[r.getAttribute('Id')] = r.getAttribute('Target'); });
+  const RNS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const sheets = all(wb, 'sheet').map(s => {
+    const t = target[s.getAttributeNS(RNS, 'id') || s.getAttribute('r:id')] || '';
+    return { name: s.getAttribute('name'), state: s.getAttribute('state') || 'visible', path: t.startsWith('/') ? t.slice(1) : 'xl/' + t.replace(/^\.\//, '') };
+  });
+  const names = {}; all(wb, 'definedName').forEach(d => { if (!d.hasAttribute('localSheetId')) names[d.getAttribute('name')] = d.textContent; });
+  const sstXml = await file('xl/sharedStrings.xml');
+  const shared = sstXml ? all(xml(sstXml), 'si').map(si => all(si, 't').filter(t => t.parentNode.localName !== 'rPh').map(t => t.textContent).join('')) : [];
+  const cache = {}, fcache = {};
+  async function load(name) {
+    if (cache[name]) return true;
+    const sh = sheets.find(x => x.name === name); if (!sh) return false;
+    const src = await file(sh.path); if (!src) return false;
+    const cells = {}, formulas = {};
+    for (const c of all(xml(src), 'c')) {
+      const ref = c.getAttribute('r'); const t = c.getAttribute('t');
+      const v = c.getElementsByTagNameNS('*', 'v')[0]; const f = c.getElementsByTagNameNS('*', 'f')[0];
+      let val = null;
+      if (t === 's') val = v ? shared[+v.textContent] ?? null : null;
+      else if (t === 'inlineStr') val = all(c, 't').map(x => x.textContent).join('');
+      else if (t === 'str' || t === 'e') val = v ? v.textContent : null;
+      else if (t === 'b') val = v ? v.textContent === '1' : null;
+      else val = v && v.textContent !== '' ? +v.textContent : null;
+      cells[ref] = val;
+      if (f && f.textContent) formulas[ref] = f.textContent;
+    }
+    cache[name] = cells; fcache[name] = formulas; return true;
+  }
+  const sheet = async name => ((await load(name)) ? cache[name] : null);
+  const formula = async (name, ref) => ((await load(name)) ? fcache[name][ref] || null : null);
+  async function named(name) {
+    const ref = names[name]; if (!ref) return null;
+    const m = ref.match(/^'?(.+?)'?!\$?([A-Z]+)\$?(\d+)$/); if (!m) return null;
+    const c = await sheet(m[1]); return c ? c[m[2] + m[3]] : null;
+  }
+  return { sheets, sheet, formula, named, names };
+}
+const isEstimateTab = c => c && /task description/i.test(String(c.G9 || '')) && /role/i.test(String(c.F9 || ''));
+const str = v => (v == null ? '' : String(v).trim());
+function cleanPhase(activity, wbs) {
+  let a = str(activity);
+  if (!a && wbs) a = String(wbs).slice(7).trim();
+  return a.replace(/^[A-Z]{2,6}-(?=[A-Za-z])/, '');
+}
+
+/* ---------- Import from the GMS estimator (.xlsm): every estimating tab plus the Financial roll-up ---------- */
+const SETPOINT_NAMES = [['Airfare_SP', 'Airfare', 'trip'], ['Lodging_SP', 'Lodging', 'night'], ['Meals_SP', 'Meals', 'day'], ['Misc_SP', 'Miscellaneous', 'day'],
+  ['RntCar_SP', 'Rental car', 'day'], ['PrsnlCar_SP', 'Private automobile', 'mile'], ['PerDiem_SP', 'Per diem', 'day'], ['PerWeek_SP', 'Per week', 'week']];
+
+async function listEstimatorTabs(wb) {
+  const fin = await wb.sheet('Financial'); const tabs = [];
+  if (fin) {
+    for (let r = 9; r <= 40; r++) {
+      const nm = str(fin['B' + r]); if (!nm || /^template/i.test(nm) || tabs.some(t => t.name === nm)) continue;
+      const sh = wb.sheets.find(s => s.name === nm); if (!sh) continue;
+      if (isEstimateTab(await wb.sheet(nm))) tabs.push({ name: nm, include: !/^no/i.test(str(fin['C' + r])) });
+    }
+  }
+  if (!tabs.length) for (const s of wb.sheets) if (s.state === 'visible' && isEstimateTab(await wb.sheet(s.name))) tabs.push({ name: s.name, include: true });
+  return tabs;
+}
+async function extractTab(wb, tabName, rates, levelIds) {
+  const c = await wb.sheet(tabName);
+  if (!isEstimateTab(c)) throw new Error(`The ${tabName} tab does not look like an estimate tab.`);
+  const rows = []; let pmRow = null;
+  for (let r = 10; r <= 500; r++) {
+    const D = c['D' + r]; const E = str(c['E' + r]);
+    if (D === 900005 || /^project management$/i.test(E)) { pmRow = r; break; }
+    const name = str(c['G' + r]); const hours = num(c['J' + r]) + num(c['K' + r]) + num(c['L' + r]);
+    if (!name && !hours) continue;
+    const code = str(c['F' + r]);
+    if (code && !rates[code] && isNum(c['P' + r]) && c['P' + r] > 0) rates[code] = { desc: '', cost: c['P' + r] };
+    if (code) levelIds.add(code);
+    const wbs = str(c['C' + r]);
+    rows.push({ r, t: { id: uid('t'), wbs: wbs.slice(0, 6), phase: cleanPhase(E, wbs), name, level: code || null, qty: isNum(c['I' + r]) ? c['I' + r] : null, hours: hours || null, notes: '', pmBase: true } });
+  }
+  if (pmRow === null) throw new Error(`Could not find the Project Management row on the ${tabName} tab.`);
+  const pmCode = str(c['F' + pmRow]) || 'PROJ_MGR';
+  if (!rates[pmCode] && isNum(c['P' + pmRow])) rates[pmCode] = { desc: '', cost: c['P' + pmRow] };
+  const absorbed = /yes\s*$/i.test(str(c['G' + (pmRow + 1)]));
+  const pmPct = num(c['I' + pmRow]) || num(c['I' + (pmRow + 1)]);
+  // Which task rows the workbook's PM formula counts, e.g. =SUM(N8:N20)
+  const pmF = await wb.formula(tabName, 'J' + (pmRow + 1));
+  const rng = pmF && pmF.match(/SUM\(\s*\$?N\$?(\d+)\s*:\s*\$?N\$?(\d+)\s*\)/i);
+  if (rng) rows.forEach(x => { x.t.pmBase = x.r >= +rng[1] && x.r <= +rng[2]; });
+  let contPct = 0, contMode = 'none', laborTotals = null;
+  for (let r = pmRow + 1; r <= pmRow + 15; r++) {
+    const D = c['D' + r]; const E = str(c['E' + r]); const G = str(c['G' + r]);
+    if (D === 900095 || /labor contingency/i.test(E)) { contPct = /^no/i.test(G) ? 0 : num(c['I' + r]); contMode = /^no/i.test(G) ? 'none' : /priced$/i.test(G) && !/not priced$/i.test(G) ? 'priced' : 'cost'; }
+    if (/labor totals/i.test(str(D))) { laborTotals = r; break; }
+  }
+  // Expenses: lines until "Expense Totals"
+  const expenses = []; let expContPct = 0, expTotals = null;
+  for (let r = (laborTotals || pmRow) + 1; r <= (laborTotals || pmRow) + 40; r++) {
+    const D = c['D' + r];
+    if (/expense totals/i.test(str(D))) { expTotals = r; break; }
+    if (D === 910095) { if (/priced$/i.test(str(c['G' + r])) && !/not priced$/i.test(str(c['G' + r]))) expContPct = num(c['I' + r]); continue; }
+    if (D !== 910005) continue;
+    const q = c['I' + r]; if (!isNum(q) || !q) continue;
+    const kf = await wb.formula(tabName, 'K' + r); const m = kf && kf.match(/^\s*=?\s*([A-Za-z_]+_SP)\s*$/);
+    expenses.push({ id: uid('x'), sp: m ? m[1] : null, desc: str(c['G' + r]), qty: q, mult: isNum(c['J' + r]) ? c['J' + r] : 1, unit: m ? null : (isNum(c['N' + r]) ? c['N' + r] : num(c['K' + r])) });
+  }
+  const laborPrice = laborTotals ? num(c['AJ' + laborTotals]) : 0;
+  const expPrice = expTotals ? num(c['AJ' + expTotals]) : 0;
+  return {
+    tasks: rows.map(x => x.t), expenses, pmCode, pmPct, contPct, contMode, expContPct, absorbed,
+    tab: { price: num(c.AJ5), cost: num(c.S5), hours: num(c.N5), other: num(c.AJ5) - laborPrice - expPrice, pmHours: num(c['N' + pmRow]) }
+  };
+}
+async function extractEstimator(wb, fileName, picks) {
+  const setup = await wb.sheet('Setup'); const fin = await wb.sheet('Financial');
+  const rates = {};
+  if (setup) for (let r = 40; r <= 120; r++) {
+    const code = setup['C' + r];
+    if (typeof code !== 'string' || !code.trim() || /role code/i.test(code)) continue;
+    const cost = isNum(setup['P' + r]) ? setup['P' + r] : setup['I' + r];
+    if (isNum(cost)) rates[code.trim()] = { desc: str(setup['D' + r]), cost };
+  }
+  const g = async (n, fb) => { const v = await wb.named(n); return isNum(v) ? v : fb; };
+  const margin = await g('Lbr_Mrgn', 0), pmPct = await g('PM_Prcnt', 0), contPct = await g('Lbr_Cntngcy', 0);
+  const escPct = await g('Lbr_Cost_Escl_Fctr', 0), expMargin = await g('Exp_Mrgn', 0), expEscPct = await g('Exp_Cost_Escl_Fctr', 0);
+  const iopsM = await wb.named('IOPS_Lbr_Mrgn');
+  const levelIds = new Set();
+  const worksheets = [], tasks = [], expenses = [], tabs = {}; let pmCode = 'PROJ_MGR'; const notes = [];
+  for (const p of picks) {
+    const x = await extractTab(wb, p.name, rates, levelIds);
+    const w = blankWorksheet(p.name); w.include = p.include;
+    if (Math.abs(x.pmPct - pmPct) > 1e-9) w.pmPct = x.pmPct;
+    if (Math.abs(x.contPct - contPct) > 1e-9) w.contPct = x.contPct;
+    if (x.expContPct) w.expContPct = x.expContPct;
+    worksheets.push(w); pmCode = x.pmCode;
+    x.tasks.forEach(t => { t.ws = w.id; tasks.push(t); });
+    x.expenses.forEach(e => { e.ws = w.id; expenses.push(e); });
+    tabs[w.id] = { name: p.name, ...x.tab };
+    if (x.absorbed && p.include) notes.push(`${p.name} absorbs PM in the workbook (cost only). The app prices PM.`);
+    if (x.contMode === 'cost' && p.include) notes.push(`${p.name} carries contingency as cost only in the workbook. The app prices it.`);
+  }
+  levelIds.add(pmCode);
+  const mix = [];
+  const hb = await wb.sheet('HMI Breakdown');
+  if (hb) for (let r = 2; r <= 12; r++) { const code = str(hb['C' + r]); const pc = hb['D' + r]; if (code && rates[code] && isNum(pc)) { mix.push({ level: code, pct: pc }); levelIds.add(code); } }
+  const order = ['IA_ENGR_I', 'IA_ENGR_II', 'IA_ENGR_SR'].filter(k => rates[k]);
+  levelIds.forEach(k => { if (!order.includes(k)) order.push(k); });
+  const levels = order.map(code => ({ id: code, code, name: FRIENDLY[code] || (rates[code] && rates[code].desc) || code, cost: rates[code] ? +rates[code].cost : 0, margin: code === 'IOPS' && isNum(iopsM) ? iopsM : null }));
+  const setpoints = [];
+  for (const [nm, label, unit] of SETPOINT_NAMES) { const v = await wb.named(nm); if (isNum(v)) setpoints.push({ id: nm, name: label, unit, cost: v }); }
+  expenses.forEach(e => { if (e.sp && !setpoints.some(s => s.id === e.sp)) { e.unit = num(e.unit); e.sp = null; } });
+  const approval = await readDOA(wb);
+  const first = picks[0] ? (await wb.sheet(picks[0].name)) : null;
+  const payOn = fin && /^on$/i.test(str(fin.H33));
+  const commissioned = fin ? num(fin.R28) + num(fin.S29) + num(fin.R37) : 0;
+  if (payOn) notes.push(`Extended payment terms are on in the workbook and add ${money(num(fin.R33))}. The app does not apply them yet.`);
+  if (Math.abs(commissioned) > 1) notes.push(`The workbook has ${money(commissioned)} of commissioned software, which the app does not carry yet.`);
+  const fn = async n => { const v = await wb.named(n); return isNum(v) ? v : null; };
+  const doa = await wb.sheet('DOA');
+  return {
+    app: 'gm-simple-estimator', version: 2,
+    project: {
+      name: str(first && first.F3) || str(setup && setup.E6), customer: str(first && first.F4) || str(setup && setup.E5),
+      number: first && first.F5 != null ? String(first.F5) : str(setup && setup.E7), rev: first && first.H5 != null ? String(first.H5) : '0',
+      preparedBy: str(setup && setup.E11), notes: ''
+    },
+    settings: { margin, pmPct, contPct, escPct: +escPct.toFixed(8), pmLevel: pmCode, expMargin, expEscPct: +expEscPct.toFixed(8), pmRule: 'workbook' },
+    levels, setpoints, approval, worksheets, tasks, expenses, matrix: { ...blankMatrix(), mix },
+    source: {
+      kind: 'estimator', file: fileName, importedAt: new Date().toISOString(), tabs, notes,
+      final: { price: await fn('Final_Total_Price'), cost: await fn('Final_Total_Cost'), margin: await fn('Final_Total_Margin'), hours: await fn('Total_Hours'), approver: doa ? str(doa.Q6) : '' }
+    }
+  };
+}
+async function readDOA(wb) {
+  const d = await wb.sheet('DOA'); if (!d) return null;
+  const tiers = [10, 11, 12, 13, 14].map(r => str(d['C' + r])).filter(Boolean);
+  if (tiers.length < 2) return null;
+  const n = (col, rows) => rows.map(r => (isNum(d[col + r]) ? d[col + r] : null));
+  const f17 = await wb.formula('DOA', 'M17'); const sp = f17 && f17.match(/<=\s*([\d.]+)\s*\)\s*$/);
+  return {
+    source: 'DOA tab', tiers, priceMax: n('F', [10, 11, 12, 13]),
+    labor: n('J', [10, 11, 12]), expense: n('K', [10, 11, 12]), material: n('L', [10, 11, 12]),
+    floors: { labor: 3, expense: 2, material: 3 },
+    overall: { minGP: isNum(d.M12) ? d.M12 : null, splitPrice: sp ? +sp[1] : null, below: 2, above: 3 }
+  };
+}
+
+/* ---------- Read a workbook saved by this app (v2: Summary, Worksheets, Tasks, Expenses, Rates, Approval; v1: Summary, Tasks, Rates) ---------- */
+async function isAppWorkbook(wb) {
+  if (!wb.sheets.some(s => s.name === 'Tasks') || !wb.sheets.some(s => s.name === 'Rates')) return false;
+  const t = await wb.sheet('Tasks'); return !!t && Object.keys(headerMap(t, 4)).includes('task');
+}
+function headerMap(cells, row) {
+  const map = {};
+  for (let i = 0; i < 40; i++) {
+    const col = colName(i); const v = str(cells[col + row]).toLowerCase(); if (!v) continue;
+    map[v] = col;
+  }
+  return map;
+}
+function colName(i) { let s = ''; i++; while (i) { const m = (i - 1) % 26; s = String.fromCharCode(65 + m) + s; i = Math.floor((i - 1) / 26); } return s; }
+function findRow(cells, col, text, from = 1, to = 400) { for (let r = from; r <= to; r++) if (str(cells[col + r]).toLowerCase() === text) return r; return null; }
+async function extractAppWorkbook(wb, fileName) {
+  const T = await wb.sheet('Tasks'); const Rt = await wb.sheet('Rates');
+  const nv = v => (isNum(v) ? v : (v == null || v === '' ? null : (isFinite(parseNum(v)) ? parseNum(v) : null)));
+  // Engineer levels
+  const levels = []; const byName = {};
+  const lh = findRow(Rt, 'A', 'level');
+  if (lh) for (let r = lh + 1; r <= lh + 400; r++) {
+    const name = str(Rt['A' + r]);
+    if (/^expense type$/i.test(name)) break;
+    if (!name) continue;
+    const code = str(Rt['B' + r]); let id = code || name; while (levels.some(l => l.id === id)) id += '_';
+    const L = { id, name, code, cost: num(nv(Rt['C' + r])), margin: nv(Rt['D' + r]) };
+    levels.push(L); byName[name.toLowerCase()] = L;
+  }
+  const levelFor = n => { const k = str(n); if (!k) return null; let L = byName[k.toLowerCase()]; if (!L) { L = { id: k, name: k, code: '', cost: 0, margin: null }; levels.push(L); byName[k.toLowerCase()] = L; } return L.id; };
+  // Expense rate list
+  const setpoints = []; const spByName = {};
+  const sh = findRow(Rt, 'A', 'expense type');
+  if (sh) for (let r = sh + 1; r <= sh + 100; r++) { const name = str(Rt['A' + r]); if (!name) continue; const x = { id: uid('s'), name, unit: str(Rt['B' + r]), cost: num(nv(Rt['C' + r])) }; setpoints.push(x); spByName[name.toLowerCase()] = x; }
+  // Worksheets
+  const worksheets = []; const wsByName = {};
+  const W = await wb.sheet('Worksheets');
+  if (W) {
+    const hm = headerMap(W, 4);
+    for (let r = 5; r <= 400; r++) {
+      const name = str(W[(hm.worksheet || 'A') + r]); if (!name) continue; if (/^included total$/i.test(name)) break;
+      const w = blankWorksheet(name); w.include = !/^no/i.test(str(W[(hm.include || 'B') + r]));
+      if (hm['pm %']) w.pmPct = nv(W[hm['pm %'] + r]);
+      if (hm['contingency %']) w.contPct = nv(W[hm['contingency %'] + r]);
+      if (hm['expense contingency %']) w.expContPct = nv(W[hm['expense contingency %'] + r]);
+      worksheets.push(w); wsByName[name.toLowerCase()] = w;
+    }
+  }
+  const wsFor = n => { const k = str(n) || (worksheets[0] ? worksheets[0].name : 'Worksheet 1'); let w = wsByName[k.toLowerCase()]; if (!w) { w = blankWorksheet(k); worksheets.push(w); wsByName[k.toLowerCase()] = w; } return w.id; };
+  // Tasks
+  const hm = headerMap(T, 4); const tasks = [];
+  for (let r = 5; r <= 5000; r++) {
+    const name = str(T[hm.task + r]); const q = T[hm.quantity + r]; const hh = T[hm['hours each'] + r];
+    if (!name && q == null && hh == null) continue;
+    tasks.push({
+      id: uid('t'), ws: wsFor(hm.worksheet ? T[hm.worksheet + r] : null), wbs: '', phase: str(T[hm.phase + r]), name,
+      level: levelFor(T[hm['engineer level'] + r]), qty: nv(q), hours: nv(hh), notes: str(T[hm.notes + r]),
+      pmBase: hm['in pm base'] ? !/^no/i.test(str(T[hm['in pm base'] + r])) : true
+    });
+  }
+  if (!worksheets.length) wsFor(null);
+  // Expenses
+  const expenses = []; const E = await wb.sheet('Expenses');
+  if (E) {
+    const em = headerMap(E, 4);
+    for (let r = 5; r <= 3000; r++) {
+      const type = str(E[em['expense type'] + r]); const desc = str(E[em.description + r]); const q = E[em.quantity + r];
+      if (!type && !desc && q == null) continue;
+      const x = type ? spByName[type.toLowerCase()] : null;
+      expenses.push({ id: uid('x'), ws: wsFor(E[em.worksheet + r]), sp: x ? x.id : null, desc: desc || type, qty: nv(q), mult: nv(E[em.multiplier + r]) ?? 1, unit: nv(E[em['unit cost override'] + r]) });
+    }
+  }
+  const g = async (n, cell) => { const v = await wb.named(n); return isNum(v) ? v : nv(Rt[cell]); };
+  const pmName = str(await wb.named('PM_Level')) || str(Rt.B8);
+  const pmL = byName[pmName.toLowerCase()];
+  const rule = str(await wb.named('PM_Rule'));
+  const final = async n => { const v = await wb.named(n); return isNum(v) ? v : null; };
+  const Sm = await wb.sheet('Summary');
+  return {
+    app: 'gm-simple-estimator', version: 2,
+    project: { name: str(Rt.F4), customer: str(Rt.F5), number: str(Rt.F6), rev: str(Rt.F7), preparedBy: str(Rt.F8), notes: str(Rt.F9) },
+    settings: {
+      margin: num(await g('Margin', 'B4')), pmPct: num(await g('PM_Pct', 'B5')), contPct: num(await g('Contingency_Pct', 'B6')), escPct: num(await g('Escalation', 'B7')),
+      pmLevel: pmL ? pmL.id : (levels[0] || {}).id || null, expMargin: num(await wb.named('Exp_Margin')), expEscPct: num(await wb.named('Exp_Escalation')),
+      pmRule: /workbook/i.test(rule) ? 'workbook' : 'all'
+    },
+    levels, setpoints: setpoints.length ? setpoints : blankEstimate().setpoints, approval: await readAppApproval(wb), worksheets, tasks, expenses,
+    matrix: await readAppMatrix(wb, levelFor, wsFor),
+    source: {
+      kind: 'app', file: fileName, importedAt: new Date().toISOString(),
+      final: { price: (await final('Final_Price')) ?? (Sm && isNum(Sm.D13) ? Sm.D13 : null), hours: (await final('Final_Hours')) ?? (Sm && isNum(Sm.B13) ? Sm.B13 : null), margin: await final('Final_Margin') }
+    }
+  };
+}
+async function readAppApproval(wb) {
+  const A = await wb.sheet('Approval'); if (!A) return null;
+  const tiers = [5, 6, 7, 8, 9].map(r => str(A['A' + r])).filter(Boolean); if (tiers.length < 2) return null;
+  const n = (col, rows) => rows.map(r => (isNum(A[col + r]) ? A[col + r] : null));
+  const idx = v => { const i = tiers.findIndex(t => t.toLowerCase() === str(v).toLowerCase()); return i < 0 ? null : i; };
+  return {
+    source: 'Approval tab', tiers, priceMax: n('B', [5, 6, 7, 8]), labor: n('C', [5, 6, 7]), expense: n('D', [5, 6, 7]), material: n('E', [5, 6, 7]),
+    floors: { labor: idx(A.B16) ?? 3, expense: idx(A.C16) ?? 2, material: 3 },
+    overall: { minGP: isNum(A.B11) ? A.B11 : null, splitPrice: isNum(A.B12) ? A.B12 : null, below: idx(A.B13) ?? 2, above: idx(A.B14) ?? 3 }
+  };
+}
+
+/* ---------- Organized workbook: graphics, popups, dashboards scored by complexity ---------- */
+const maxRow = cells => Object.keys(cells).reduce((m, k) => Math.max(m, +k.replace(/^[A-Z]+/, '')), 0);
+async function isOrganizedWorkbook(wb) {
+  for (const nm of ['Graphics', 'Popups']) { const c = await wb.sheet(nm); if (c && /plant/i.test(str(c.A1)) && /complexity/i.test(str(c.C1))) return true; }
+  return false;
+}
+/* Blocks start at a header row (Title, Complexity); the next row holds the scale, e.g. "1-6" and "x 6" */
+function complexityBlocks(c) {
+  const last = maxRow(c); const heads = [];
+  for (let r = 1; r <= last; r++) if (/title/i.test(str(c['B' + r])) && /complexity/i.test(str(c['C' + r]))) heads.push(r);
+  return heads.map((hr, i) => {
+    const end = i + 1 < heads.length ? heads[i + 1] - 1 : last;
+    const pp = str(c['D' + (hr + 1)]).match(/x\s*([\d.]+)/i);
+    const lines = []; let subtotals = 0;
+    for (let r = hr + 2; r <= end; r++) {
+      const area = str(c['A' + r]); const title = str(c['B' + r]); const cx = c['C' + r];
+      if (area && isNum(c['E' + r])) subtotals += c['E' + r];
+      if (!area || !title || !isNum(cx) || /^plant$/i.test(area)) continue;
+      lines.push({ area, title, cx, sheetHrs: num(c['D' + r]) });
+    }
+    return { perPoint: pp ? +pp[1] : null, range: str(c['C' + (hr + 1)]), lines, subtotals };
+  });
+}
+async function extractOrganized(wb) {
+  const types = {}; const lines = []; const report = [];
+  const addBlock = (typeId, b, label, opt) => {
+    const key = 'g' + report.length;
+    types[typeId] = types[typeId] || { perPoint: b.perPoint };
+    b.lines.forEach(l => lines.push({ id: uid('c'), area: l.area, title: l.title, type: typeId, cx: l.cx, qty: 1, level: 'mix', notes: '', _g: key }));
+    report.push({ key, label, typeId, n: b.lines.length, hrs: b.lines.reduce((a, l) => a + l.cx * num(b.perPoint), 0), sheet: b.subtotals || null, on: !opt });
+  };
+  const G = await wb.sheet('Graphics'), P = await wb.sheet('Popups');
+  if (G) complexityBlocks(G).forEach(b => addBlock('graphic', b, 'Graphics'));
+  if (P) complexityBlocks(P).forEach(b => addBlock('popup', b, 'Popups'));
+  // Any other tab laid out the same way (Crush): match each block to a type by its hours per point
+  for (const s of wb.sheets) {
+    if (['Graphics', 'Popups', 'Dashboards', 'Summary'].includes(s.name) || s.state !== 'visible') continue;
+    const c = await wb.sheet(s.name); if (!c) continue;
+    for (const b of complexityBlocks(c)) {
+      if (!b.lines.length) continue;
+      let id = Object.keys(types).find(k => isNum(types[k].perPoint) && Math.abs(types[k].perPoint - num(b.perPoint)) < 1e-9);
+      if (!id) { id = `${s.name.toLowerCase()}_${b.perPoint}`; types[id] = { perPoint: b.perPoint, name: `${s.name} (× ${b.perPoint})` }; }
+      addBlock(id, b, `${s.name} ${id === 'graphic' ? 'graphics' : id === 'popup' ? 'popups' : 'items'}`, /research|sample|test/i.test(s.name));
+    }
+  }
+  // Dashboards: one row each, hours by stage
+  const D = await wb.sheet('Dashboards');
+  if (D) {
+    const last = maxRow(D); let hr = null;
+    for (let r = 1; r <= Math.min(last, 30); r++) if (/plant/i.test(str(D['B' + r])) && /title/i.test(str(D['C' + r]))) { hr = r; break; }
+    if (hr) {
+      const cols = []; let totalCol = null;
+      for (let i = 3; i < 30; i++) { const col = colName(i); const v = str(D[col + hr]); if (!v) continue; if (/^total$/i.test(v)) { totalCol = col; break; } cols.push({ col, name: v.replace(/^wirerame/i, 'Wireframe') }); }
+      let stages = null, differs = 0, n = 0, hrs = 0;
+      for (let r = hr + 1; r <= last; r++) {
+        const area = str(D['B' + r]), title = str(D['C' + r]); if (!area || !title) continue;
+        const vals = cols.map(x => num(D[x.col + r]));
+        if (!stages) stages = cols.map((x, i) => ({ name: x.name, hrs: vals[i] }));
+        else if (vals.some((v, i) => v !== stages[i].hrs)) differs++;
+        n++; hrs += vals.reduce((a, v) => a + v, 0);
+        lines.push({ id: uid('c'), area, title, type: 'dashboard', cx: null, qty: 1, level: 'mix', notes: '', _g: 'dash' });
+      }
+      const sheetTot = totalCol ? Object.keys(D).filter(k => k.startsWith(totalCol) && +k.slice(totalCol.length) > hr).reduce((a, k) => Math.max(a, num(D[k])), 0) : null;
+      if (stages) { types.dashboard = { stages }; report.push({ key: 'dash', label: 'Dashboards', typeId: 'dashboard', n, hrs, sheet: sheetTot, differs, on: true }); }
+    }
+  }
+  return { types, lines, report };
+}
+/* Put Organized lines onto a worksheet; hours per point and stages replace the matrix rows they came from */
+function applyOrganized(est, data, wsId, replace, keys) {
+  const M = est.matrix; const pick = new Set(keys);
+  const used = new Set(data.report.filter(x => pick.has(x.key)).map(x => x.typeId));
+  for (const [id, t] of Object.entries(data.types)) {
+    if (!used.has(id)) continue;
+    let T = M.types.find(x => x.id === id);
+    if (!T) { T = { id, name: t.name || id, basis: t.stages ? 'fixed' : 'scale', perPoint: null, hours: [null, null, null, null, null, null, null], stages: [], fixed: null }; M.types.push(T); }
+    if (t.stages) { T.basis = 'fixed'; T.stages = t.stages.map(x => ({ ...x })); }
+    else { T.basis = 'scale'; T.perPoint = t.perPoint; T.hours = [null, null, null, null, null, null, null]; }
+  }
+  if (replace) M.lines = M.lines.filter(l => l.ws !== wsId);
+  data.lines.filter(l => pick.has(l._g)).forEach(l => { const x = { ...l, id: uid('c'), ws: wsId }; delete x._g; M.lines.push(x); });
+}
+
+async function readAppMatrix(wb, levelFor, wsFor) {
+  const C = await wb.sheet('Complexity'); const M = blankMatrix(); M.types = [];
+  if (!C) return blankMatrix();
+  const last = maxRow(C); const nv = v => (isNum(v) ? v : (v == null || v === '' ? null : (isFinite(parseNum(v)) ? parseNum(v) : null)));
+  const head = (a, b) => { for (let r = 1; r <= last; r++) if (str(C['A' + r]).toLowerCase() === a && str(C['B' + r]).toLowerCase() === b) return r; return null; };
+  const tH = head('type', 'basis'), sH = head('type', 'stage'), mH = head('engineer level', 'share'), lH = head('worksheet', 'area');
+  const byName = {};
+  if (tH) for (let r = tH + 1; r <= last; r++) {
+    const name = str(C['A' + r]); if (!name) break;
+    const fixed = /fixed/i.test(str(C['B' + r])); const pp = nv(C['C' + r]);
+    const hours = CX_LEVELS.map((cx, i) => { const v = nv(C[colName(3 + i) + r]); return v == null || (isNum(pp) && Math.abs(v - pp * cx) < 1e-9) ? null : v; });
+    const T = { id: uid('k'), name, basis: fixed ? 'fixed' : 'scale', perPoint: pp, hours, stages: [], fixed: fixed ? nv(C['K' + r]) : null };
+    if (/^graphic$/i.test(name)) T.id = 'graphic'; else if (/^popup$/i.test(name)) T.id = 'popup'; else if (/^dashboard$/i.test(name)) T.id = 'dashboard';
+    M.types.push(T); byName[name.toLowerCase()] = T;
+  }
+  if (sH) for (let r = sH + 1; r <= last; r++) { const tn = str(C['A' + r]); if (!tn) break; const T = byName[tn.toLowerCase()]; if (T) T.stages.push({ name: str(C['B' + r]), hrs: num(nv(C['C' + r])) }); }
+  if (mH) for (let r = mH + 1; r <= last; r++) { const ln = str(C['A' + r]); if (!ln || /^mix$/i.test(ln)) break; const id = levelFor(ln); if (id) M.mix.push({ level: id, pct: num(nv(C['B' + r])) }); }
+  if (lH) for (let r = lH + 1; r <= last; r++) {
+    const tn = str(C['D' + r]); const area = str(C['B' + r]); const title = str(C['C' + r]); if (!tn && !area && !title) continue;
+    let T = byName[tn.toLowerCase()]; if (!T && tn) { T = { id: uid('k'), name: tn, basis: 'scale', perPoint: null, hours: [null, null, null, null, null, null, null], stages: [], fixed: null }; M.types.push(T); byName[tn.toLowerCase()] = T; }
+    const lvName = str(C['G' + r]);
+    M.lines.push({ id: uid('c'), ws: wsFor(C['A' + r]), area, title, type: T ? T.id : null, cx: nv(C['E' + r]), qty: nv(C['F' + r]), level: !lvName || /^mix$/i.test(lvName) ? 'mix' : levelFor(lvName), notes: str(C['L' + r]) });
+  }
+  if (!M.types.length) M.types = blankMatrix().types;
+  return M;
+}
+
 /* ---------- Excel writer: builds a real .xlsx with live formulas, no libraries ---------- */
 const XL = (() => {
   const HEAD = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
@@ -301,7 +1056,7 @@ const XL = (() => {
     }).join('');
     const pane = sh.freeze ? `<pane ySplit="${sh.freeze - 1}" topLeftCell="A${sh.freeze}" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A${sh.freeze}" sqref="A${sh.freeze}"/>` : '';
     const cols = sh.widths ? `<cols>${sh.widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>` : '';
-    const dv = sh.lists && sh.lists.length ? `<dataValidations count="${sh.lists.length}">${sh.lists.map(([sq, src]) => `<dataValidation type="list" allowBlank="1" showErrorMessage="1" errorTitle="Not in the list" error="Pick a level from the Rates tab, or add it there first." sqref="${sq}"><formula1>${xe(src)}</formula1></dataValidation>`).join('')}</dataValidations>` : '';
+    const dv = sh.lists && sh.lists.length ? `<dataValidations count="${sh.lists.length}">${sh.lists.map(([sq, src]) => `<dataValidation type="list" allowBlank="1" showErrorMessage="1" errorTitle="Not in the list" error="Pick a value from the list." sqref="${sq}"><formula1>${xe(src)}</formula1></dataValidation>`).join('')}</dataValidations>` : '';
     return HEAD + `<worksheet ${NS}>${sh.fit ? '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>' : ''}<sheetViews><sheetView workbookViewId="0"${sh.selected ? ' tabSelected="1"' : ''} showGridLines="${sh.grid ? 1 : 0}">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>${cols}<sheetData>${data}</sheetData>${dv}<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/><pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
   }
 
@@ -349,377 +1104,341 @@ const XL = (() => {
   return { ST, workbook };
 })();
 
-/* Layout of the saved workbook. The reader below depends on these positions. */
-const XLL = { tasksHead: 4, task0: 5, extraTasks: 60, level0: 12, extraLevels: 10 };
 
-function buildEstimateWorkbook(est, res) {
-  const T = XL.ST; const levelName = id => ((est.levels.find(l => l.id === id) || {}).name || '');
-  const nT = est.tasks.length, nL = est.levels.length;
-  const t0 = XLL.task0, tLast = t0 + nT + XLL.extraTasks - 1;
-  const l0 = XLL.level0, lLast = l0 + nL + XLL.extraLevels - 1;
-  const s = est.settings, p = est.project, m = num(s.margin), e = num(s.escPct);
-  const gross = c => (m < 1 ? c * (1 + e) / (1 - m) : 0);
+/* ---------- Saved workbook layout (v2). The reader finds tables by their header text. ---------- */
+const XLL = { head: 4, row0: 5, extraTasks: 60, extraExp: 30, extraWs: 6, extraLevels: 10, extraSp: 5, levelHead: 15 };
 
-  // Rates and settings
-  const rates = { name: 'Rates', widths: [44, 18, 16, 4, 18, 44], cells: {}, heights: { 1: 24 }, fit: true };
+function buildEstimateWorkbook(est, R) {
+  const T = XL.ST; const s = est.settings, p = est.project;
+  const lvName = id => ((est.levels.find(l => l.id === id) || {}).name || '');
+  const wsName = id => ((est.worksheets.find(w => w.id === id) || {}).name || '');
+  const spName = id => ((est.setpoints.find(x => x.id === id) || {}).name || '');
+  const r0 = XL_ROW0();
+  const nW = est.worksheets.length, nT = est.tasks.length, nE = est.expenses.length, nL = est.levels.length, nS = est.setpoints.length;
+  const wLast = r0 + nW + XLL.extraWs - 1, wTot = wLast + 2;
+  const tLast = r0 + nT + XLL.extraTasks - 1, eLast = r0 + nE + XLL.extraExp - 1;
+  const l0 = XLL.levelHead + 1, lLast = l0 + nL + XLL.extraLevels - 1;
+  const sHead = lLast + 2, s0 = sHead + 1, sLast = s0 + nS + XLL.extraSp - 1;
+  const rng = (sh, c, a, b) => `${sh}!$${c}$${a}:$${c}$${b}`;
+  const TA = rng('Tasks', 'A', r0, tLast), TD = rng('Tasks', 'D', r0, tLast), TG = rng('Tasks', 'G', r0, tLast), TH = rng('Tasks', 'H', r0, tLast),
+    TJ = rng('Tasks', 'J', r0, tLast), TL = rng('Tasks', 'L', r0, tLast), TN = rng('Tasks', 'N', r0, tLast);
+  const EA = rng('Expenses', 'A', r0, eLast), EH = rng('Expenses', 'H', r0, eLast);
+  const blankIf = (v, live) => (live ? v : '');
+  const levelMargin = ref => `IFERROR(IF(LEN(INDEX(LevelMargins,MATCH(${ref},LevelNames,0)))=0,Margin,INDEX(LevelMargins,MATCH(${ref},LevelNames,0))),Margin)`;
+
+  /* Rates */
+  const rates = { name: 'Rates', widths: [44, 18, 16, 16, 18, 44], cells: {}, heights: { 1: 24 }, fit: true, lists: [] };
   const rc = rates.cells;
   rc.A1 = { s: T.title, str: 'Rates and settings' };
-  rc.A2 = { s: T.note, str: 'Blue cells are inputs. Change them here or in the Estimator app; every tab recalculates. To add an engineer level, type it in an empty row of the levels table, then pick it on the Tasks tab.' };
-  [['Margin', 'margin'], ['Project management, share of task hours', 'pmPct'], ['Contingency, share of task and PM', 'contPct'], ['Escalation', 'escPct']]
-    .forEach(([label, k], i) => { rc['A' + (4 + i)] = { s: T.bold, str: label }; rc['B' + (4 + i)] = { s: T.inPct, n: num(s[k]) }; });
-  rc.A8 = { s: T.bold, str: 'PM charged at (level)' }; rc.B8 = { s: T.inText, str: levelName(s.pmLevel) };
+  rc.A2 = { s: T.note, str: 'Blue cells are inputs; black cells calculate. To add an engineer level or expense type, use an empty row in its table.' };
+  const setRow = (r, label, cell) => { rc['A' + r] = { s: T.bold, str: label }; rc['B' + r] = cell; };
+  setRow(4, 'Labor margin', { s: T.inPct, n: num(s.margin) });
+  setRow(5, 'Project management, share of task hours', { s: T.inPct, n: num(s.pmPct) });
+  setRow(6, 'Contingency, share of task and PM', { s: T.inPct, n: num(s.contPct) });
+  setRow(7, 'Labor escalation', { s: T.inPct, n: num(s.escPct) });
+  setRow(8, 'PM charged at (level)', { s: T.inText, str: lvName(s.pmLevel) });
+  setRow(9, 'PM base', { s: T.inText, str: s.pmRule === 'workbook' ? 'Workbook rule' : 'All tasks' });
+  setRow(10, 'Expense margin', { s: T.inPct, n: num(s.expMargin) });
+  setRow(11, 'Expense escalation', { s: T.inPct, n: num(s.expEscPct) });
+  const pmL = est.levels.find(l => l.id === s.pmLevel);
+  setRow(12, 'PM rate used', { s: T.money, f: 'IFERROR(VLOOKUP(PM_Level,Levels,3,FALSE),0)', cv: pmL ? num(pmL.cost) : 0 });
+  setRow(13, 'PM margin used', { s: T.pct, f: levelMargin('PM_Level'), cv: pmL && isNum(pmL.margin) ? pmL.margin : num(s.margin) });
   [['Project name', 'name'], ['Customer', 'customer'], ['Proposal number', 'number'], ['Revision', 'rev'], ['Prepared by', 'preparedBy'], ['Notes', 'notes']]
     .forEach(([label, k], i) => { rc['E' + (4 + i)] = { s: T.bold, str: label }; rc['F' + (4 + i)] = { s: T.inText, str: p[k] || '' }; });
-  rc.A11 = { s: T.head, str: 'Level' }; rc.B11 = { s: T.head, str: 'Role code' }; rc.C11 = { s: T.headR, str: 'Cost per hour' };
+  ['Level', 'Role code', 'Cost per hour', 'Margin override'].forEach((hd, i) => { rc[colName(i) + XLL.levelHead] = { s: i >= 2 ? T.headR : T.head, str: hd }; });
   for (let i = 0; i < nL + XLL.extraLevels; i++) {
-    const L = est.levels[i]; const r = l0 + i;
+    const L = est.levels[i], r = l0 + i;
     rc['A' + r] = { s: T.inText, str: L ? L.name : '' }; rc['B' + r] = { s: T.inText, str: L ? L.code : '' };
     rc['C' + r] = L && isNum(L.cost) ? { s: T.inMoney, n: L.cost } : { s: T.inMoney };
+    rc['D' + r] = L && isNum(L.margin) ? { s: T.inPct, n: L.margin } : { s: T.inPct };
   }
-  rates.lists = [['B8', 'LevelNames']];
+  ['Expense type', 'Per', 'Unit cost'].forEach((hd, i) => { rc[colName(i) + sHead] = { s: i === 2 ? T.headR : T.head, str: hd }; });
+  for (let i = 0; i < nS + XLL.extraSp; i++) {
+    const x = est.setpoints[i], r = s0 + i;
+    rc['A' + r] = { s: T.inText, str: x ? x.name : '' }; rc['B' + r] = { s: T.inText, str: x ? x.unit : '' };
+    rc['C' + r] = x && isNum(x.cost) ? { s: T.inMoney, n: x.cost } : { s: T.inMoney };
+  }
+  rates.lists = [['B8', 'LevelNames'], ['B9', '"All tasks,Workbook rule"']];
 
-  // Tasks
-  const tasks = { name: 'Tasks', widths: [18, 42, 18, 11, 11, 12, 14, 14, 14, 34], cells: {}, freeze: t0, heights: { 1: 24, 4: 22 }, fit: true };
+  /* Tasks */
+  const tasks = { name: 'Tasks', widths: [16, 16, 38, 16, 10, 10, 10, 11, 12, 13, 9, 13, 28, 12], cells: {}, freeze: r0, heights: { 1: 24, 4: 22 }, fit: true };
   const tc = tasks.cells;
   tc.A1 = { s: T.title, str: 'Tasks' };
-  tc.A2 = { s: T.note, str: 'Blue cells are inputs. Total hours = quantity × hours each, rounded up. Use the empty rows below to add tasks; formulas are already in place.' };
-  const head = ['Phase', 'Task', 'Engineer level', 'Quantity', 'Hours each', 'Total hours', 'Rate per hour', 'Cost', 'Price', 'Notes'];
-  head.forEach((hd, i) => { tc[String.fromCharCode(65 + i) + XLL.tasksHead] = { s: i >= 3 && i <= 8 ? T.headR : T.head, str: hd }; });
-  let sumPrice = 0;
+  tc.A2 = { s: T.note, str: 'Blue cells are inputs. Total hours = quantity × hours each, rounded up. Add tasks in the empty rows below; the formulas are already in place.' };
+  ['Worksheet', 'Phase', 'Task', 'Engineer level', 'Quantity', 'Hours each', 'In PM base', 'Total hours', 'Rate per hour', 'Cost', 'Margin', 'Price', 'Notes', 'Worksheet included']
+    .forEach((hd, i) => { tc[colName(i) + XLL.head] = { s: (i >= 4 && i <= 11 && i !== 6) ? T.headR : T.head, str: hd }; });
   for (let i = 0; i < nT + XLL.extraTasks; i++) {
-    const t = est.tasks[i]; const r = t0 + i; const tr = t ? res.tasks[t.id] : null;
-    tc['A' + r] = { s: T.inText, str: t ? t.phase : '' }; tc['B' + r] = { s: T.inText, str: t ? t.name : '' };
-    tc['C' + r] = { s: T.inText, str: t ? levelName(t.level) : '' };
-    tc['D' + r] = t && isNum(t.qty) ? { s: T.inNum, n: t.qty } : { s: T.inNum };
-    tc['E' + r] = t && isNum(t.hours) ? { s: T.inNum, n: t.hours } : { s: T.inNum };
+    const t = est.tasks[i], r = r0 + i, tr = t ? R.tasks[t.id] : null;
     const live = !!t && ((t.name || '') + (isNum(t.qty) ? t.qty : '') + (isNum(t.hours) ? t.hours : '')) !== '';
-    const price = live ? gross(tr.cost) : '';
-    if (live) sumPrice += price;
-    tc['F' + r] = { s: T.hrs, f: `IF(B${r}&D${r}&E${r}="","",ROUNDUP(N(D${r})*N(E${r}),0))`, cv: live ? tr.hrs : '' };
-    tc['G' + r] = { s: T.money, f: `IF(F${r}="","",IFERROR(VLOOKUP(C${r},Levels,3,FALSE),0))`, cv: live ? tr.rate : '' };
-    tc['H' + r] = { s: T.money, f: `IF(F${r}="","",F${r}*G${r})`, cv: live ? tr.cost : '' };
-    tc['I' + r] = { s: T.money, f: `IF(F${r}="","",H${r}*(1+Escalation)/(1-Margin))`, cv: price };
-    tc['J' + r] = { s: T.inText, str: t ? t.notes || '' : '' };
+    const w = t ? est.worksheets.find(x => x.id === t.ws) : null;
+    tc['A' + r] = { s: T.inText, str: t ? wsName(t.ws) : '' }; tc['B' + r] = { s: T.inText, str: t ? t.phase : '' };
+    tc['C' + r] = { s: T.inText, str: t ? t.name : '' }; tc['D' + r] = { s: T.inText, str: t ? lvName(t.level) : '' };
+    tc['E' + r] = t && isNum(t.qty) ? { s: T.inNum, n: t.qty } : { s: T.inNum };
+    tc['F' + r] = t && isNum(t.hours) ? { s: T.inNum, n: t.hours } : { s: T.inNum };
+    tc['G' + r] = { s: T.inText, str: t ? (t.pmBase === false ? 'No' : 'Yes') : '' };
+    tc['H' + r] = { s: T.hrs, f: `IF(C${r}&E${r}&F${r}="","",ROUNDUP(N(E${r})*N(F${r}),0))`, cv: blankIf(tr && tr.hrs, live) };
+    tc['I' + r] = { s: T.money, f: `IF(H${r}="","",IFERROR(VLOOKUP(D${r},Levels,3,FALSE),0))`, cv: blankIf(tr && tr.rate, live) };
+    tc['J' + r] = { s: T.money, f: `IF(H${r}="","",H${r}*I${r})`, cv: blankIf(tr && tr.cost, live) };
+    tc['K' + r] = { s: T.pct, f: `IF(H${r}="","",${levelMargin('D' + r)})`, cv: blankIf(tr && tr.m, live) };
+    tc['L' + r] = { s: T.money, f: `IF(H${r}="","",J${r}*(1+Escalation)/(1-K${r}))`, cv: blankIf(tr && tr.price, live) };
+    tc['M' + r] = { s: T.inText, str: t ? t.notes || '' : '' };
+    tc['N' + r] = { s: T.sub, f: `IF(A${r}="","",IFERROR(VLOOKUP(A${r},Worksheets!$A$${r0}:$B$${wLast},2,FALSE),"No"))`, cv: t ? (w && w.include !== false ? 'Yes' : 'No') : '' };
   }
-  tc.E3 = { s: T.bold, str: 'Totals' };
-  tc.F3 = { s: T.boldHrs, f: `SUM(F${t0}:F${tLast})`, cv: res.taskHrs };
-  tc.H3 = { s: T.boldMoney, f: `SUM(H${t0}:H${tLast})`, cv: res.taskCost };
-  tc.I3 = { s: T.boldMoney, f: `SUM(I${t0}:I${tLast})`, cv: sumPrice };
-  tasks.lists = [[`C${t0}:C${tLast}`, 'LevelNames']];
+  tasks.lists = [[`A${r0}:A${tLast}`, 'WorksheetNames'], [`D${r0}:D${tLast}`, 'LevelNames'], [`G${r0}:G${tLast}`, '"Yes,No"']];
 
-  // Summary
-  const sum = { name: 'Summary', widths: [40, 14, 24, 16, 18], cells: {}, selected: true, heights: { 1: 24, 4: 30 }, fit: true };
-  const sc = sum.cells; const TR = c => `Tasks!$${c}$${t0}:$${c}$${tLast}`;
+  /* Expenses */
+  const exps = { name: 'Expenses', widths: [16, 22, 30, 10, 11, 16, 12, 13, 13], cells: {}, freeze: r0, heights: { 1: 24, 4: 22 }, fit: true };
+  const ec = exps.cells;
+  ec.A1 = { s: T.title, str: 'Expenses' };
+  ec.A2 = { s: T.note, str: 'Blue cells are inputs. Unit cost comes from the expense type on the Rates tab unless you enter an override.' };
+  ['Worksheet', 'Expense type', 'Description', 'Quantity', 'Multiplier', 'Unit cost override', 'Unit cost', 'Cost', 'Price']
+    .forEach((hd, i) => { ec[colName(i) + XLL.head] = { s: i >= 3 ? T.headR : T.head, str: hd }; });
+  for (let i = 0; i < nE + XLL.extraExp; i++) {
+    const x = est.expenses[i], r = r0 + i, xr = x ? R.exp[x.id] : null;
+    const live = !!x && ((x.sp ? spName(x.sp) : '') + (x.desc || '') + (isNum(x.qty) ? x.qty : '')) !== '';
+    ec['A' + r] = { s: T.inText, str: x ? wsName(x.ws) : '' }; ec['B' + r] = { s: T.inText, str: x && x.sp ? spName(x.sp) : '' };
+    ec['C' + r] = { s: T.inText, str: x ? x.desc || '' : '' };
+    ec['D' + r] = x && isNum(x.qty) ? { s: T.inNum, n: x.qty } : { s: T.inNum };
+    ec['E' + r] = x && isNum(x.mult) ? { s: T.inNum, n: x.mult } : { s: T.inNum };
+    ec['F' + r] = x && isNum(x.unit) ? { s: T.inMoney, n: x.unit } : { s: T.inMoney };
+    ec['G' + r] = { s: T.money, f: `IF(B${r}&C${r}&D${r}="","",IF(F${r}<>"",F${r},IFERROR(VLOOKUP(B${r},ExpTypes,3,FALSE),0)))`, cv: blankIf(xr && xr.unit, live) };
+    ec['H' + r] = { s: T.money, f: `IF(G${r}="","",N(D${r})*G${r}*IF(E${r}="",1,E${r}))`, cv: blankIf(xr && xr.cost, live) };
+    ec['I' + r] = { s: T.money, f: `IF(G${r}="","",H${r}*(1+Exp_Escalation)/(1-Exp_Margin))`, cv: blankIf(xr && xr.price, live) };
+  }
+  exps.lists = [[`A${r0}:A${eLast}`, 'WorksheetNames'], [`B${r0}:B${eLast}`, 'ExpTypeNames']];
+
+  /* Worksheets: the Financial tab's job, one row per estimating worksheet */
+  const wsh = { name: 'Worksheets', widths: [20, 9, 9, 13, 13, 11, 12, 11, 12, 11, 13, 12, 13, 12, 13, 12, 12, 14, 14, 13, 13, 13, 14, 14, 10], cells: {}, freeze: r0, heights: { 1: 24, 4: 30 }, fit: true };
+  const wc = wsh.cells;
+  wc.A1 = { s: T.title, str: 'Worksheets' };
+  wc.A2 = { s: T.note, str: 'One row per estimating worksheet, like the Financial tab. Blue cells are inputs; a blank PM or contingency % uses the Rates tab. Only rows marked Yes count in the final totals.' };
+  const WH = ['Worksheet', 'Include', 'PM %', 'Contingency %', 'Expense contingency %', 'Task hours', 'PM base hours', 'PM hours', 'Contingency hours', 'Total hours',
+    'Task cost', 'PM cost', 'Contingency cost', 'Labor escalation', 'Expense cost', 'Expense contingency', 'Expense escalation', 'Total cost',
+    'Task price', 'PM price', 'Contingency price', 'Expense price', 'Total price', 'Gross profit', 'Margin'];
+  WH.forEach((hd, i) => { wc[colName(i) + XLL.head] = { s: i ? T.headR : T.head, str: hd }; });
+  const wf = r => {
+    const g = x => `IF($A${r}="","",${x})`;
+    return {
+      F: g(`SUMIF(${TA},$A${r},${TH})+SUMIF(CxWs,$A${r},CxHours)`), G: g(`IF(PM_Rule="Workbook rule",SUMIFS(${TH},${TA},$A${r},${TG},"<>No")+SUMIF(CxWs,$A${r},CxHours),F${r})`),
+      H: g(`ROUNDUP(IF(C${r}="",PM_Pct,C${r})*G${r},0)`), I: g(`ROUNDDOWN(IF(D${r}="",Contingency_Pct,D${r})*(F${r}+H${r}),0)`), J: g(`F${r}+H${r}+I${r}`),
+      K: g(`SUMIF(${TA},$A${r},${TJ})+SUMIF(CxWs,$A${r},CxCost)`), L: g(`H${r}*PM_Rate`), M: g(`IF(D${r}="",Contingency_Pct,D${r})*(K${r}+L${r})`), N: g(`(K${r}+L${r}+M${r})*Escalation`),
+      O: g(`SUMIF(${EA},$A${r},${EH})`), P: g(`N(E${r})*O${r}`), Q: g(`(O${r}+P${r})*Exp_Escalation`), R: g(`K${r}+L${r}+M${r}+N${r}+O${r}+P${r}+Q${r}`),
+      S: g(`SUMIF(${TA},$A${r},${TL})+SUMIF(CxWs,$A${r},CxPrice)`), T: g(`L${r}*(1+Escalation)/(1-PM_Margin)`), U: g(`M${r}*(1+Escalation)/(1-Margin)`),
+      V: g(`(O${r}+P${r})*(1+Exp_Escalation)/(1-Exp_Margin)`), W: g(`S${r}+T${r}+U${r}+V${r}`), X: g(`W${r}-R${r}`), Y: `IF(OR($A${r}="",N(W${r})=0),"",X${r}/W${r})`
+    };
+  };
+  const wsVals = W => W ? {
+    F: W.taskHrs, G: W.pmBase, H: W.pm.hrs, I: W.cont.hrs, J: W.hrs, K: W.taskCost, L: W.pm.cost, M: W.cont.cost, N: W.laborEsc,
+    O: W.expCost, P: W.expCont.cost, Q: W.expEsc, R: W.cost, S: W.taskPrice, T: W.pm.price, U: W.cont.price, V: W.expPrice, W: W.price, X: W.gp, Y: W.margin ?? ''
+  } : null;
+  const money0Cols = 'KLMNOPQRSTUVWX', hrsCols = 'FGHIJ';
+  const styleFor = c => (hrsCols.includes(c) ? T.hrs : c === 'Y' ? T.pct : T.money0);
+  for (let i = 0; i < nW + XLL.extraWs; i++) {
+    const w = est.worksheets[i], r = r0 + i, vals = w ? wsVals(R.ws[w.id]) : null;
+    wc['A' + r] = { s: T.inText, str: w ? w.name : '' };
+    wc['B' + r] = { s: T.inText, str: w ? (w.include !== false ? 'Yes' : 'No') : '' };
+    wc['C' + r] = w && isNum(w.pmPct) ? { s: T.inPct, n: w.pmPct } : { s: T.inPct };
+    wc['D' + r] = w && isNum(w.contPct) ? { s: T.inPct, n: w.contPct } : { s: T.inPct };
+    wc['E' + r] = w && isNum(w.expContPct) ? { s: T.inPct, n: w.expContPct } : { s: T.inPct };
+    const f = wf(r);
+    for (const c of Object.keys(f)) wc[c + r] = { s: styleFor(c), f: f[c], cv: vals ? vals[c] : '' };
+  }
+  wc['A' + wTot] = { s: T.totLabel, str: 'Included total' }; ['B', 'C', 'D', 'E'].forEach(c => { wc[c + wTot] = { s: T.totLabel }; });
+  const totVals = { F: R.taskHrs, G: null, H: R.pmHrs, I: R.contHrs, J: R.hrs, K: R.taskCost, L: R.pmCost, M: R.contCost, N: R.laborEsc, O: null, P: null, Q: R.expEsc, R: R.cost, S: R.taskPrice, T: R.pmPrice, U: R.contPrice, V: R.expPrice, W: R.price, X: R.gp };
+  const incWs = est.worksheets.filter(w => w.include !== false).map(w => R.ws[w.id]);
+  totVals.G = incWs.reduce((a, W) => a + W.pmBase, 0); totVals.O = incWs.reduce((a, W) => a + W.expCost, 0); totVals.P = incWs.reduce((a, W) => a + W.expCont.cost, 0);
+  for (const c of 'FGHIJKLMNOPQRSTUVWX') wc[c + wTot] = { s: hrsCols.includes(c) ? T.totHrs : T.totMoney, f: `SUMIF($B$${r0}:$B$${wLast},"Yes",${c}${r0}:${c}${wLast})`, cv: totVals[c] };
+  wc['Y' + wTot] = { s: T.totLabel, f: `IF(W${wTot}=0,0,X${wTot}/W${wTot})`, cv: R.margin || 0 };
+  wc['Y' + wTot].s = XL.ST.boldPct;
+  wsh.lists = [[`B${r0}:B${wLast}`, '"Yes,No"']];
+
+  /* Approval */
+  let appr = null;
+  const a = est.approval;
+  if (a) {
+    appr = { name: 'Approval', widths: [36, 16, 22, 22, 22], cells: {}, heights: { 1: 24 }, fit: true };
+    const ac = appr.cells;
+    ac.A1 = { s: T.title, str: 'Approval matrix' };
+    ac.A2 = { s: T.note, str: `From the ${a.source || 'estimator'}. Each test picks the first tier the quote qualifies for; the highest tier is the required approver.` };
+    ['Approver tier', 'Price up to', 'Labor margin at least', 'Expense margin at least', 'Materials margin at least'].forEach((hd, i) => { ac[colName(i) + 4] = { s: i ? T.headR : T.head, str: hd }; });
+    for (let i = 0; i < 5; i++) {
+      const r = 5 + i;
+      ac['A' + r] = { s: T.inText, str: a.tiers[i] || '' };
+      ac['B' + r] = i < 4 ? (isNum((a.priceMax || [])[i]) ? { s: T.inMoney, n: a.priceMax[i] } : { s: T.inMoney }) : { s: T.sub, str: 'Anything higher' };
+      ['labor', 'expense', 'material'].forEach((k, j) => {
+        const col = 'CDE'[j]; const v = (a[k] || [])[i];
+        ac[col + r] = i < 3 ? (isNum(v) ? { s: T.inPct, n: v } : { s: T.inPct }) : { s: T.sub, str: '' };
+      });
+    }
+    const o = a.overall || {};
+    ac.A11 = { s: T.bold, str: 'Overall margin floor' }; ac.B11 = isNum(o.minGP) ? { s: T.inPct, n: o.minGP } : { s: T.inPct };
+    ac.A12 = { s: T.bold, str: 'Price split for the floor' }; ac.B12 = isNum(o.splitPrice) ? { s: T.inMoney, n: o.splitPrice } : { s: T.inMoney };
+    ac.A13 = { s: T.bold, str: 'Below floor, at or under split' }; ac.B13 = { s: T.inText, str: a.tiers[num(o.below)] || '' };
+    ac.A14 = { s: T.bold, str: 'Below floor, over split' }; ac.B14 = { s: T.inText, str: a.tiers[num(o.above)] || '' };
+    ac.B15 = { s: T.head, str: 'Labor' }; ac.C15 = { s: T.head, str: 'Expense' };
+    ac.A16 = { s: T.bold, str: 'Tier when below the lowest threshold' };
+    ac.B16 = { s: T.inText, str: a.tiers[num((a.floors || {}).labor)] || '' }; ac.C16 = { s: T.inText, str: a.tiers[num((a.floors || {}).expense)] || '' };
+    ['Test', 'Value', 'Tier number', 'Tier'].forEach((hd, i) => { ac[colName(i) + 18] = { s: i ? T.headR : T.head, str: hd }; });
+    const lab = `(Worksheets!S${wTot}+Worksheets!T${wTot}+Worksheets!U${wTot})`, labC = `(Worksheets!K${wTot}+Worksheets!L${wTot}+Worksheets!M${wTot}+Worksheets!N${wTot})`;
+    const ex = `Worksheets!V${wTot}`, exC = `(Worksheets!O${wTot}+Worksheets!P${wTot}+Worksheets!Q${wTot})`;
+    const ap = R.approval || { by: {} };
+    const tierCell = (r, idx) => ({ f: `INDEX($A$5:$A$9,C${r})`, cv: a.tiers[idx] || '' });
+    ac.A19 = { str: 'Price' }; ac.B19 = { s: T.money0, f: 'Final_Price', cv: R.price };
+    ac.C19 = { f: 'IF(B19<=B5,1,IF(B19<=B6,2,IF(B19<=B7,3,IF(B19<=B8,4,5))))', cv: num(ap.by.price) + 1 }; ac.D19 = tierCell(19, num(ap.by.price));
+    ac.A20 = { str: 'Labor margin' }; ac.B20 = { s: T.pct, f: `IF(${lab}<=0,"",(${lab}-${labC})/${lab})`, cv: R.laborPrice > 0 ? R.laborMargin : '' };
+    ac.C20 = { f: 'IF(B20="",1,IF(B20>=C5,1,IF(B20>=C6,2,IF(B20>=C7,3,MATCH(B16,A5:A9,0)))))', cv: num(ap.by.labor) + 1 }; ac.D20 = tierCell(20, num(ap.by.labor));
+    ac.A21 = { str: 'Expense margin' }; ac.B21 = { s: T.pct, f: `IF(${ex}<=0,"",(${ex}-${exC})/${ex})`, cv: R.expPrice > 0 ? R.expMargin : '' };
+    ac.C21 = { f: 'IF(B21="",1,IF(B21>=D5,1,IF(B21>=D6,2,IF(B21>=D7,3,MATCH(C16,A5:A9,0)))))', cv: num(ap.by.expense) + 1 }; ac.D21 = tierCell(21, num(ap.by.expense));
+    ac.A22 = { str: 'Overall margin floor' }; ac.B22 = { s: T.pct, f: 'Final_Margin', cv: R.margin || 0 };
+    ac.C22 = { f: 'IF(AND(Final_Price>0,B11<>"",B22<B11),IF(Final_Price<=B12,MATCH(B13,A5:A9,0),MATCH(B14,A5:A9,0)),1)', cv: num(ap.by.overall) + 1 }; ac.D22 = tierCell(22, num(ap.by.overall));
+    ac.A24 = { s: T.totLabel, str: 'Required approver' }; ac.B24 = { s: T.totLabel, f: 'INDEX(A5:A9,MAX(C19:C22))', cv: R.approver };
+  }
+
+  /* Complexity: matrix, stages, skill mix, lines */
+  const MX = est.matrix || blankMatrix();
+  const cxs = { name: 'Complexity', widths: [18, 16, 30, 12, 10, 12, 10, 10, 10, 10, 13, 26, 12], cells: {}, heights: { 1: 24 }, fit: true, lists: [] };
+  const cc = cxs.cells;
+  cc.A1 = { s: T.title, str: 'Complexity matrix' };
+  cc.A2 = { s: T.note, str: 'Hours per item by type and complexity 0-6. A blank hours cell uses hours per point × complexity; type a number to override it. Fixed types (dashboards) use their stage hours.' };
+  ['Type', 'Basis', 'Hours per point', '0', '1', '2', '3', '4', '5', '6', 'Fixed hours'].forEach((hd, i) => { cc[colName(i) + 4] = { s: i >= 2 ? T.headR : T.head, str: hd }; });
+  const nK = MX.types.length, k0 = 5, kLast = k0 + nK + 3 - 1;
+  const stagesAll = []; MX.types.forEach(t => (t.basis === 'fixed' ? t.stages : []).forEach(x => stagesAll.push({ type: t.name, ...x })));
+  const kSH = kLast + 2, kSLast = kSH + stagesAll.length + 8;
+  for (let i = 0; i < nK + 3; i++) {
+    const t = MX.types[i], r = k0 + i; const fixed = t && t.basis === 'fixed';
+    cc['A' + r] = { s: T.inText, str: t ? t.name : '' }; cc['B' + r] = { s: T.inText, str: t ? (fixed ? 'Fixed' : 'Per complexity') : '' };
+    cc['C' + r] = t && isNum(t.perPoint) ? { s: T.inNum, n: t.perPoint } : { s: T.inNum };
+    CX_LEVELS.forEach((cx, j) => {
+      const col = colName(3 + j);
+      if (fixed) { cc[col + r] = { s: T.sub }; return; }
+      const ov = t ? (t.hours || [])[j] : null;
+      cc[col + r] = isNum(ov) ? { s: T.inNum, n: ov } : { s: T.hrs, f: `IF($C${r}="","",$C${r}*${cx})`, cv: t && isNum(t.perPoint) ? t.perPoint * cx : '' };
+    });
+    if (fixed && t.stages.length) cc['K' + r] = { s: T.hrs, f: `SUMIF(StageTypes,A${r},StageHours)`, cv: typeHours(t, 0) };
+    else cc['K' + r] = t && fixed && isNum(t.fixed) ? { s: T.inNum, n: t.fixed } : { s: T.inNum };
+  }
+  ['Type', 'Stage', 'Hours'].forEach((hd, i) => { cc[colName(i) + kSH] = { s: i === 2 ? T.headR : T.head, str: hd }; });
+  for (let i = 0; i < stagesAll.length + 8; i++) {
+    const x = stagesAll[i], r = kSH + 1 + i;
+    cc['A' + r] = { s: T.inText, str: x ? x.type : '' }; cc['B' + r] = { s: T.inText, str: x ? x.name : '' };
+    cc['C' + r] = x && isNum(x.hrs) ? { s: T.inNum, n: x.hrs } : { s: T.inNum };
+  }
+  const mH = kSLast + 2, nM = (MX.mix || []).length, mLast = mH + nM + 3, mT = mLast + 1;
+  ['Engineer level', 'Share', 'Cost per hour', 'Price per hour before escalation'].forEach((hd, i) => { cc[colName(i) + mH] = { s: i ? T.headR : T.head, str: hd }; });
+  for (let i = 0; i < nM + 3; i++) {
+    const p = MX.mix[i], r = mH + 1 + i; const L = p ? est.levels.find(l => l.id === p.level) : null;
+    const m = L && isNum(L.margin) ? L.margin : num(s.margin);
+    cc['A' + r] = { s: T.inText, str: L ? L.name : '' }; cc['B' + r] = p && isNum(p.pct) ? { s: T.inPct, n: p.pct } : { s: T.inPct };
+    cc['C' + r] = { s: T.money, f: `IF(A${r}="","",IFERROR(VLOOKUP(A${r},Levels,3,FALSE),0))`, cv: L ? num(L.cost) : '' };
+    cc['D' + r] = { s: T.money, f: `IF(A${r}="","",C${r}/(1-${levelMargin('A' + r)}))`, cv: L ? num(L.cost) / (1 - m) : '' };
+  }
+  cc['A' + mT] = { s: T.totLabel, str: 'Mix' }; cc['B' + mT] = { s: XL.ST.boldPct, f: `SUM(B${mH + 1}:B${mLast})`, cv: R.mixPct };
+  cc['C' + mT] = { s: T.totMoney, f: `SUMPRODUCT(B${mH + 1}:B${mLast},C${mH + 1}:C${mLast})`, cv: R.mixCost };
+  cc['D' + mT] = { s: T.totMoney, f: `SUMPRODUCT(B${mH + 1}:B${mLast},D${mH + 1}:D${mLast})`, cv: R.mixPrice };
+  cc['C' + mT].s = XL.ST.boldMoney; cc['D' + mT].s = XL.ST.boldMoney;
+  const lH = mT + 2, nC = MX.lines.length, cLast = lH + nC + 50;
+  ['Worksheet', 'Area', 'Title', 'Type', 'Complexity', 'Quantity', 'Engineer level', 'Hours', 'Cost per hour', 'Cost', 'Price', 'Notes', 'Worksheet included']
+    .forEach((hd, i) => { cc[colName(i) + lH] = { s: (i >= 4 && i <= 10 && i !== 6) ? T.headR : T.head, str: hd }; });
+  const tyName = id => ((MX.types.find(t => t.id === id) || {}).name || '');
+  for (let i = 0; i < nC + 50; i++) {
+    const l = MX.lines[i], r = lH + 1 + i, x = l ? R.cx[l.id] : null; const live = !!l && !!tyName(l.type);
+    const w = l ? est.worksheets.find(z => z.id === l.ws) : null;
+    cc['A' + r] = { s: T.inText, str: l ? wsName(l.ws) : '' }; cc['B' + r] = { s: T.inText, str: l ? l.area : '' }; cc['C' + r] = { s: T.inText, str: l ? l.title : '' };
+    cc['D' + r] = { s: T.inText, str: l ? tyName(l.type) : '' };
+    cc['E' + r] = l && isNum(l.cx) ? { s: T.inNum, n: l.cx } : { s: T.inNum }; cc['F' + r] = l && isNum(l.qty) ? { s: T.inNum, n: l.qty } : { s: T.inNum };
+    cc['G' + r] = { s: T.inText, str: l ? (l.level === 'mix' ? 'Mix' : lvName(l.level)) : '' };
+    const idx = `MATCH(D${r},MatrixTypes,0)`;
+    cc['H' + r] = { s: T.money, f: `IF(D${r}="","",N(F${r})*IFERROR(IF(INDEX(MatrixBasis,${idx})="Fixed",N(INDEX(MatrixFixed,${idx})),IF(OR(N(E${r})<0,N(E${r})>6),0,N(INDEX(MatrixHours,${idx},INT(N(E${r}))+1)))),0))`, cv: live ? x.hrs : '' };
+    cc['H' + r].s = 0; // General: popups run in half hours
+    cc['I' + r] = { s: T.money, f: `IF(H${r}="","",IF(G${r}="Mix",Mix_Cost_Rate,IFERROR(VLOOKUP(G${r},Levels,3,FALSE),0)))`, cv: live ? x.rate : '' };
+    cc['J' + r] = { s: T.money, f: `IF(H${r}="","",H${r}*I${r})`, cv: live ? x.cost : '' };
+    cc['K' + r] = { s: T.money, f: `IF(H${r}="","",IF(G${r}="Mix",H${r}*Mix_Price_Rate*(1+Escalation),J${r}*(1+Escalation)/(1-${levelMargin('G' + r)})))`, cv: live ? x.price : '' };
+    cc['L' + r] = { s: T.inText, str: l ? l.notes || '' : '' };
+    cc['M' + r] = { s: T.sub, f: `IF(A${r}="","",IFERROR(VLOOKUP(A${r},Worksheets!$A$${r0}:$B$${wLast},2,FALSE),"No"))`, cv: l ? (w && w.include !== false ? 'Yes' : 'No') : '' };
+  }
+  cxs.freeze = null;
+  cxs.lists = [[`B${k0}:B${kLast}`, '"Per complexity,Fixed"'], [`A${kSH + 1}:A${kSLast}`, 'MatrixTypes'], [`A${mH + 1}:A${mLast}`, 'LevelNames'],
+    [`A${lH + 1}:A${cLast}`, 'WorksheetNames'], [`D${lH + 1}:D${cLast}`, 'MatrixTypes']];
+  const cxRange = c => `Complexity!$${c}$${lH + 1}:$${c}$${cLast}`;
+  const cxNames = [
+    ['CxCost', cxRange('J')], ['CxHours', cxRange('H')], ['CxInc', cxRange('M')], ['CxLevel', cxRange('G')], ['CxPrice', cxRange('K')], ['CxWs', cxRange('A')],
+    ['MatrixBasis', `Complexity!$B$${k0}:$B$${kLast}`], ['MatrixFixed', `Complexity!$K$${k0}:$K$${kLast}`], ['MatrixHours', `Complexity!$D$${k0}:$J$${kLast}`], ['MatrixTypes', `Complexity!$A$${k0}:$A$${kLast}`],
+    ['Mix_Cost_Rate', `Complexity!$C$${mT}`], ['Mix_Price_Rate', `Complexity!$D$${mT}`], ['MixCosts', `Complexity!$C$${mH + 1}:$C$${mLast}`], ['MixLevels', `Complexity!$A$${mH + 1}:$A$${mLast}`],
+    ['MixPrices', `Complexity!$D$${mH + 1}:$D$${mLast}`], ['MixShares', `Complexity!$B$${mH + 1}:$B$${mLast}`],
+    ['StageHours', `Complexity!$C$${kSH + 1}:$C$${kSLast}`], ['StageTypes', `Complexity!$A$${kSH + 1}:$A$${kSLast}`]
+  ];
+
+  /* Summary */
+  const sum = { name: 'Summary', widths: [40, 12, 14, 18, 18, 12], cells: {}, selected: true, heights: { 1: 24, 5: 30 }, fit: true };
+  const sc = sum.cells;
   const ident = [p.customer, p.number ? `Proposal ${p.number}${p.rev !== '' && p.rev != null ? ` rev ${p.rev}` : ''}` : ''].filter(Boolean).join(', ');
   sc.A1 = { s: T.title, f: 'IF(Rates!F4="","Estimate",Rates!F4)', cv: p.name || 'Estimate' };
   sc.A2 = { s: T.sub, f: 'IF(Rates!F5="","",Rates!F5&IF(Rates!F6="","",", "))&IF(Rates!F6="","","Proposal "&Rates!F6&IF(Rates!F7="",""," rev "&Rates!F7))', cv: ident };
-  sc.A3 = { s: T.note, str: 'Calculated from the Tasks and Rates tabs. Draft estimate: a qualified person reviews hours, rates and margin before anything is sent.' };
-  sc.A4 = { s: T.bold, str: 'Fixed price' }; sc.B4 = { s: T.big, f: 'D13', cv: res.price };
-  sc.A5 = { s: T.bold, str: 'Margin' }; sc.B5 = { s: T.boldPct, f: 'D15', cv: res.margin || 0 };
-  sc.A6 = { s: T.bold, str: 'Total hours' }; sc.B6 = { s: T.boldHrs, f: 'B13', cv: res.hrs };
-  ['Item', 'Hours', 'Cost before escalation', 'Price'].forEach((hd, i) => { sc[String.fromCharCode(65 + i) + 8] = { s: i ? T.headR : T.head, str: hd }; });
-  const row = (r, label, b, c, d) => { sc['A' + r] = { str: label }; if (b) sc['B' + r] = b; if (c) sc['C' + r] = c; if (d) sc['D' + r] = d; };
-  row(9, 'Task labor', { s: T.hrs, f: `SUM(${TR('F')})`, cv: res.taskHrs }, { s: T.money0, f: `SUM(${TR('H')})`, cv: res.taskCost }, { s: T.money0, f: `SUM(${TR('I')})`, cv: sumPrice });
-  row(10, 'Project management', { s: T.hrs, f: 'ROUNDUP(PM_Pct*B9,0)', cv: res.pm.hrs }, { s: T.money0, f: 'B10*IFERROR(VLOOKUP(PM_Level,Levels,3,FALSE),0)', cv: res.pm.cost }, { s: T.money0, f: 'C10*(1+Escalation)/(1-Margin)', cv: gross(res.pm.cost) });
-  row(11, 'Contingency', { s: T.hrs, f: 'ROUNDDOWN(Contingency_Pct*(B9+B10),0)', cv: res.cont.hrs }, { s: T.money0, f: 'Contingency_Pct*(C9+C10)', cv: res.cont.cost }, { s: T.money0, f: 'C11*(1+Escalation)/(1-Margin)', cv: gross(res.cont.cost) });
-  row(12, 'Escalation (included in prices)', null, { s: T.money0, f: 'SUM(C9:C11)*Escalation', cv: res.esc }, null);
-  sc.A13 = { s: T.totLabel, str: 'Total' }; sc.B13 = { s: T.totHrs, f: 'SUM(B9:B11)', cv: res.hrs }; sc.C13 = { s: T.totMoney, f: 'SUM(C9:C12)', cv: res.cost }; sc.D13 = { s: T.totMoney, f: 'SUM(D9:D11)', cv: res.price };
-  row(14, 'Gross profit', null, null, { s: T.money0, f: 'D13-C13', cv: res.gp });
-  row(15, 'Margin', null, null, { s: T.pct, f: 'IF(D13=0,0,D14/D13)', cv: res.margin || 0 });
-  row(16, 'Average price per hour', null, null, { s: T.money, f: 'IF(B13=0,0,D13/B13)', cv: res.perHr || 0 });
-  ['Engineer level', 'Hours', 'Cost before escalation', 'Price', 'Share of all hours'].forEach((hd, i) => { sc[String.fromCharCode(65 + i) + 18] = { s: i ? T.headR : T.head, str: hd }; });
-  let r = 19;
-  for (let i = 0; i < nL + XLL.extraLevels; i++, r++) {
-    const L = est.levels[i]; const rr = l0 + i;
-    let hh = '', cc = '', pp = '', sh = '';
-    if (L) {
-      hh = est.tasks.filter(t => levelName(t.level) === L.name).reduce((a, t) => a + res.tasks[t.id].hrs, 0) + (L.name === levelName(s.pmLevel) ? res.pm.hrs : 0);
-      cc = est.tasks.filter(t => levelName(t.level) === L.name).reduce((a, t) => a + res.tasks[t.id].cost, 0) + (L.name === levelName(s.pmLevel) ? res.pm.cost : 0);
-      pp = gross(cc); sh = res.hrs ? hh / res.hrs : '';
-    }
-    sc['A' + r] = { f: `IF(Rates!A${rr}="","",Rates!A${rr})`, cv: L ? L.name : '' };
-    sc['B' + r] = { s: T.hrs, f: `IF(A${r}="","",SUMIF(${TR('C')},A${r},${TR('F')})+IF(A${r}=PM_Level,$B$10,0))`, cv: hh };
-    sc['C' + r] = { s: T.money0, f: `IF(A${r}="","",SUMIF(${TR('C')},A${r},${TR('H')})+IF(A${r}=PM_Level,$C$10,0))`, cv: cc };
-    sc['D' + r] = { s: T.money0, f: `IF(A${r}="","",C${r}*(1+Escalation)/(1-Margin))`, cv: pp };
-    sc['E' + r] = { s: T.pct, f: `IF(OR(A${r}="",$B$13=0),"",B${r}/$B$13)`, cv: sh };
+  sc.A3 = { s: T.note, str: 'Calculated from the other tabs. Draft estimate: a qualified person reviews hours, rates and margin before anything is sent.' };
+  sc.A5 = { s: T.bold, str: 'Fixed price' }; sc.B5 = { s: T.big, f: 'Final_Price', cv: R.price };
+  sc.A6 = { s: T.bold, str: 'Margin' }; sc.B6 = { s: T.boldPct, f: 'Final_Margin', cv: R.margin || 0 };
+  sc.A7 = { s: T.bold, str: 'Total hours' }; sc.B7 = { s: T.boldHrs, f: 'Final_Hours', cv: R.hrs };
+  sc.A8 = { s: T.bold, str: 'Required approver' }; sc.B8 = a ? { s: T.bold, f: 'Approver', cv: R.approver } : { s: T.bold, str: 'Not set' };
+  let r = 10;
+  ['Worksheet', 'Include', 'Hours', 'Cost', 'Price', 'Margin'].forEach((hd, i) => { sc[colName(i) + r] = { s: i > 1 ? T.headR : T.head, str: hd }; });
+  for (let i = 0; i < nW + 3; i++) {
+    r++; const wr = r0 + i, w = est.worksheets[i], W = w ? R.ws[w.id] : null;
+    sc['A' + r] = { f: `IF(Worksheets!A${wr}="","",Worksheets!A${wr})`, cv: w ? w.name : '' };
+    sc['B' + r] = { f: `IF(A${r}="","",Worksheets!B${wr})`, cv: w ? (w.include !== false ? 'Yes' : 'No') : '' };
+    sc['C' + r] = { s: T.hrs, f: `IF(A${r}="","",Worksheets!J${wr})`, cv: W ? W.hrs : '' };
+    sc['D' + r] = { s: T.money0, f: `IF(A${r}="","",Worksheets!R${wr})`, cv: W ? W.cost : '' };
+    sc['E' + r] = { s: T.money0, f: `IF(A${r}="","",Worksheets!W${wr})`, cv: W ? W.price : '' };
+    sc['F' + r] = { s: T.pct, f: `IF(A${r}="","",Worksheets!Y${wr})`, cv: W ? (W.margin ?? '') : '' };
   }
+  r++;
+  sc['A' + r] = { s: T.totLabel, str: 'Final total (included worksheets)' }; sc['B' + r] = { s: T.totLabel };
+  sc['C' + r] = { s: T.totHrs, f: 'Final_Hours', cv: R.hrs }; sc['D' + r] = { s: T.totMoney, f: 'Final_Cost', cv: R.cost };
+  sc['E' + r] = { s: T.totMoney, f: 'Final_Price', cv: R.price }; sc['F' + r] = { s: T.boldPct, f: 'Final_Margin', cv: R.margin || 0 };
+  r += 2;
+  ['How the price builds up', '', 'Hours', 'Cost', 'Price'].forEach((hd, i) => { sc[colName(i) + r] = { s: i > 1 ? T.headR : T.head, str: hd }; });
+  const W_ = c => `Worksheets!${c}${wTot}`;
+  const build = [['Task labor', 'F', 'K', 'S', R.taskHrs, R.taskCost, R.taskPrice], ['Project management', 'H', 'L', 'T', R.pmHrs, R.pmCost, R.pmPrice],
+    ['Contingency', 'I', 'M', 'U', R.contHrs, R.contCost, R.contPrice]];
+  for (const [label, hc, cc, pc, hv, cv, pv] of build) { r++; sc['A' + r] = { str: label }; sc['C' + r] = { s: T.hrs, f: W_(hc), cv: hv }; sc['D' + r] = { s: T.money0, f: W_(cc), cv }; sc['E' + r] = { s: T.money0, f: W_(pc), cv: pv }; }
+  r++; sc['A' + r] = { str: 'Expenses' }; sc['D' + r] = { s: T.money0, f: `${W_('O')}+${W_('P')}`, cv: R.expCost }; sc['E' + r] = { s: T.money0, f: W_('V'), cv: R.expPrice };
+  r++; sc['A' + r] = { str: 'Escalation (included in prices)' }; sc['D' + r] = { s: T.money0, f: `${W_('N')}+${W_('Q')}`, cv: R.esc };
+  r++; sc['A' + r] = { s: T.totLabel, str: 'Total' }; sc['B' + r] = { s: T.totLabel }; sc['C' + r] = { s: T.totHrs, f: 'Final_Hours', cv: R.hrs };
+  sc['D' + r] = { s: T.totMoney, f: 'Final_Cost', cv: R.cost }; sc['E' + r] = { s: T.totMoney, f: 'Final_Price', cv: R.price };
+  r += 2;
+  ['Engineer level', '', 'Hours', 'Cost', 'Price', 'Share of hours'].forEach((hd, i) => { sc[colName(i) + r] = { s: i > 1 ? T.headR : T.head, str: hd }; });
+  const incIds = new Set(est.worksheets.filter(w => w.include !== false).map(w => w.id));
+  for (let i = 0; i < nL + 5; i++) {
+    r++; const lr = l0 + i, L = est.levels[i];
+    let hv = '', cv = '', pv = '', sv = '';
+    if (L) { const b = R.byLevel.find(x => x.id === L.id) || { hrs: 0, cost: 0, price: 0 }; hv = b.hrs; cv = b.cost; pv = b.price; sv = R.hrs ? hv / R.hrs : ''; }
+    const mixIdx = `MATCH(A${r},MixLevels,0)`, cxMix = `SUMIFS(CxHours,CxLevel,"Mix",CxInc,"Yes")`;
+    sc['A' + r] = { f: `IF(Rates!A${lr}="","",Rates!A${lr})`, cv: L ? L.name : '' };
+    sc['C' + r] = { s: T.hrs, f: `IF(A${r}="","",SUMIFS(${TH},${TD},A${r},${TN},"Yes")+IF(A${r}=PM_Level,${W_('H')},0)+SUMIFS(CxHours,CxLevel,A${r},CxInc,"Yes")+${cxMix}*IFERROR(INDEX(MixShares,${mixIdx}),0))`, cv: hv };
+    sc['D' + r] = { s: T.money0, f: `IF(A${r}="","",SUMIFS(${TJ},${TD},A${r},${TN},"Yes")+IF(A${r}=PM_Level,${W_('L')},0)+SUMIFS(CxCost,CxLevel,A${r},CxInc,"Yes")+${cxMix}*IFERROR(INDEX(MixShares,${mixIdx})*INDEX(MixCosts,${mixIdx}),0))`, cv };
+    sc['E' + r] = { s: T.money0, f: `IF(A${r}="","",SUMIFS(${TL},${TD},A${r},${TN},"Yes")+IF(A${r}=PM_Level,${W_('T')},0)+SUMIFS(CxPrice,CxLevel,A${r},CxInc,"Yes")+${cxMix}*IFERROR(INDEX(MixShares,${mixIdx})*INDEX(MixPrices,${mixIdx}),0)*(1+Escalation))`, cv: pv };
+    sc['F' + r] = { s: T.pct, f: `IF(OR(A${r}="",Final_Hours=0),"",C${r}/Final_Hours)`, cv: sv };
+  }
+  r++; sc['A' + r] = { str: 'Contingency' }; sc['C' + r] = { s: T.hrs, f: W_('I'), cv: R.contHrs }; sc['D' + r] = { s: T.money0, f: W_('M'), cv: R.contCost };
+  sc['E' + r] = { s: T.money0, f: W_('U'), cv: R.contPrice }; sc['F' + r] = { s: T.pct, f: `IF(Final_Hours=0,"",C${r}/Final_Hours)`, cv: R.hrs ? R.contHrs / R.hrs : '' };
 
-  const names = [['Contingency_Pct', 'Rates!$B$6'], ['Escalation', 'Rates!$B$7'], ['LevelNames', `Rates!$A$${l0}:$A$${lLast}`], ['Levels', `Rates!$A$${l0}:$C$${lLast}`], ['Margin', 'Rates!$B$4'], ['PM_Level', 'Rates!$B$8'], ['PM_Pct', 'Rates!$B$5']];
-  return XL.workbook([sum, tasks, rates], names, p.name || 'Estimate');
+  const names = [
+    ['Contingency_Pct', 'Rates!$B$6'], ['Escalation', 'Rates!$B$7'], ['Exp_Escalation', 'Rates!$B$11'], ['Exp_Margin', 'Rates!$B$10'],
+    ['ExpTypeNames', `Rates!$A$${s0}:$A$${sLast}`], ['ExpTypes', `Rates!$A$${s0}:$C$${sLast}`],
+    ['Final_Cost', `Worksheets!$R$${wTot}`], ['Final_Hours', `Worksheets!$J$${wTot}`], ['Final_Margin', `Worksheets!$Y$${wTot}`], ['Final_Price', `Worksheets!$W$${wTot}`],
+    ['LevelMargins', `Rates!$D$${l0}:$D$${lLast}`], ['LevelNames', `Rates!$A$${l0}:$A$${lLast}`], ['Levels', `Rates!$A$${l0}:$D$${lLast}`],
+    ['Margin', 'Rates!$B$4'], ['PM_Level', 'Rates!$B$8'], ['PM_Margin', 'Rates!$B$13'], ['PM_Pct', 'Rates!$B$5'], ['PM_Rate', 'Rates!$B$12'], ['PM_Rule', 'Rates!$B$9'],
+    ['WorksheetNames', `Worksheets!$A$${r0}:$A$${wLast}`]
+  ];
+  names.push(...cxNames); names.sort((a, b) => a[0].localeCompare(b[0]));
+  if (appr) names.unshift(['Approver', 'Approval!$B$24']);
+  const sheets = [sum, wsh, tasks, cxs, exps, rates]; if (appr) sheets.push(appr);
+  return XL.workbook(sheets, names, p.name || 'Estimate');
 }
+function XL_ROW0() { return XLL.row0; }
 
-/* Read a workbook saved by this app (Summary, Tasks and Rates tabs) */
-async function isAppWorkbook(wb) {
-  if (!wb.sheets.some(s => s.name === 'Tasks') || !wb.sheets.some(s => s.name === 'Rates')) return false;
-  const t = await wb.sheet('Tasks'); const r = await wb.sheet('Rates');
-  return !!t && !!r && String(t['B' + XLL.tasksHead] || '').trim() === 'Task' && String(r['A' + (XLL.level0 - 1)] || '').trim() === 'Level';
-}
-async function extractAppWorkbook(wb, fileName) {
-  const T = await wb.sheet('Tasks'); const Rt = await wb.sheet('Rates'); const Sm = await wb.sheet('Summary');
-  const str = v => (v == null ? '' : String(v).trim());
-  const levels = []; const byName = {};
-  for (let r = XLL.level0; r < XLL.level0 + 500; r++) {
-    const name = str(Rt['A' + r]); if (!name) continue;
-    const code = str(Rt['B' + r]);
-    let id = code || name; while (levels.some(l => l.id === id)) id += '_';
-    const L = { id, name, code, cost: isNum(Rt['C' + r]) ? Rt['C' + r] : num(parseNum(Rt['C' + r] || 0)) };
-    levels.push(L); byName[name.toLowerCase()] = L;
-  }
-  const tasks = [];
-  for (let r = XLL.task0; r < XLL.task0 + 5000; r++) {
-    const name = str(T['B' + r]); const q = T['D' + r]; const hh = T['E' + r];
-    if (!name && q == null && hh == null && !str(T['A' + r])) continue;
-    if (!name && q == null && hh == null) continue;
-    const lname = str(T['C' + r]); let L = lname ? byName[lname.toLowerCase()] : null;
-    if (lname && !L) { L = { id: lname, name: lname, code: '', cost: 0 }; levels.push(L); byName[lname.toLowerCase()] = L; }
-    const n = v => (isNum(v) ? v : (v == null || v === '' ? null : (isFinite(parseNum(v)) ? parseNum(v) : null)));
-    tasks.push({ id: uid('t'), wbs: '', phase: str(T['A' + r]), name, level: L ? L.id : null, qty: n(q), hours: n(hh), notes: str(T['J' + r]) });
-  }
-  const pmName = str(await wb.named('PM_Level')); const pmL = byName[pmName.toLowerCase()];
-  const pick = async (nm, cell) => { const v = await wb.named(nm); return isNum(v) ? v : num(Rt[cell]); };
-  return {
-    app: 'gm-simple-estimator', version: 1,
-    project: { name: str(Rt.F4), customer: str(Rt.F5), number: str(Rt.F6), rev: str(Rt.F7), preparedBy: str(Rt.F8), notes: str(Rt.F9) },
-    settings: { margin: await pick('Margin', 'B4'), pmPct: await pick('PM_Pct', 'B5'), contPct: await pick('Contingency_Pct', 'B6'), escPct: await pick('Escalation', 'B7'), pmLevel: pmL ? pmL.id : (levels[0] || {}).id || null },
-    levels, tasks,
-    source: { kind: 'app', file: fileName, sheet: 'Summary', importedAt: new Date().toISOString(), hours: Sm && isNum(Sm.B13) ? Sm.B13 : null, price: Sm && isNum(Sm.D13) ? Sm.D13 : null }
-  };
-}
-
-'use strict';
-/* GrayMatter Estimator (simple). One file, no libraries, nothing leaves the browser. */
-const KEY = 'gm-simple-estimator:v1';
-const $ = (s, e = document) => e.querySelector(s);
-const $$ = (s, e = document) => [...e.querySelectorAll(s)];
-const isNum = v => typeof v === 'number' && isFinite(v);
-const num = v => (isNum(v) ? v : (v === '' || v == null ? 0 : (isFinite(+v) ? +v : 0)));
-const up = x => (!isNum(x) || x === 0 ? 0 : Math.sign(x) * Math.ceil(Math.abs(x) - 1e-9));     // Excel ROUNDUP(x,0)
-const down = x => (!isNum(x) || x === 0 ? 0 : Math.sign(x) * Math.floor(Math.abs(x) + 1e-9)); // Excel ROUNDDOWN(x,0)
-const uid = p => p + Math.random().toString(36).slice(2, 9);
-const h = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const parseNum = s => +String(s).replace(/[$,%\s]/g, '');
-const pctIn = v => (isNum(v) ? String(+(v * 100).toFixed(4)) : '');
-const numIn = v => (isNum(v) ? String(+v) : '');
-
-const F0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0, minimumFractionDigits: 0 });
-const F2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, minimumFractionDigits: 2 });
-const money = (x, dp = 0) => (isNum(x) ? (dp ? F2 : F0).format(Math.abs(x) < 0.005 ? 0 : x) : '—');
-const hrs = x => (isNum(x) ? Math.round(x).toLocaleString('en-US') : '—');
-const pct = (x, dp = 1) => (isNum(x) ? (x * 100).toFixed(dp) + '%' : '—');
-function fmt(v, f) {
-  switch (f) {
-    case 'm0': return money(v, 0);
-    case 'm2': return money(v, 2);
-    case 'h': return hrs(v);
-    case 'p': return pct(v);
-    default: return v == null ? '' : String(v);
-  }
-}
-const walk = (o, p) => p.split('.').reduce((a, k) => (a == null ? undefined : a[k]), o);
-
-/* ---------- Data ---------- */
-const FRIENDLY = { IA_ENGR_I: 'Eng I', IA_ENGR_II: 'Eng II', IA_ENGR_SR: 'Eng Sr', IA_CONSULT: 'Consultant', PROJ_MGR: 'Project manager', PROJ_MGR_SR: 'Sr project manager', IOPS: 'iOPS partner' };
-function blankEstimate() {
-  return {
-    app: 'gm-simple-estimator', version: 1,
-    project: { name: '', customer: '', number: '', rev: '0', preparedBy: '', notes: '' },
-    settings: { margin: 0, pmPct: 0, contPct: 0, escPct: 0, pmLevel: 'PM' },
-    levels: [
-      { id: 'ENG_I', name: 'Eng I', code: 'ENG_I', cost: 0 },
-      { id: 'ENG_II', name: 'Eng II', code: 'ENG_II', cost: 0 },
-      { id: 'ENG_SR', name: 'Eng Sr', code: 'ENG_SR', cost: 0 },
-      { id: 'PM', name: 'Project manager', code: 'PROJ_MGR', cost: 0 }
-    ],
-    tasks: [], source: null
-  };
-}
-function normalize(q) {
-  if (!q || typeof q !== 'object' || !Array.isArray(q.tasks) || !Array.isArray(q.levels)) throw new Error('This is not an estimate file from this app.');
-  const b = blankEstimate();
-  q.app = b.app; q.version = 1;
-  q.project = Object.assign({}, b.project, q.project || {});
-  q.settings = Object.assign({}, b.settings, q.settings || {});
-  q.levels.forEach(l => { if (!l.id) l.id = uid('L'); });
-  q.tasks.forEach(t => { if (!t.id) t.id = uid('t'); });
-  if (q.source === undefined) q.source = null;
-  return q;
-}
-
-let S = null;           // the estimate
-let R = null;           // calculated results
-let tab = 'dashboard';
-const ui = { target: '' };
-
-/* ---------- Calculation (same rules as the SCADA tab) ---------- */
-function calc(st, marginOverride) {
-  const lv = {}; st.levels.forEach(l => { lv[l.id] = l; });
-  const s = st.settings;
-  const m = isNum(marginOverride) ? marginOverride : num(s.margin);
-  const e = num(s.escPct);
-  const price = c => (m < 1 ? c * (1 + e) / (1 - m) : NaN);
-  const out = { tasks: {}, m, e };
-  const byL = {}; const byP = {}; const order = [];
-  const addL = (id, name, hh, c) => { const k = id || '_none'; byL[k] = byL[k] || { id: k, name, hrs: 0, cost: 0 }; byL[k].hrs += hh; byL[k].cost += c; };
-  let th = 0, tc = 0;
-  for (const t of st.tasks) {
-    const L = lv[t.level]; const rate = L ? num(L.cost) : 0;
-    const hh = up(num(t.qty) * num(t.hours)); const c = hh * rate;
-    out.tasks[t.id] = { hrs: hh, rate, cost: c, price: price(c) };
-    th += hh; tc += c;
-    addL(t.level, L ? L.name : 'No level', hh, c);
-    const p = (t.phase || '').trim() || 'No phase';
-    if (!byP[p]) { byP[p] = { phase: p, hrs: 0, cost: 0, n: 0 }; order.push(p); }
-    byP[p].hrs += hh; byP[p].cost += c; byP[p].n++;
-  }
-  const PL = lv[s.pmLevel]; const pmRate = PL ? num(PL.cost) : 0;
-  const pmH = up(num(s.pmPct) * th); const pmC = pmH * pmRate;
-  out.pm = { pct: num(s.pmPct), base: th, hrs: pmH, rate: pmRate, cost: pmC, price: price(pmC), name: PL ? PL.name : 'No level' };
-  if (pmH) addL(s.pmLevel, out.pm.name, pmH, pmC);
-  const cp = num(s.contPct); const cH = down(cp * (th + pmH)); const cC = cp * (tc + pmC);
-  out.cont = { pct: cp, base: th + pmH, hrs: cH, cost: cC, price: price(cC) };
-  if (cH || cC) byL._cont = { id: '_cont', name: 'Contingency', hrs: cH, cost: cC };
-  out.taskHrs = th; out.taskCost = tc;
-  out.hrs = th + pmH + cH;
-  out.labor = tc + pmC + cC; out.esc = out.labor * e; out.cost = out.labor + out.esc;
-  out.price = price(out.labor); out.gp = out.price - out.cost;
-  out.margin = out.price ? out.gp / out.price : null;
-  out.perHr = out.hrs ? out.price / out.hrs : null;
-  out.byLevel = Object.values(byL).filter(x => x.hrs || x.cost).map(x => ({ ...x, price: price(x.cost) })).sort((a, b) => b.hrs - a.hrs);
-  out.byPhase = order.map(p => ({ ...byP[p], price: price(byP[p].cost) }));
-  out.taskHrsTxt = `${hrs(th)} task hours`;
-  return out;
-}
-
-/* ---------- Excel reader: unzip with the browser's own decompressor, parse the sheet XML ---------- */
-async function openZip(buf) {
-  const dv = new DataView(buf); const u8 = new Uint8Array(buf); const dec = new TextDecoder();
-  let eocd = -1;
-  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65600); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
-  if (eocd < 0) throw new Error('This file is not an Excel workbook (.xlsx or .xlsm).');
-  const count = dv.getUint16(eocd + 10, true); let p = dv.getUint32(eocd + 16, true);
-  const entries = {};
-  for (let n = 0; n < count; n++) {
-    if (dv.getUint32(p, true) !== 0x02014b50) break;
-    const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
-    const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
-    entries[dec.decode(u8.subarray(p + 46, p + 46 + nlen))] = { method, csize, off };
-    p += 46 + nlen + xlen + clen;
-  }
-  return async name => {
-    const e = entries[name]; if (!e) return null;
-    const start = e.off + 30 + dv.getUint16(e.off + 26, true) + dv.getUint16(e.off + 28, true);
-    const data = u8.subarray(start, start + e.csize);
-    if (e.method === 0) return dec.decode(data);
-    if (e.method !== 8) throw new Error('This workbook uses a compression this page cannot read.');
-    if (typeof DecompressionStream === 'undefined') throw new Error('This browser cannot read Excel files. Use a current version of Edge, Chrome, Firefox or Safari.');
-    const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
-    return dec.decode(await new Response(stream).arrayBuffer());
-  };
-}
-async function readWorkbook(buf) {
-  const file = await openZip(buf);
-  const xml = s => new DOMParser().parseFromString(s, 'application/xml');
-  const all = (node, tag) => [...node.getElementsByTagNameNS('*', tag)];
-  const wbXml = await file('xl/workbook.xml'); if (!wbXml) throw new Error('This file is not an Excel workbook.');
-  const wb = xml(wbXml); const rels = xml(await file('xl/_rels/workbook.xml.rels'));
-  const target = {}; all(rels, 'Relationship').forEach(r => { target[r.getAttribute('Id')] = r.getAttribute('Target'); });
-  const RNS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
-  const sheets = all(wb, 'sheet').map(s => {
-    const t = target[s.getAttributeNS(RNS, 'id') || s.getAttribute('r:id')] || '';
-    return { name: s.getAttribute('name'), state: s.getAttribute('state') || 'visible', path: t.startsWith('/') ? t.slice(1) : 'xl/' + t.replace(/^\.\//, '') };
-  });
-  const names = {}; all(wb, 'definedName').forEach(d => { if (!d.hasAttribute('localSheetId')) names[d.getAttribute('name')] = d.textContent; });
-  const sstXml = await file('xl/sharedStrings.xml');
-  const shared = sstXml ? all(xml(sstXml), 'si').map(si => all(si, 't').filter(t => t.parentNode.localName !== 'rPh').map(t => t.textContent).join('')) : [];
-  const cache = {};
-  async function sheet(name) {
-    if (cache[name]) return cache[name];
-    const sh = sheets.find(x => x.name === name); if (!sh) return null;
-    const src = await file(sh.path); if (!src) return null;
-    const cells = {};
-    for (const c of all(xml(src), 'c')) {
-      const t = c.getAttribute('t'); const v = c.getElementsByTagNameNS('*', 'v')[0];
-      let val = null;
-      if (t === 's') val = v ? shared[+v.textContent] ?? null : null;
-      else if (t === 'inlineStr') val = all(c, 't').map(x => x.textContent).join('');
-      else if (t === 'str' || t === 'e') val = v ? v.textContent : null;
-      else if (t === 'b') val = v ? v.textContent === '1' : null;
-      else val = v && v.textContent !== '' ? +v.textContent : null;
-      cells[c.getAttribute('r')] = val;
-    }
-    return (cache[name] = cells);
-  }
-  async function named(name) {
-    const ref = names[name]; if (!ref) return null;
-    const m = ref.match(/^'?(.+?)'?!\$?([A-Z]+)\$?(\d+)$/); if (!m) return null;
-    const c = await sheet(m[1]); return c ? c[m[2] + m[3]] : null;
-  }
-  return { sheets, sheet, named };
-}
-const isEstimateTab = c => c && /task description/i.test(String(c.G9 || '')) && /role/i.test(String(c.F9 || ''));
-function cleanPhase(activity, wbs) {
-  let a = String(activity || '').trim();
-  if (!a && wbs) a = String(wbs).slice(7).trim();
-  return a.replace(/^[A-Z]{2,6}-(?=[A-Za-z])/, '');
-}
-async function extractTab(wb, tabName, fileName) {
-  const c = await wb.sheet(tabName);
-  if (!isEstimateTab(c)) throw new Error(`The ${tabName} tab does not look like an estimate tab.`);
-  const setup = await wb.sheet('Setup');
-  const rates = {};
-  if (setup) for (let r = 40; r <= 120; r++) {
-    const code = setup['C' + r];
-    if (typeof code !== 'string' || !code.trim() || /role code/i.test(code)) continue;
-    const cost = isNum(setup['P' + r]) ? setup['P' + r] : setup['I' + r];
-    if (isNum(cost)) rates[code.trim()] = { desc: String(setup['D' + r] || '').trim(), cost };
-  }
-  const tasks = []; let pmRow = null;
-  for (let r = 10; r <= 500; r++) {
-    const D = c['D' + r]; const E = String(c['E' + r] ?? '');
-    if (D === 900005 || /^project management$/i.test(E.trim())) { pmRow = r; break; }
-    const name = String(c['G' + r] ?? '').trim();
-    const hours = num(c['J' + r]) + num(c['K' + r]) + num(c['L' + r]);
-    if (!name && !hours) continue;
-    const code = String(c['F' + r] ?? '').trim();
-    if (code && !rates[code] && isNum(c['P' + r]) && c['P' + r] > 0) rates[code] = { desc: '', cost: c['P' + r] };
-    const wbs = String(c['C' + r] ?? '').trim();
-    tasks.push({ id: uid('t'), wbs: wbs.slice(0, 6), phase: cleanPhase(E, wbs), name, level: code || null, qty: isNum(c['I' + r]) ? c['I' + r] : null, hours: hours || null, notes: '' });
-  }
-  if (pmRow === null) throw new Error(`Could not find the Project Management row on the ${tabName} tab.`);
-  const pmCode = String(c['F' + pmRow] || 'PROJ_MGR').trim();
-  if (!rates[pmCode] && isNum(c['P' + pmRow])) rates[pmCode] = { desc: '', cost: c['P' + pmRow] };
-  const absorbed = /yes\s*$/i.test(String(c['G' + (pmRow + 1)] || ''));
-  const pmPct = num(c['I' + pmRow]) || num(c['I' + (pmRow + 1)]) || num(await wb.named('PM_Prcnt'));
-  let contPct = 0, totalsRow = null;
-  for (let r = pmRow + 1; r <= pmRow + 15; r++) {
-    const D = c['D' + r]; const E = String(c['E' + r] || ''); const G = String(c['G' + r] || '');
-    if ((D === 900095 || /labor contingency/i.test(E)) && !/^no/i.test(G.trim())) contPct = num(c['I' + r]);
-    if (/labor totals/i.test(String(D || ''))) { totalsRow = r; break; }
-  }
-  let margin = num(await wb.named('Lbr_Mrgn')); if (!margin) margin = num(c.AG10);
-  const esc = isNum(c.R9) ? c.R9 : num(await wb.named('Lbr_Cost_Escl_Fctr'));
-  const wanted = ['IA_ENGR_I', 'IA_ENGR_II', 'IA_ENGR_SR'].filter(k => rates[k]);
-  tasks.forEach(t => { if (t.level && !wanted.includes(t.level)) wanted.push(t.level); });
-  if (!wanted.includes(pmCode)) wanted.push(pmCode);
-  const levels = wanted.map(code => ({ id: code, code, name: FRIENDLY[code] || (rates[code] && rates[code].desc) || code, cost: rates[code] ? +rates[code].cost : 0 }));
-  const proj = {
-    name: String(c.F3 ?? (setup && setup.E6) ?? '').trim(), customer: String(c.F4 ?? (setup && setup.E5) ?? '').trim(),
-    number: c.F5 != null ? String(c.F5) : '', rev: c.H5 != null ? String(c.H5) : '0',
-    preparedBy: setup && setup.E11 ? String(setup.E11) : '', notes: ''
-  };
-  return {
-    app: 'gm-simple-estimator', version: 1, project: proj,
-    settings: { margin: +margin.toFixed(6), pmPct: +pmPct.toFixed(6), contPct: +contPct.toFixed(6), escPct: +num(esc).toFixed(6), pmLevel: pmCode },
-    levels, tasks,
-    source: {
-      file: fileName, sheet: tabName, importedAt: new Date().toISOString(), absorbedPM: absorbed,
-      hours: totalsRow ? c['N' + totalsRow] : null, cost: totalsRow ? c['S' + totalsRow] : null, price: totalsRow ? c['AJ' + totalsRow] : null,
-      pmHours: c['N' + pmRow], pmBase: c['J' + (pmRow + 1)]
-    }
-  };
-}
-
-/* ---------- Persistence ---------- */
+/* ---------- State ---------- */
+let S = null, R = null, tab = 'dashboard';
+const ui = { target: '', ws: null };
 let saveTimer = null;
 function status(msg, bad) { const el = $('#status'); if (el) { el.textContent = msg || ''; el.style.color = bad ? 'var(--bad)' : ''; } }
 function save() { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 250); }
@@ -731,8 +1450,9 @@ function saveNow() {
 function load() { try { const s = localStorage.getItem(KEY); return s ? normalize(JSON.parse(s)) : null; } catch (e) { return null; } }
 document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && saveTimer) saveNow(); });
 
-/* ---------- Rendering ---------- */
 const levelById = id => S.levels.find(l => l.id === id);
+const wsById = id => S.worksheets.find(w => w.id === id);
+const curWs = () => { let w = wsById(ui.ws); if (!w) { w = S.worksheets[0]; ui.ws = w ? w.id : null; } return w; };
 function levelOptions(sel) {
   let o = `<option value="">Choose level</option>`;
   for (const l of S.levels) o += `<option value="${h(l.id)}"${l.id === sel ? ' selected' : ''}>${h(l.name || l.code)}</option>`;
@@ -742,18 +1462,22 @@ function levelOptions(sel) {
 const out = (key, f) => `<span data-o="${key}|${f}"></span>`;
 const DYN = {};
 
+/* ---------- Render ---------- */
 function render() {
   const a = document.activeElement; const focus = a && a.dataset && (a.dataset.k || a.dataset.u) ? { k: a.dataset.k, u: a.dataset.u, s: a.selectionStart, e: a.selectionEnd } : null;
-  if (S) R = calc(S);
+  if (S) { R = calc(S); curWs(); }
   renderTop();
-  const hero = $('#hero'); const main = $('#main');
-  if (!S) { hero.hidden = true; hero.innerHTML = ''; main.innerHTML = startView(); }
+  const hero = $('#hero'), main = $('#main'), sl = $('#statusline');
+  if (!S) { hero.hidden = true; hero.innerHTML = ''; main.innerHTML = startView(); sl.hidden = true; }
   else {
     hero.hidden = tab !== 'dashboard'; hero.innerHTML = tab === 'dashboard' ? heroView() : '';
-    main.innerHTML = tab === 'dashboard' ? dashboardView() : tab === 'tasks' ? tasksView() : tab === 'breakdown' ? breakdownView() : settingsView();
+    if (!['dashboard', 'tasks', 'complexity', 'expenses', 'settings'].includes(tab)) tab = 'tasks';
+    main.innerHTML = tab === 'dashboard' ? dashboardView() : tab === 'tasks' ? tasksView() : tab === 'complexity' ? complexityView() : tab === 'expenses' ? expensesView() : settingsView();
+    sl.hidden = false; sl.innerHTML = statusLine();
     fill();
   }
   const dl = $('#phase-list'); if (dl) dl.innerHTML = S ? [...new Set(S.tasks.map(t => (t.phase || '').trim()).filter(Boolean))].map(p => `<option value="${h(p)}">`).join('') : '';
+  const al = $('#area-list'); if (al) al.innerHTML = S ? [...new Set(S.matrix.lines.map(l => (l.area || '').trim()).filter(Boolean))].map(p => `<option value="${h(p)}">`).join('') : '';
   if (focus) {
     const el = focus.k ? document.querySelector(`[data-k="${CSS.escape(focus.k)}"]`) : document.querySelector(`[data-u="${CSS.escape(focus.u)}"]`);
     if (el) { el.focus(); try { if (focus.s != null) el.setSelectionRange(focus.s, focus.e); } catch (e) { } }
@@ -763,12 +1487,16 @@ function refresh() { if (!S) return; R = calc(S); fill(); }
 function fill() {
   for (const el of $$('[data-o]')) { const [p, f] = el.dataset.o.split('|'); const t = fmt(walk(R, p), f); if (el.textContent !== t) el.textContent = t; }
   for (const el of $$('[data-dyn]')) { const fn = DYN[el.dataset.dyn]; if (fn) el.innerHTML = fn(el.dataset.arg); }
+  for (const el of $$('[data-cxph]')) {
+    const [id, cx] = el.dataset.cxph.split('|'); const t = typeById(id); if (!t) continue;
+    el.placeholder = numIn(num(t.perPoint) * +cx); el.classList.toggle('ovr', el.value.trim() !== '');
+  }
   const slider = $('#margin-range'); if (slider && document.activeElement !== slider) slider.value = (num(S.settings.margin) * 100).toFixed(1);
   document.title = (S.project.name ? S.project.name + ' | ' : '') + 'GrayMatter Estimator';
 }
 function renderTop() {
   const t = (id, label) => `<button class="tab" role="tab" aria-selected="${tab === id}" data-act="tab" data-tab="${id}">${label}</button>`;
-  $('#tabs').innerHTML = S ? t('dashboard', 'Dashboard') + t('tasks', 'Tasks') + t('breakdown', 'Price breakdown') + t('settings', 'Rates and settings') : '';
+  $('#tabs').innerHTML = S ? t('dashboard', 'Dashboard') + t('tasks', 'Price breakdown') + t('complexity', 'Complexity matrix') + t('expenses', 'Expenses') + t('settings', 'Rates and settings') : '';
   $('#actions').innerHTML = S
     ? `<button class="btn" data-act="pickExcel">Open Excel</button><button class="btn primary" data-act="saveExcel">Save as Excel</button>
        <details class="menu"><summary class="btn">More</summary><div class="pop">
@@ -776,12 +1504,20 @@ function renderTop() {
          <button data-act="blank">Start a blank estimate</button><button data-act="clear">Remove estimate from this browser</button></div></details>`
     : `<button class="btn primary" data-act="pickExcel">Open Excel</button>`;
 }
+/* The workbook's status bar, on every tab */
+function statusLine() {
+  return `<span class="sl-label">Estimate totals</span>
+    <span><small>Price</small><b data-o="price|m0"></b></span><span><small>Cost</small><b data-o="cost|m0"></b></span>
+    <span><small>Margin</small><b class="sl-m" data-o="margin|p"></b></span><span><small>Hours</small><b data-o="hrs|h"></b></span>
+    <span><small>Approver</small><b data-o="approver|t"></b></span>
+    <span class="sl-note">${R.included} of ${S.worksheets.length} worksheet${S.worksheets.length === 1 ? '' : 's'} included</span>`;
+}
 
 /* ---------- Start ---------- */
 function startView() {
   return `<div class="start">
     <h1>Start an estimate</h1>
-    <p>Open an Excel workbook to begin. That can be your estimate tool (.xlsm), where the app pulls the tasks, engineer levels, hours and rates from the SCADA tab, or a workbook you saved from this app.</p>
+    <p>Open an Excel workbook to begin: your estimate tool (.xlsm), which brings in every estimating tab listed on the Financial tab; a workbook you saved from this app; or the Organized workbook, which loads graphics, popups and dashboards into the Complexity matrix.</p>
     <div class="row"><button class="btn primary" data-act="pickExcel">Open Excel workbook</button><button class="btn" data-act="blank">Start blank</button></div>
     <p class="fine">Save as Excel writes a normal .xlsx with working formulas, so you can keep editing in Excel and open it here again. Workbooks are read inside this browser and never uploaded. This page holds no rates or client details until you open a file.</p>
   </div>`;
@@ -790,64 +1526,71 @@ function startView() {
 /* ---------- Dashboard ---------- */
 function heroView() {
   const p = S.project;
-  const sub = [p.customer, p.number ? `Proposal ${p.number}${p.rev !== '' ? ` rev ${p.rev}` : ''}` : '', S.source && S.source.kind !== 'app' ? `from the ${S.source.sheet} tab` : ''].filter(Boolean).join(', ');
+  const sub = [p.customer, p.number ? `Proposal ${p.number}${p.rev !== '' ? ` rev ${p.rev}` : ''}` : ''].filter(Boolean).join(', ');
   return `<div class="hero-id"><h1>${h(p.name || 'Untitled estimate')}</h1>${sub ? `<p>${h(sub)}</p>` : ''}</div>
   <div class="hero-main">
     <div>
-      <span class="price-label">Fixed price</span>
+      <span class="price-label">Fixed price, ${R.included} of ${S.worksheets.length} worksheet${S.worksheets.length === 1 ? '' : 's'}</span>
       <b class="price" data-o="price|m0"></b>
       <div class="dial">
-        <label for="margin-range">Margin</label><output data-o="margin|p" for="margin-range"></output>
-        <input id="margin-range" type="range" min="0" max="85" step="0.5" data-k="settings.margin" data-t="pct" value="${(num(S.settings.margin) * 100).toFixed(1)}" aria-label="Margin percent">
+        <label for="margin-range">Labor margin</label><output data-o="m|p" for="margin-range"></output>
+        <input id="margin-range" type="range" min="0" max="85" step="0.5" data-k="settings.margin" data-t="pct" value="${(num(S.settings.margin) * 100).toFixed(1)}" aria-label="Labor margin percent">
         <div class="scale"><span>0%</span><span>20%</span><span>40%</span><span>60%</span><span>85%</span></div>
       </div>
       <div class="target"><label for="target-in">Need a specific price?</label><input id="target-in" inputmode="decimal" data-u="target" placeholder="$ target price" value="${h(ui.target)}"><span data-dyn="target"></span></div>
     </div>
     <dl class="kpis">
+      <div><dt>Overall margin</dt><dd data-o="margin|p"></dd></div>
       <div><dt>Total hours</dt><dd data-o="hrs|h"></dd></div>
-      <div><dt>Total cost</dt><dd data-o="cost|m0"></dd></div>
       <div><dt>Gross profit</dt><dd data-o="gp|m0"></dd></div>
-      <div><dt>Average price per hour</dt><dd data-o="perHr|m2"></dd></div>
+      <div><dt>Required approver</dt><dd data-o="approver|t"></dd></div>
     </dl>
   </div>`;
 }
 DYN.target = () => {
   const raw = String(ui.target || '').trim(); if (!raw) return '';
   const v = parseNum(raw); if (!isFinite(v) || v <= 0) return 'Enter a dollar amount.';
-  if (v <= R.cost) return `That is below cost (${money(R.cost)}).`;
-  const m = 1 - R.cost / v;
-  return `needs a <b>${pct(m, 2)}</b> margin <button class="btn" data-act="useMargin" data-m="${m}">Use it</button>`;
+  const r = solveMargin(S, v); if (!r.ok) return h(r.why);
+  return `needs a <b>${pct(r.m, 2)}</b> labor margin <button class="btn" data-act="useMargin" data-m="${r.m}">Use it</button>`;
 };
 function dashboardView() {
-  if (!S.tasks.length) return `<section class="card build-card"><div class="empty"><p>No tasks yet. Add them on the Tasks tab or import your workbook.</p><button class="btn primary" data-act="tab" data-tab="tasks">Add tasks</button></div></section>`;
-  return `<section class="card build-card"><header><h2>How the price builds up</h2><p class="hint">Cost of each piece, then the margin on top.</p></header><div data-dyn="build"></div></section>
+  if (!S.tasks.length && !S.expenses.length) return `<section class="card build-card"><div class="empty"><p>No tasks yet. Add them on the Tasks tab or open your estimate workbook.</p><button class="btn primary" data-act="tab" data-tab="tasks">Add tasks</button></div></section>`;
+  return `<section class="card build-card"><header><h2>How the price builds up</h2><p class="hint">Included worksheets. Cost of each piece, then the margin on top.</p></header><div data-dyn="build"></div></section>
+  <section class="card"><header><div><h2>Worksheets</h2><p class="hint">Like the Financial tab: untick a worksheet to leave it out of the final total.</p></div></header><div data-dyn="wstable"></div></section>
   <div class="grid2">
     <section class="card"><header><h2>Hours by engineer level</h2></header><div data-dyn="donut"></div></section>
     <section class="card"><header><h2>Hours by phase</h2></header><div data-dyn="phases"></div></section>
   </div>
   <div class="grid2">
-    <section class="card"><header><h2>Largest tasks</h2><button class="btn ghost" data-act="tab" data-tab="tasks">Edit tasks</button></header><div data-dyn="top"></div></section>
+    <section class="card"><header><h2>Largest tasks</h2><button class="btn ghost" data-act="tab" data-tab="tasks">Edit in Price breakdown</button></header><div data-dyn="top"></div></section>
     <section class="card"><header><h2>Checks</h2></header><div data-dyn="checks"></div></section>
   </div>`;
 }
+DYN.wstable = () => {
+  const rows = S.worksheets.map(w => {
+    const W = R.ws[w.id];
+    return `<tr class="${w.include === false ? 'off' : ''}"><td class="c-inc"><input type="checkbox" data-k="worksheets#${w.id}.include" data-t="bool" aria-label="Include ${h(w.name)}"${w.include !== false ? ' checked' : ''}></td>
+      <td><button class="linkish" data-act="openWs" data-id="${w.id}">${h(w.name || 'Untitled')}</button>${w.include === false ? ' <span class="tag">excluded</span>' : ''}</td>
+      <td class="r">${hrs(W.hrs)}</td><td class="r">${money(W.cost)}</td><td class="r">${money(W.price)}</td><td class="r">${W.margin == null ? '' : pct(W.margin)}</td></tr>`;
+  }).join('');
+  return `<div class="scroll"><table class="t"><thead><tr><th class="c-inc">Include</th><th>Worksheet</th><th class="r">Hours</th><th class="r">Cost</th><th class="r">Price</th><th class="r">Margin</th></tr></thead>
+    <tbody>${rows}</tbody><tfoot><tr class="sum"><td></td><td>Final total</td><td class="r">${hrs(R.hrs)}</td><td class="r">${money(R.cost)}</td><td class="r big">${money(R.price)}</td><td class="r">${pct(R.margin)}</td></tr></tfoot></table></div>`;
+};
 const LEVEL_COLORS = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c6)', 'var(--c5)'];
 DYN.build = () => {
-  const parts = [
-    ['Task labor', R.taskCost, 'var(--c1)'], ['Project management', R.pm.cost, 'var(--c2)'],
-    ['Contingency', R.cont.cost, 'var(--c3)'], ['Escalation', R.esc, 'var(--c4)'], ['Gross profit', R.gp, 'var(--orange)']
-  ].filter(p => p[1] > 0.005);
-  const total = R.price || 0;
-  if (!(total > 0)) return '<p class="hint">Enter rates on the Rates and settings tab to see the price.</p>';
-  return `<div class="stack" role="img" aria-label="Price build-up">${parts.map(p => `<i style="width:${(p[1] / total * 100).toFixed(3)}%;background:${p[2]}" title="${h(p[0])} ${money(p[1])}"></i>`).join('')}</div>
+  const parts = [['Task labor', R.taskCost, 'var(--c1)'], ['Project management', R.pmCost, 'var(--c2)'], ['Contingency', R.contCost, 'var(--c3)'],
+    ['Expenses', R.expCost, 'var(--c5)'], ['Escalation', R.esc, 'var(--c4)'], ['Gross profit', R.gp, 'var(--orange)']].filter(p => p[1] > 0.005);
+  if (!(R.price > 0)) return '<p class="hint">Enter rates on the Rates and settings tab to see the price.</p>';
+  return `<div class="stack" role="img" aria-label="Price build-up">${parts.map(p => `<i style="width:${(p[1] / R.price * 100).toFixed(3)}%;background:${p[2]}" title="${h(p[0])} ${money(p[1])}"></i>`).join('')}</div>
     <div class="legend">${parts.map(p => `<div><i class="sw" style="background:${p[2]}"></i><span>${h(p[0])}</span><b>${money(p[1])}</b></div>`).join('')}
     <div class="eq"><i class="sw" style="background:transparent"></i><span>Fixed price</span><b>${money(R.price)}</b></div></div>`;
 };
 DYN.donut = () => {
   const rows = R.byLevel.filter(x => x.hrs > 0); const total = rows.reduce((s, x) => s + x.hrs, 0);
   if (!total) return '<p class="hint">No hours yet.</p>';
-  const r = 70, C = 2 * Math.PI * r; let acc = 0;
-  const segs = rows.map((x, i) => {
-    const len = x.hrs / total * C; const col = x.id === '_cont' ? 'var(--c5)' : LEVEL_COLORS[i % LEVEL_COLORS.length];
+  const r = 70, C = 2 * Math.PI * r; let acc = 0; let ci = 0;
+  const segs = rows.map(x => {
+    const len = x.hrs / total * C; const col = x.id === '_cont' ? 'var(--c5)' : LEVEL_COLORS[ci++ % LEVEL_COLORS.length];
     const s = `<circle r="${r}" cx="95" cy="95" fill="none" stroke="${col}" stroke-width="26" stroke-dasharray="${Math.max(len - 1.5, 0.5)} ${C}" stroke-dashoffset="${-acc}" transform="rotate(-90 95 95)"><title>${h(x.name)} ${hrs(x.hrs)} hrs</title></circle>`;
     acc += len; x.col = col; return s;
   }).join('');
@@ -856,109 +1599,262 @@ DYN.donut = () => {
     <div class="keys">${rows.map(x => `<div class="key"><i class="sw" style="background:${x.col}"></i><span>${h(x.name)}</span><span class="n">${hrs(x.hrs)} hrs</span><span class="p">${pct(x.hrs / total, 0)}</span></div>`).join('')}</div></div>`;
 };
 DYN.phases = () => {
-  const rows = R.byPhase.filter(x => x.hrs > 0); const max = Math.max(1, ...rows.map(x => x.hrs));
-  if (!rows.length) return '<p class="hint">No hours yet.</p>';
+  const rows = R.byPhase.filter(x => x.hrs > 0); if (!rows.length) return '<p class="hint">No hours yet.</p>';
+  const max = Math.max(...rows.map(x => x.hrs));
   return `<div class="bars">${rows.map(x => `<div class="bar"><span class="lbl" title="${h(x.phase)}">${h(x.phase)}<small>${x.n} task${x.n === 1 ? '' : 's'}, ${money(x.price)}</small></span><span class="track"><i style="width:${(x.hrs / max * 100).toFixed(2)}%"></i></span><span class="n">${hrs(x.hrs)}</span></div>`).join('')}</div>`;
 };
 DYN.top = () => {
-  const rows = S.tasks.map(t => ({ t, r: R.tasks[t.id] })).filter(x => x.r.hrs > 0).sort((a, b) => b.r.hrs - a.r.hrs).slice(0, 6);
+  const inc = new Set(S.worksheets.filter(w => w.include !== false).map(w => w.id));
+  const rows = S.tasks.filter(t => inc.has(t.ws)).map(t => ({ t, r: R.tasks[t.id] })).filter(x => x.r.hrs > 0).sort((a, b) => b.r.hrs - a.r.hrs).slice(0, 6);
   if (!rows.length) return '<p class="hint">No hours yet.</p>';
-  const max = rows[0].r.hrs;
-  return `<div class="bars">${rows.map(({ t, r }) => `<div class="bar"><span class="lbl" title="${h(t.name)}">${h(t.name || 'Untitled task')}<small>${h((levelById(t.level) || {}).name || 'No level')}, ${numIn(t.qty) || 0} × ${numIn(t.hours) || 0} hrs</small></span><span class="track"><i style="width:${(r.hrs / max * 100).toFixed(2)}%;background:var(--c1)"></i></span><span class="n">${hrs(r.hrs)}</span></div>`).join('')}</div>`;
+  const max = rows[0].r.hrs; const multi = S.worksheets.length > 1;
+  return `<div class="bars">${rows.map(({ t, r }) => `<div class="bar"><span class="lbl" title="${h(t.name)}">${h(t.name || 'Untitled task')}<small>${multi ? h((wsById(t.ws) || {}).name) + ', ' : ''}${h((levelById(t.level) || {}).name || 'No level')}, ${numIn(t.qty) || 0} × ${numIn(t.hours) || 0} hrs</small></span><span class="track"><i style="width:${(r.hrs / max * 100).toFixed(2)}%;background:var(--c1)"></i></span><span class="n">${hrs(r.hrs)}</span></div>`).join('')}</div>`;
 };
 function checks() {
-  const c = [];
-  const src = S.source;
-  if (src && src.kind === 'app' && isNum(src.price)) {
-    const diff = R.price - src.price;
-    if (Math.abs(diff) < 1) c.push(['ok', `Matches the Summary tab of ${h(src.file)}: ${hrs(src.hours)} hours, ${money(src.price)}.`]);
-    else c.push(['warn', `The Summary tab of ${h(src.file)} shows ${money(src.price)}. This estimate is ${money(R.price)}, ${diff > 0 ? 'up' : 'down'} ${money(Math.abs(diff))}, from edits made here or formulas changed in Excel. Save as Excel to bring the file up to date.`]);
-  } else if (src && isNum(src.price)) {
-    const diff = R.price - src.price;
-    if (Math.abs(diff) < 1) c.push(['ok', `Matches the ${h(src.sheet)} tab of the workbook: ${hrs(src.hours)} hours, ${money(src.price)}.`]);
+  const c = []; const src = S.source;
+  if (src && src.final && isNum(src.final.price)) {
+    const diff = R.price - src.final.price;
+    const where = src.kind === 'app' ? `the Summary tab of ${h(src.file)}` : `the workbook's Financial tab (T35)`;
+    if (Math.abs(diff) < 1) c.push(['ok', `Matches ${where}: ${pct(src.final.margin ?? R.margin)} margin on ${money(src.final.price)}${isNum(src.final.hours) ? `, ${hrs(src.final.hours)} hours` : ''}.`]);
     else {
-      let why = '';
-      if (isNum(src.pmBase) && src.pmBase !== R.taskHrs && !src.absorbedPM) why = ` One known reason: the workbook's PM formula counts ${hrs(src.pmBase)} of the ${hrs(R.taskHrs)} task hours, which gives it ${hrs(src.pmHours)} PM hours instead of ${hrs(R.pm.hrs)}. This page counts every task.`;
-      if (src.absorbedPM) why = ' The workbook absorbs PM (cost only, not priced). This page prices PM.';
-      c.push(['warn', `The ${h(src.sheet)} tab shows ${money(src.price)} for ${hrs(src.hours)} hours. This estimate is ${money(R.price)}, ${diff > 0 ? 'up' : 'down'} ${money(Math.abs(diff))}.${why} Edits made here since the import also change the total.`]);
+      let msg = `${src.kind === 'app' ? `The Summary tab of ${h(src.file)}` : `The workbook's Financial tab (T35)`} shows ${money(src.final.price)}${isNum(src.final.margin) ? ` at ${pct(src.final.margin)}` : ''}. This estimate is ${money(R.price)}, ${diff > 0 ? 'up' : 'down'} ${money(Math.abs(diff))}.`;
+      if (src.kind === 'estimator' && src.tabs) {
+        const parts = S.worksheets.filter(w => w.include !== false && src.tabs[w.id]).map(w => ({ w, d: R.ws[w.id].price - src.tabs[w.id].price })).filter(x => Math.abs(x.d) >= 1);
+        if (parts.length) msg += ' By worksheet: ' + parts.map(x => `${h(x.w.name)} ${x.d > 0 ? '+' : '−'}${money(Math.abs(x.d))}`).join(', ') + '.';
+      }
+      c.push(['warn', msg + ' Edits made here since opening the file also change the total.']);
+      if (S.settings.pmRule !== 'workbook' && src.kind === 'estimator') {
+        const alt = calc({ ...S, settings: { ...S.settings, pmRule: 'workbook' } });
+        if (Math.abs(alt.price - src.final.price) < 1) c.push(['warn', `Using the workbook's PM rule would match it exactly. <button class="linkish" data-act="pmRule" data-v="workbook">Use the workbook PM rule</button>`]);
+      }
+    }
+    if (src.final.approver && R.approver && src.final.approver !== R.approver && Math.abs(diff) < 1) c.push(['warn', `The workbook's DOA tab says ${h(src.final.approver)}; this estimate says ${h(R.approver)}.`]);
+    (src.notes || []).forEach(n => c.push(['warn', h(n)]));
+    if (src.tabs) S.worksheets.filter(w => w.include !== false && src.tabs[w.id] && Math.abs(src.tabs[w.id].other) > 1)
+      .forEach(w => c.push(['warn', `${h(w.name)} has ${money(src.tabs[w.id].other)} of materials or subcontracts in the workbook, which the app does not carry yet.`]));
+  }
+  if (S.settings.pmRule === 'workbook') {
+    const outT = S.tasks.filter(t => t.pmBase === false && (wsById(t.ws) || {}).include !== false);
+    if (outT.length) {
+      const alt = calc({ ...S, settings: { ...S.settings, pmRule: 'all' } });
+      c.push(['info', `PM follows the workbook rule, which leaves ${outT.length} task line${outT.length > 1 ? 's' : ''} out of the PM base (${outT.slice(0, 3).map(t => h(t.name)).join(', ')}${outT.length > 3 ? ', …' : ''}). Counting them adds ${money(alt.price - R.price)}. <button class="linkish" data-act="pmRule" data-v="all">Count every task</button>`]);
     }
   }
+  const ML = S.matrix.lines;
+  if (ML.some(l => l.level === 'mix') && Math.abs(R.mixPct - 1) > 1e-6) c.push(['bad', `The skill mix adds to ${pct(R.mixPct)}, not 100%, so lines on the skill mix are mispriced. <button class="linkish" data-act="tab" data-tab="complexity">Fix the skill mix</button>`]);
+  const zeroT = S.matrix.types.filter(t => ML.some(l => l.type === t.id) && CX_LEVELS.every(cx => !typeHours(t, cx)));
+  if (zeroT.length) c.push(['warn', `${zeroT.map(t => h(t.name)).join(', ')} ${zeroT.length > 1 ? 'have' : 'has'} no hours in the complexity matrix yet. <button class="linkish" data-act="tab" data-tab="complexity">Set hours per point</button>`]);
+  const badCx = ML.filter(l => { const t = typeById(l.type); return !t || (t.basis !== 'fixed' && (!isNum(l.cx) || l.cx < 0 || l.cx > 6)); }).length;
+  if (badCx) c.push(['warn', `${badCx} complexity line${badCx > 1 ? 's have' : ' has'} no type or a complexity outside 0 to 6, so ${badCx > 1 ? 'they count' : 'it counts'} as 0 hours.`]);
   const zero = S.levels.filter(l => !num(l.cost) && S.tasks.some(t => t.level === l.id));
   if (zero.length) c.push(['bad', `${zero.map(l => h(l.name)).join(', ')} ${zero.length > 1 ? 'have' : 'has'} a $0 rate. Set it on the Rates and settings tab.`]);
   const noLevel = S.tasks.filter(t => R.tasks[t.id].hrs > 0 && !levelById(t.level)).length;
   if (noLevel) c.push(['bad', `${noLevel} task${noLevel > 1 ? 's have' : ' has'} hours but no engineer level.`]);
-  const noHours = S.tasks.filter(t => !R.tasks[t.id].hrs).length;
-  if (noHours) c.push(['warn', `${noHours} task${noHours > 1 ? 's have' : ' has'} no hours yet.`]);
-  if (num(S.settings.margin) >= 1) c.push(['bad', 'A margin of 100% or more cannot be priced.']);
-  else if (!num(S.settings.margin)) c.push(['warn', 'Margin is 0%, so the price equals cost.']);
+  if (num(S.settings.margin) >= 1 || num(S.settings.expMargin) >= 1) c.push(['bad', 'A margin of 100% or more cannot be priced.']);
+  else if (!num(S.settings.margin)) c.push(['warn', 'Labor margin is 0%, so labor is priced at cost.']);
+  const ex = S.worksheets.filter(w => w.include === false);
+  if (ex.length) c.push(['info', `${ex.map(w => h(w.name)).join(', ')} ${ex.length > 1 ? 'are' : 'is'} excluded from the final total.`]);
+  if (!S.approval) c.push(['info', 'No approval matrix, so the required approver is not set. Open the estimator workbook to bring in its DOA tab.']);
   c.push(['info', 'Draft estimate. A qualified person reviews hours, rates and margin before the price is sent.']);
   return c;
 }
 DYN.checks = () => `<ul class="checks">${checks().map(([s, m]) => `<li><i class="dot ${s}"></i><span>${m}</span></li>`).join('')}</ul>`;
 
-/* ---------- Tasks ---------- */
-function tasksView() {
-  const s = S.settings;
-  let rows = '';
-  S.tasks.forEach((t, i) => {
-    const K = `tasks#${t.id}`;
-    rows += `<tr>
-      <td><input data-k="${K}.phase" data-t="text" list="phase-list" value="${h(t.phase)}" aria-label="Phase" placeholder="Phase"></td>
-      <td><input data-k="${K}.name" data-t="text" value="${h(t.name)}" aria-label="Task" placeholder="Task"></td>
-      <td><select data-k="${K}.level" data-t="sel" aria-label="Engineer level">${levelOptions(t.level)}</select></td>
-      <td><input class="num" inputmode="decimal" data-k="${K}.qty" data-t="num" value="${h(numIn(t.qty))}" aria-label="Quantity"></td>
-      <td><input class="num" inputmode="decimal" data-k="${K}.hours" data-t="num" value="${h(numIn(t.hours))}" aria-label="Hours each"></td>
-      <td class="tot" data-o="tasks.${t.id}.hrs|h"></td>
-      <td><input data-k="${K}.notes" data-t="text" value="${h(t.notes)}" aria-label="Notes" placeholder="Optional"></td>
-      <td><div class="row-act">
-        <button class="btn ghost" data-act="move" data-id="${t.id}" data-d="-1" aria-label="Move up"${i === 0 ? ' disabled' : ''}>Up</button>
-        <button class="btn ghost" data-act="copy" data-id="${t.id}" aria-label="Duplicate task">Copy</button>
-        <button class="btn ghost danger" data-act="del" data-id="${t.id}" aria-label="Delete task">Delete</button></div></td></tr>`;
-  });
-  const pmName = (levelById(s.pmLevel) || {}).name || 'no level';
-  return `<section class="card"><header><div><h2>Tasks</h2><p class="hint">Total hours = quantity × hours each, rounded up. Project management and contingency are added below.</p></div>
-      <div class="chips"><span class="chip">Tasks <b>${S.tasks.length}</b></span><span class="chip">Task hours <b>${out('taskHrs', 'h')}</b></span><span class="chip">All hours <b>${out('hrs', 'h')}</b></span></div></header>
-    ${S.tasks.length ? `<div class="scroll"><table class="t tasks">
-      <thead><tr><th class="c-phase">Phase</th><th class="c-task">Task</th><th class="c-level">Engineer level</th><th class="c-num r">Quantity</th><th class="c-num r">Hours each</th><th class="c-tot r">Total hours</th><th class="c-notes">Notes</th><th class="c-act"></th></tr></thead>
-      <tbody>${rows}</tbody>
-      <tfoot>
-        <tr class="auto"><td colspan="5">Project management, ${pct(num(s.pmPct))} of task hours, at the ${h(pmName)} rate</td><td class="r" data-o="pm.hrs|h"></td><td colspan="2"></td></tr>
-        <tr class="auto"><td colspan="5">Contingency, ${pct(num(s.contPct))} of task and PM hours</td><td class="r" data-o="cont.hrs|h"></td><td colspan="2"></td></tr>
-        <tr class="sum"><td colspan="5">Total hours</td><td class="r big" data-o="hrs|h"></td><td colspan="2"></td></tr>
-      </tfoot></table></div>`
-      : `<div class="empty"><p>No tasks yet. Add your first one, or import the SCADA tab from your workbook.</p></div>`}
-    <div class="toolbar"><button class="btn primary" data-act="add">Add task</button><button class="btn" data-act="tab" data-tab="settings">Change PM and contingency</button></div></section>`;
+/* ---------- Worksheet selector (Tasks and Expenses) ---------- */
+function wsBar(mode) {
+  const w = curWs();
+  const tabsHtml = S.worksheets.map(x => `<button class="wstab" aria-pressed="${x.id === w.id}" data-act="wsSel" data-id="${x.id}">${h(x.name || 'Untitled')}${x.include === false ? '<small>excluded</small>' : ''}</button>`).join('');
+  const s = S.settings; const K = `worksheets#${w.id}`;
+  const pctBox = (k, label, def) => `<label class="mini">${label}<span class="sfx" data-sfx="%"><input inputmode="decimal" data-k="${K}.${k}" data-t="pct" value="${h(pctIn(w[k]))}" placeholder="${h(pctIn(def))}"></span></label>`;
+  return `<div class="wsbar"><div class="wstabs" role="tablist" aria-label="Worksheets">${tabsHtml}<button class="wstab add" data-act="wsAdd">Add worksheet</button></div>
+    <div class="wsset">
+      <label class="mini grow">Worksheet name<input data-k="${K}.name" data-t="text" data-rr value="${h(w.name)}"></label>
+      <label class="check"><input type="checkbox" data-k="${K}.include" data-t="bool"${w.include !== false ? ' checked' : ''}> Include in final total</label>
+      ${mode === 'tasks' ? pctBox('pmPct', 'PM %', s.pmPct) + pctBox('contPct', 'Contingency %', s.contPct) : pctBox('expContPct', 'Expense contingency %', 0)}
+      <button class="btn ghost danger" data-act="wsDel" data-id="${w.id}"${S.worksheets.length < 2 ? ' disabled' : ''}>Delete worksheet</button>
+    </div></div>`;
 }
 
-/* ---------- Price breakdown ---------- */
-function breakdownView() {
+/* ---------- Price breakdown: tasks you edit, with cost and price alongside ---------- */
+const levelLabel = id => (id === 'mix' ? 'Skill mix' : id === 'several' ? 'Several' : ((levelById(id) || {}).name || 'No level'));
+function taskRow(t, rule) {
+  const K = `tasks#${t.id}`, o = `tasks.${t.id}`;
+  return `<tr>
+    <td><input data-k="${K}.phase" data-t="text" data-rr list="phase-list" value="${h(t.phase)}" aria-label="Phase" placeholder="Phase"></td>
+    <td><input data-k="${K}.name" data-t="text" value="${h(t.name)}" aria-label="Task" placeholder="Task"></td>
+    <td><select data-k="${K}.level" data-t="sel" aria-label="Engineer level">${levelOptions(t.level)}</select></td>
+    <td><input class="num" inputmode="decimal" data-k="${K}.qty" data-t="num" value="${h(numIn(t.qty))}" aria-label="Quantity"></td>
+    <td><input class="num" inputmode="decimal" data-k="${K}.hours" data-t="num" value="${h(numIn(t.hours))}" aria-label="Hours each"></td>
+    <td class="tot" data-o="${o}.hrs|h"></td><td class="r o" data-o="${o}.rate|m2"></td><td class="r o" data-o="${o}.cost|m0"></td>
+    <td class="r o" data-o="${o}.m|p"></td><td class="r o pr" data-o="${o}.price|m0"></td>
+    ${rule ? `<td class="c-pmb"><input type="checkbox" data-k="${K}.pmBase" data-t="bool" aria-label="Counts toward PM"${t.pmBase !== false ? ' checked' : ''}></td>` : ''}
+    <td><input data-k="${K}.notes" data-t="text" value="${h(t.notes)}" aria-label="Notes" placeholder="Optional"></td>
+    <td><div class="row-act"><button class="btn ghost" data-act="copy" data-id="${t.id}" aria-label="Duplicate task">Copy</button><button class="btn ghost danger" data-act="del" data-id="${t.id}" aria-label="Delete task">Delete</button></div></td></tr>`;
+}
+function tasksView() {
+  const w = curWs(); const s = S.settings; const Wk = `ws.${w.id}`; const W = R.ws[w.id]; const rule = s.pmRule === 'workbook';
+  const cols = rule ? 13 : 12, tail = cols - 10;
+  const list = S.tasks.filter(t => t.ws === w.id);
+  const groups = [], gi = {};
+  list.forEach(t => { const ph = (t.phase || '').trim() || 'No phase'; if (!(ph in gi)) { gi[ph] = groups.length; groups.push({ ph, items: [] }); } groups[gi[ph]].items.push(t); });
+  const sumRow = (label, k, cls = 'sub') => `<tr class="${cls}"><td colspan="5">${label}</td><td class="r" data-o="${k}.hrs|h"></td><td></td><td class="r" data-o="${k}.cost|m0"></td><td></td><td class="r" data-o="${k}.price|m0"></td><td colspan="${tail}"></td></tr>`;
   let body = '';
-  const groups = {}; const order = [];
-  S.tasks.forEach(t => { const p = (t.phase || '').trim() || 'No phase'; if (!groups[p]) { groups[p] = []; order.push(p); } groups[p].push(t); });
-  for (const p of order) {
-    body += `<tr class="phase"><td colspan="6">${h(p)}</td></tr>`;
-    for (const t of groups[p]) {
-      const r = `tasks.${t.id}`;
-      body += `<tr><td>${h(t.name || 'Untitled task')}</td><td>${h((levelById(t.level) || {}).name || 'No level')}</td><td class="r" data-o="${r}.hrs|h"></td><td class="r" data-o="${r}.rate|m2"></td><td class="r" data-o="${r}.cost|m0"></td><td class="r" data-o="${r}.price|m0"></td></tr>`;
-    }
-    const ph = R.byPhase.find(x => x.phase === p) || {};
-    body += `<tr class="sub"><td colspan="2">${h(p)} subtotal</td><td class="r">${hrs(ph.hrs)}</td><td></td><td class="r">${money(ph.cost)}</td><td class="r">${money(ph.price)}</td></tr>`;
+  groups.forEach((g, i) => { body += `<tr class="phase"><td colspan="${cols}">${h(g.ph)}</td></tr>` + g.items.map(t => taskRow(t, rule)).join('') + sumRow(`${h(g.ph)} subtotal`, `${Wk}.phases.${i}`); });
+  if (!list.length) body += `<tr><td colspan="${cols}" class="empty-row">No tasks on this worksheet yet. Add one below.</td></tr>`;
+  if (W.cx.length) {
+    body += `<tr class="phase"><td colspan="${cols}">From the complexity matrix <button class="linkish small" data-act="cxOpen" data-ws="${w.id}">Edit lines</button></td></tr>`;
+    W.cx.forEach((g, i) => {
+      const k = `${Wk}.cx.${i}`;
+      body += `<tr class="cxrow"><td>${h(g.typeName)}</td><td>${h(g.area)}<small>${g.n} item${g.n === 1 ? '' : 's'}</small></td><td>${h(levelLabel(g.level))}</td>
+        <td class="r">${g.n}</td><td class="r tag">${hrs(g.hrs / g.n)} avg</td><td class="tot" data-o="${k}.hrs|h"></td><td class="r o" data-o="${k}.rate|m2"></td><td class="r o" data-o="${k}.cost|m0"></td>
+        <td class="r o" data-o="${k}.m|p"></td><td class="r o pr" data-o="${k}.price|m0"></td>${rule ? '<td class="c-pmb tag">Yes</td>' : ''}<td class="tag">From matrix</td>
+        <td><div class="row-act"><button class="btn ghost" data-act="cxOpen" data-ws="${w.id}" data-area="${h(g.area)}" data-type="${h(g.type)}">Edit</button></div></td></tr>`;
+    });
+    body += `<tr class="sub"><td colspan="5">Complexity matrix subtotal</td><td class="r" data-o="${Wk}.cxHrs|h"></td><td></td><td class="r" data-o="${Wk}.cxCost|m0"></td><td></td><td class="r" data-o="${Wk}.cxPrice|m0"></td><td colspan="${tail}"></td></tr>`;
   }
-  const lv = R.byLevel;
-  return `<section class="card"><header><div><h2>Price breakdown</h2><p class="hint">Cost is hours × rate. Price adds escalation (${pct(R.e, 2)}) and divides by (1 − margin).</p></div></header>
-    <div class="scroll"><table class="t"><thead><tr><th>Task</th><th>Level</th><th class="r">Hours</th><th class="r">Rate</th><th class="r">Cost</th><th class="r">Price</th></tr></thead>
-    <tbody>${body}
-      <tr class="phase"><td colspan="6">Added to every estimate</td></tr>
-      <tr><td>Project management, ${pct(R.pm.pct)} of task hours</td><td>${h(R.pm.name)}</td><td class="r" data-o="pm.hrs|h"></td><td class="r" data-o="pm.rate|m2"></td><td class="r" data-o="pm.cost|m0"></td><td class="r" data-o="pm.price|m0"></td></tr>
-      <tr><td>Contingency, ${pct(R.cont.pct)} of task and PM cost</td><td>Blended</td><td class="r" data-o="cont.hrs|h"></td><td></td><td class="r" data-o="cont.cost|m0"></td><td class="r" data-o="cont.price|m0"></td></tr>
-      <tr><td>Escalation, ${pct(R.e, 2)} of cost</td><td></td><td></td><td></td><td class="r" data-o="esc|m0"></td><td class="r">included above</td></tr>
-    </tbody>
-    <tfoot><tr class="sum"><td colspan="2">Total</td><td class="r" data-o="hrs|h"></td><td></td><td class="r" data-o="cost|m0"></td><td class="r big" data-o="price|m0"></td></tr>
-      <tr><td colspan="4">Gross profit and margin</td><td class="r" data-o="gp|m0"></td><td class="r" data-o="margin|p"></td></tr></tfoot></table></div></section>
-  <section class="card"><header><h2>By engineer level</h2></header><div class="scroll"><table class="t">
-    <thead><tr><th>Level</th><th class="r">Hours</th><th class="r">Share of hours</th><th class="r">Cost</th><th class="r">Price</th><th class="r">Price per hour</th></tr></thead>
-    <tbody>${lv.map(x => `<tr><td>${h(x.name)}</td><td class="r">${hrs(x.hrs)}</td><td class="r">${pct(R.hrs ? x.hrs / R.hrs : null)}</td><td class="r">${money(x.cost * (1 + R.e))}</td><td class="r">${money(x.price)}</td><td class="r">${x.hrs ? money(x.price / x.hrs, 2) : '—'}</td></tr>`).join('')}</tbody></table></div>
-    <p class="note">Cost in this table includes escalation.</p></section>`;
+  const pmName = (levelById(s.pmLevel) || {}).name || 'no level';
+  const foot = `
+    <tr class="auto strong"><td colspan="5">Tasks and complexity items</td><td class="r" data-o="${Wk}.taskHrs|h"></td><td></td><td class="r" data-o="${Wk}.taskCost|m0"></td><td></td><td class="r" data-o="${Wk}.taskPrice|m0"></td><td colspan="${tail}"></td></tr>
+    <tr class="auto"><td colspan="5">Project management, ${pct(W.pm.pct)} of ${out(Wk + '.pm.base', 'h')} hours, at the ${h(pmName)} rate</td><td class="r" data-o="${Wk}.pm.hrs|h"></td><td class="r" data-o="${Wk}.pm.rate|m2"></td><td class="r" data-o="${Wk}.pm.cost|m0"></td><td class="r" data-o="${Wk}.pm.m|p"></td><td class="r" data-o="${Wk}.pm.price|m0"></td><td colspan="${tail}"></td></tr>
+    <tr class="auto"><td colspan="5">Contingency, ${pct(W.cont.pct)} of task and PM</td><td class="r" data-o="${Wk}.cont.hrs|h"></td><td></td><td class="r" data-o="${Wk}.cont.cost|m0"></td><td class="r" data-o="m|p"></td><td class="r" data-o="${Wk}.cont.price|m0"></td><td colspan="${tail}"></td></tr>
+    <tr class="auto"><td colspan="5">Labor escalation, ${pct(R.e, 2)}</td><td></td><td></td><td class="r" data-o="${Wk}.laborEsc|m0"></td><td></td><td class="r tag">in prices</td><td colspan="${tail}"></td></tr>
+    <tr class="auto"><td colspan="5">Expenses, with contingency and escalation <button class="linkish small" data-act="tab" data-tab="expenses">Edit expenses</button></td><td></td><td></td><td class="r" data-o="${Wk}.expCostTotal|m0"></td><td></td><td class="r" data-o="${Wk}.expPrice|m0"></td><td colspan="${tail}"></td></tr>
+    <tr class="sum"><td colspan="5">${h(w.name)} total</td><td class="r" data-o="${Wk}.hrs|h"></td><td></td><td class="r" data-o="${Wk}.cost|m0"></td><td class="r" data-o="${Wk}.margin|p"></td><td class="r big" data-o="${Wk}.price|m0"></td><td colspan="${tail}"></td></tr>`;
+  return `${wsBar('tasks')}
+  <section class="card"><header><div><h2>Price breakdown for ${h(w.name)}</h2><p class="hint">Edit tasks in the blue columns; hours, cost and price update as you type. Total hours = quantity × hours each, rounded up. Price = cost × (1 + escalation) ÷ (1 − margin).</p></div>
+      <div class="chips"><span class="chip">Hours <b>${out(Wk + '.hrs', 'h')}</b></span><span class="chip">Price <b>${out(Wk + '.price', 'm0')}</b></span><span class="chip">Margin <b>${out(Wk + '.margin', 'p')}</b></span></div></header>
+    <div class="scroll"><table class="t tasks pb">
+      <thead><tr><th class="c-phase">Phase</th><th class="c-task">Task</th><th class="c-level">Engineer level</th><th class="c-num r">Quantity</th><th class="c-num r">Hours each</th><th class="c-tot r">Total hours</th>
+        <th class="r">Rate</th><th class="r">Cost</th><th class="r">Margin</th><th class="r">Price</th>${rule ? '<th class="c-pmb" title="Counts toward the PM base under the workbook rule">PM base</th>' : ''}<th class="c-notes">Notes</th><th class="c-act"></th></tr></thead>
+      <tbody>${body}</tbody><tfoot>${foot}</tfoot></table></div>
+    <div class="toolbar"><button class="btn primary" data-act="add">Add task</button><button class="btn" data-act="cxAdd" data-ws="${w.id}">Add complexity line</button><button class="btn" data-act="tab" data-tab="settings">Change rates and PM rules</button></div></section>
+  <section class="card"><header><div><h2>Final total</h2><p class="hint">Included worksheets, like the Financial tab.</p></div></header><div data-dyn="wstable"></div></section>
+  ${laborRatesCard()}`;
+}
+function laborRatesCard() {
+  return `<section class="card"><header><div><h2>Labor rates by engineer level</h2><p class="hint">The workbook's Labor Rates Breakdown, always current. Included worksheets; complexity items split by the skill mix.</p></div></header><div data-dyn="rates"></div></section>`;
+}
+DYN.rates = () => `<div class="scroll"><table class="t">
+    <thead><tr><th>Level</th><th class="r">Hours</th><th class="r">Share</th><th class="r">Avg cost /hr</th><th class="r">Avg price /hr</th><th class="r">Margin</th><th class="r">Cost</th><th class="r">Price</th></tr></thead>
+    <tbody>${R.byLevel.map(x => { const c = x.cost * (1 + R.e); return `<tr><td>${h(x.name)}</td><td class="r">${hrs(x.hrs)}</td><td class="r">${pct(R.hrs ? x.hrs / R.hrs : null)}</td><td class="r">${x.hrs ? money(x.cost / x.hrs, 2) : '—'}</td><td class="r">${x.hrs ? money(x.price / x.hrs, 2) : '—'}</td><td class="r">${x.price ? pct((x.price - c) / x.price) : '—'}</td><td class="r">${money(c)}</td><td class="r">${money(x.price)}</td></tr>`; }).join('')}</tbody></table></div>
+    <p class="note">Cost here includes escalation.</p>`;
+
+/* ---------- Complexity matrix ---------- */
+const ui2 = { cxWs: 'all', cxArea: 'all', cxType: 'all', open: {}, all: false };
+const typeById = id => (S.matrix.types || []).find(t => t.id === id);
+function complexityView() {
+  const M = S.matrix; const types = M.types;
+  const linesOf = id => M.lines.filter(l => l.type === id).length;
+  const typeRows = types.map(t => {
+    const K = `matrix.types#${t.id}`; const n = linesOf(t.id); const tot = (R.cxType[t.id] || {}).hrs;
+    const basisSel = `<select data-k="${K}.basis" data-t="sel" aria-label="Basis"><option value="scale"${t.basis !== 'fixed' ? ' selected' : ''}>Per complexity</option><option value="fixed"${t.basis === 'fixed' ? ' selected' : ''}>Fixed (stages)</option></select>`;
+    let cells;
+    if (t.basis === 'fixed') {
+      const sum = typeHours(t, 0);
+      cells = `<td class="tag">—</td><td colspan="7"><div class="stage-sum">${t.stages.length ? `<b>${hrs(sum)}</b> hours per item from ${t.stages.length} stage${t.stages.length === 1 ? '' : 's'}` : `<span class="sfx hrs-in"><input class="num" inputmode="decimal" data-k="${K}.fixed" data-t="num" value="${h(numIn(t.fixed))}" placeholder="0" aria-label="Fixed hours"></span> hours per item`}
+        <button class="linkish small" data-act="stages" data-id="${t.id}">${ui2.open[t.id] ? 'Hide stages' : t.stages.length ? 'Edit stages' : 'Add stages'}</button></div></td>`;
+    } else {
+      cells = `<td><input class="num" inputmode="decimal" data-k="${K}.perPoint" data-t="num" value="${h(numIn(t.perPoint))}" placeholder="0" aria-label="Hours per complexity point"></td>` +
+        CX_LEVELS.map(cx => { const v = t.hours[cx]; return `<td><input class="num cx${isNum(v) ? ' ovr' : ''}" inputmode="decimal" data-k="${K}.hours.${cx}" data-t="num" data-cxph="${h(t.id)}|${cx}" value="${h(numIn(v))}" placeholder="${h(numIn(num(t.perPoint) * cx))}" aria-label="${h(t.name)} hours at complexity ${cx}"></td>`; }).join('');
+    }
+    let row = `<tr><td><input data-k="${K}.name" data-t="text" data-rr value="${h(t.name)}" aria-label="Type name"></td><td>${basisSel}</td>${cells}<td class="r">${n || ''}</td><td class="r">${tot ? hrs(tot) : ''}</td>
+      <td class="r">${n ? '' : `<button class="btn ghost danger" data-act="delType" data-id="${t.id}">Delete</button>`}</td></tr>`;
+    if (t.basis === 'fixed' && ui2.open[t.id]) {
+      row += `<tr class="stages"><td></td><td colspan="12"><table class="t inner"><thead><tr><th>Stage</th><th class="r" style="width:120px">Hours</th><th></th></tr></thead><tbody>
+        ${t.stages.map((x, i) => `<tr><td><input data-k="${K}.stages.${i}.name" data-t="text" value="${h(x.name)}" aria-label="Stage name"></td><td><input class="num" inputmode="decimal" data-k="${K}.stages.${i}.hrs" data-t="num" value="${h(numIn(x.hrs))}" aria-label="Stage hours"></td><td class="r"><button class="btn ghost danger" data-act="delStage" data-id="${t.id}" data-i="${i}">Remove</button></td></tr>`).join('')}
+        </tbody></table><button class="btn" data-act="addStage" data-id="${t.id}">Add stage</button></td></tr>`;
+    }
+    return row;
+  }).join('');
+  const mixRows = M.mix.map((p, i) => `<tr><td><select data-k="matrix.mix.${i}.level" data-t="sel" aria-label="Engineer level">${levelOptions(p.level)}</select></td>
+    <td><span class="sfx" data-sfx="%"><input class="num" inputmode="decimal" data-k="matrix.mix.${i}.pct" data-t="pct" value="${h(pctIn(p.pct))}" aria-label="Share"></span></td>
+    <td class="r">${levelById(p.level) ? money(num(levelById(p.level).cost), 2) : '—'}</td><td class="r"><button class="btn ghost danger" data-act="delMix" data-i="${i}">Remove</button></td></tr>`).join('');
+  // Lines, filtered
+  const f = l => (ui2.cxWs === 'all' || l.ws === ui2.cxWs) && (ui2.cxArea === 'all' || (l.area || '').trim() === ui2.cxArea) && (ui2.cxType === 'all' || l.type === ui2.cxType);
+  const shown = M.lines.filter(f);
+  const areas = [...new Set(M.lines.map(l => (l.area || '').trim()).filter(Boolean))];
+  const opt = (v, label, cur) => `<option value="${h(v)}"${v === cur ? ' selected' : ''}>${h(label)}</option>`;
+  const lvlOpts = sel => `<option value="mix"${sel === 'mix' ? ' selected' : ''}>Skill mix</option>` + S.levels.map(l => opt(l.id, l.name, sel)).join('');
+  const LIMIT = 100; const visible = ui2.all ? shown : shown.slice(0, LIMIT);
+  const lineRows = visible.map(l => {
+    const K = `matrix.lines#${l.id}`; const t = typeById(l.type); const fixed = t && t.basis === 'fixed';
+    return `<tr><td><input data-k="${K}.area" data-t="text" data-rr list="area-list" value="${h(l.area)}" aria-label="Area"></td>
+      <td><input data-k="${K}.title" data-t="text" value="${h(l.title)}" aria-label="Title"></td>
+      <td><select data-k="${K}.type" data-t="sel" aria-label="Type">${types.map(x => opt(x.id, x.name, l.type)).join('')}${t ? '' : '<option selected value="">Unknown</option>'}</select></td>
+      <td>${fixed ? '<span class="tag">Stages</span>' : `<input class="num" inputmode="numeric" data-k="${K}.cx" data-t="num" value="${h(numIn(l.cx))}" aria-label="Complexity 0 to 6">`}</td>
+      <td><input class="num" inputmode="decimal" data-k="${K}.qty" data-t="num" value="${h(numIn(l.qty))}" aria-label="Quantity"></td>
+      <td class="r o" data-o="cx.${l.id}.unit|n1"></td><td class="tot" data-o="cx.${l.id}.hrs|n1"></td>
+      <td><select data-k="${K}.ws" data-t="sel" aria-label="Worksheet">${S.worksheets.map(w => opt(w.id, w.name, l.ws)).join('')}</select></td>
+      <td><select data-k="${K}.level" data-t="sel" aria-label="Engineer level">${lvlOpts(l.level)}</select></td>
+      <td class="r o pr" data-o="cx.${l.id}.price|m0"></td>
+      <td><div class="row-act"><button class="btn ghost" data-act="cxCopy" data-id="${l.id}">Copy</button><button class="btn ghost danger" data-act="cxDel" data-id="${l.id}">Delete</button></div></td></tr>`;
+  }).join('');
+  return `<section class="card"><header><div><h2>Complexity matrix</h2><p class="hint">Hours per item for each type at complexity 0 to 6. A blank cell uses hours per point × complexity; type a number to override it. Dashboards use fixed stage hours.</p></div></header>
+    <div class="scroll"><table class="t matrix"><thead><tr><th style="min-width:130px">Type</th><th style="min-width:130px">Basis</th><th class="r c-num">Hours per point</th>${CX_LEVELS.map(c => `<th class="r c-cx">${c}</th>`).join('')}<th class="r">Lines</th><th class="r">Hours</th><th></th></tr></thead>
+    <tbody>${typeRows}</tbody></table></div>
+    <div class="toolbar"><button class="btn" data-act="addType">Add type</button>${!M.lines.length ? '<span class="hint">Open the Organized workbook (Graphics, Popups, Dashboards) with Open Excel to load its lines and hours per point.</span>' : ''}</div></section>
+  <div class="grid2">
+  <section class="card"><header><div><h2>Skill mix</h2><p class="hint">How complexity hours split across engineer levels, like the HMI Breakdown tab. A line can use one level instead.</p></div></header>
+    <div class="scroll"><table class="t"><thead><tr><th>Engineer level</th><th class="r" style="width:120px">Share</th><th class="r">Cost per hour</th><th></th></tr></thead><tbody>${mixRows}</tbody>
+    <tfoot><tr class="sum"><td>Blend</td><td class="r" data-o="mixPct|p"></td><td class="r" data-o="mixCost|m2"></td><td class="r tag">price <span data-o="mixPrice|m2"></span> /hr before escalation</td></tr></tfoot></table></div>
+    <div class="toolbar"><button class="btn" data-act="addMix">Add level</button></div></section>
+  <section class="card"><header><div><h2>Pricing by area and type</h2><p class="hint">Hours and price from the lines below${ui2.cxWs !== 'all' ? `, ${h((wsById(ui2.cxWs) || {}).name || '')} only` : ''}.</p></div></header><div data-dyn="cxsum"></div></section>
+  </div>
+  <section class="card"><header><div><h2>Lines</h2><p class="hint">Hours = quantity × matrix hours. Each line feeds its worksheet on the Price breakdown, grouped by area and type.</p></div>
+      <div class="chips"><span class="chip">Showing <b>${shown.length}</b> of ${M.lines.length}</span></div></header>
+    <div class="filters">
+      <label class="mini">Worksheet<select data-f="cxWs">${opt('all', 'All worksheets', ui2.cxWs)}${S.worksheets.map(w => opt(w.id, w.name, ui2.cxWs)).join('')}</select></label>
+      <label class="mini">Area<select data-f="cxArea">${opt('all', 'All areas', ui2.cxArea)}${areas.map(a => opt(a, a, ui2.cxArea)).join('')}</select></label>
+      <label class="mini">Type<select data-f="cxType">${opt('all', 'All types', ui2.cxType)}${types.map(t => opt(t.id, t.name, ui2.cxType)).join('')}</select></label>
+      <button class="btn primary" data-act="cxAdd">Add line</button>
+    </div>
+    ${shown.length ? `<div class="scroll"><table class="t cxl"><thead><tr><th class="c-area">Area</th><th class="c-task">Title</th><th class="c-type">Type</th><th class="r c-num">Complexity</th><th class="r c-num">Quantity</th><th class="r">Hours each</th><th class="r">Hours</th><th class="c-type">Worksheet</th><th class="c-type">Engineer level</th><th class="r">Price</th><th class="c-act"></th></tr></thead>
+      <tbody>${lineRows}${visible.length < shown.length ? `<tr><td colspan="11" class="empty-row">Showing the first ${LIMIT} of ${shown.length} lines. <button class="linkish" data-act="cxAll">Show all ${shown.length}</button> or narrow the filters.</td></tr>` : ''}</tbody><tfoot><tr class="sum"><td colspan="6">Total for all ${shown.length} lines matching the filters</td><td class="r" data-dyn="cxShownHrs"></td><td colspan="2"></td><td class="r" data-dyn="cxShownPrice"></td><td></td></tr></tfoot></table></div>`
+      : `<div class="empty"><p>${M.lines.length ? 'No lines match these filters.' : 'No complexity lines yet. Add one, or open the Organized workbook.'}</p></div>`}</section>`;
+}
+const cxShown = () => S.matrix.lines.filter(l => (ui2.cxWs === 'all' || l.ws === ui2.cxWs) && (ui2.cxArea === 'all' || (l.area || '').trim() === ui2.cxArea) && (ui2.cxType === 'all' || l.type === ui2.cxType));
+DYN.cxShownHrs = () => hrs1(cxShown().reduce((a, l) => a + R.cx[l.id].hrs, 0));
+DYN.cxShownPrice = () => money(cxShown().reduce((a, l) => a + R.cx[l.id].price, 0));
+const hrs1 = x => (isNum(x) ? (Math.round(x * 10) / 10).toLocaleString('en-US') : '—');
+DYN.cxsum = () => {
+  const lines = S.matrix.lines.filter(l => ui2.cxWs === 'all' || l.ws === ui2.cxWs);
+  if (!lines.length) return '<p class="hint">No lines yet.</p>';
+  const types = S.matrix.types.filter(t => lines.some(l => l.type === t.id));
+  const areas = [...new Set(lines.map(l => (l.area || '').trim() || 'No area'))];
+  const cell = {}; const at = {}, tt = {};
+  lines.forEach(l => { const a = (l.area || '').trim() || 'No area'; const k = a + '|' + l.type; const r = R.cx[l.id]; cell[k] = (cell[k] || 0) + r.hrs; at[a] = at[a] || { hrs: 0, price: 0 }; at[a].hrs += r.hrs; at[a].price += r.price; tt[l.type] = (tt[l.type] || 0) + r.hrs; });
+  const tot = Object.values(at).reduce((a, x) => ({ hrs: a.hrs + x.hrs, price: a.price + x.price }), { hrs: 0, price: 0 });
+  return `<div class="scroll"><table class="t compact"><thead><tr><th>Area</th>${types.map(t => `<th class="r">${h(t.name)}</th>`).join('')}<th class="r">Hours</th><th class="r">Price</th></tr></thead>
+    <tbody>${areas.map(a => `<tr><td><button class="linkish" data-act="cxArea" data-area="${h(a)}">${h(a)}</button></td>${types.map(t => `<td class="r">${cell[a + '|' + t.id] ? hrs1(cell[a + '|' + t.id]) : ''}</td>`).join('')}<td class="r"><b>${hrs1(at[a].hrs)}</b></td><td class="r">${money(at[a].price)}</td></tr>`).join('')}</tbody>
+    <tfoot><tr class="sum"><td>Total</td>${types.map(t => `<td class="r">${hrs1(tt[t.id])}</td>`).join('')}<td class="r">${hrs1(tot.hrs)}</td><td class="r big">${money(tot.price)}</td></tr></tfoot></table></div>`;
+};
+
+/* ---------- Expenses ---------- */
+function expensesView() {
+  const w = curWs(); const W = `ws.${w.id}`;
+  const list = S.expenses.filter(x => x.ws === w.id);
+  const spOpts = sel => `<option value="">Custom</option>` + S.setpoints.map(x => `<option value="${h(x.id)}"${x.id === sel ? ' selected' : ''}>${h(x.name)}${x.unit && !/^per\b/i.test(x.name) ? `, per ${h(x.unit)}` : ''}</option>`).join('');
+  const rows = list.map(x => {
+    const K = `expenses#${x.id}`; const spx = S.setpoints.find(s => s.id === x.sp);
+    return `<tr><td><select data-k="${K}.sp" data-t="sel" aria-label="Expense type">${spOpts(x.sp)}</select></td>
+      <td><input data-k="${K}.desc" data-t="text" value="${h(x.desc)}" aria-label="Description" placeholder="Description"></td>
+      <td><input class="num" inputmode="decimal" data-k="${K}.qty" data-t="num" value="${h(numIn(x.qty))}" aria-label="Quantity"></td>
+      <td><input class="num" inputmode="decimal" data-k="${K}.mult" data-t="num" value="${h(numIn(x.mult))}" placeholder="1" aria-label="Multiplier"></td>
+      <td><input class="num" inputmode="decimal" data-k="${K}.unit" data-t="num" value="${h(numIn(x.unit))}" placeholder="${spx ? h(money(spx.cost, 2)) : '$0.00'}" aria-label="Unit cost"></td>
+      <td class="r" data-o="exp.${x.id}.cost|m2"></td><td class="r" data-o="exp.${x.id}.price|m2"></td>
+      <td><div class="row-act"><button class="btn ghost danger" data-act="delExp" data-id="${x.id}">Delete</button></div></td></tr>`;
+  }).join('');
+  return `${wsBar('expenses')}
+  <section class="card"><header><div><h2>Expenses on ${h(w.name)}</h2><p class="hint">Travel and living. Unit cost comes from the expense type unless you type an override. Margin ${pct(R.mE)}, escalation ${pct(R.eE, 2)}.</p></div></header>
+    ${list.length ? `<div class="scroll"><table class="t exps"><thead><tr><th class="c-level">Expense type</th><th class="c-task">Description</th><th class="c-num r">Quantity</th><th class="c-num r">Multiplier</th><th class="c-unit r">Unit cost</th><th class="r">Cost</th><th class="r">Price</th><th class="c-act"></th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr class="auto"><td colspan="5">Expense contingency, ${pct(R.ws[w.id].expCont.pct)}</td><td class="r" data-o="${W}.expCont.cost|m2"></td><td class="r" data-o="${W}.expCont.price|m2"></td><td></td></tr>
+        <tr class="auto"><td colspan="5">Escalation, ${pct(R.eE, 2)} (included in price)</td><td class="r" data-o="${W}.expEsc|m2"></td><td></td><td></td></tr>
+        <tr class="sum"><td colspan="5">Expenses on ${h(w.name)}</td><td class="r" data-o="${W}.expCostTotal|m2"></td><td class="r big" data-o="${W}.expPrice|m2"></td><td></td></tr>
+      </tfoot></table></div>`
+      : `<div class="empty"><p>No expenses on this worksheet.</p></div>`}
+    <div class="toolbar"><button class="btn primary" data-act="addExp">Add expense</button><button class="btn" data-act="tab" data-tab="settings">Edit expense types</button></div></section>`;
 }
 
 /* ---------- Rates and settings ---------- */
@@ -966,25 +1862,44 @@ function settingsView() {
   const s = S.settings; const p = S.project;
   const used = id => S.tasks.filter(t => t.level === id).length + (s.pmLevel === id ? 1 : 0);
   const pctField = (k, label, hint) => `<label class="field">${label}<span class="sfx" data-sfx="%"><input inputmode="decimal" data-k="settings.${k}" data-t="pct" value="${h(pctIn(s[k]))}"></span>${hint ? `<small>${hint}</small>` : ''}</label>`;
+  const a = S.approval;
   return `<div class="grid2">
-  <section class="card"><header><h2>Pricing</h2><p class="hint">Price = cost × (1 + escalation) ÷ (1 − margin)</p></header>
-    <div class="form">${pctField('margin', 'Margin')}${pctField('pmPct', 'Project management', 'Share of task hours')}${pctField('contPct', 'Contingency', 'Share of task and PM')}${pctField('escPct', 'Escalation')}
-      <label class="field">PM is charged at<select data-k="settings.pmLevel" data-t="sel">${levelOptions(s.pmLevel)}</select></label></div></section>
-  <section class="card"><header><h2>Project</h2></header><div class="form">
+  <section class="card"><header><h2>Labor pricing</h2><p class="hint">Price = cost × (1 + escalation) ÷ (1 − margin)</p></header>
+    <div class="form">${pctField('margin', 'Labor margin', 'Used unless a level has its own')}${pctField('pmPct', 'Project management', 'Share of task hours')}${pctField('contPct', 'Contingency', 'Share of task and PM')}${pctField('escPct', 'Labor escalation')}
+      <label class="field">PM is charged at<select data-k="settings.pmLevel" data-t="sel">${levelOptions(s.pmLevel)}</select></label>
+      <label class="field">PM base<select data-k="settings.pmRule" data-t="sel"><option value="all"${s.pmRule !== 'workbook' ? ' selected' : ''}>All tasks</option><option value="workbook"${s.pmRule === 'workbook' ? ' selected' : ''}>Workbook rule (matches T35)</option></select><small>The workbook's PM formula skips some task rows</small></label></div>
+    <p class="note">Worksheets can override PM and contingency % on the Tasks tab, like each estimating tab does.</p></section>
+  <section class="card"><header><h2>Expense pricing</h2></header>
+    <div class="form">${pctField('expMargin', 'Expense margin')}${pctField('expEscPct', 'Expense escalation')}</div>
+    <h3 class="sub-h">Project</h3><div class="form">
     ${[['name', 'Project name'], ['customer', 'Customer'], ['number', 'Proposal number'], ['rev', 'Revision'], ['preparedBy', 'Prepared by']].map(([k, l]) => `<label class="field">${l}<input data-k="project.${k}" data-t="text" value="${h(p[k])}"></label>`).join('')}</div>
     <label class="field" style="margin-top:14px">Notes<textarea data-k="project.notes" data-t="text">${h(p.notes)}</textarea></label></section></div>
-  <section class="card"><header><div><h2>Engineer levels</h2><p class="hint">Hourly cost for each level. Tasks pick from this list.</p></div></header>
-    <div class="scroll"><table class="t"><thead><tr><th>Level name</th><th>Role code</th><th class="r" style="width:160px">Cost per hour</th><th class="r">Used by</th><th></th></tr></thead><tbody>
+  <section class="card"><header><div><h2>Engineer levels</h2><p class="hint">Hourly cost for each level. A margin here overrides the labor margin, the way the workbook prices iOPS at 75%.</p></div></header>
+    <div class="scroll"><table class="t"><thead><tr><th>Level name</th><th>Role code</th><th class="r" style="width:150px">Cost per hour</th><th class="r" style="width:130px">Margin override</th><th class="r">Used by</th><th></th></tr></thead><tbody>
     ${S.levels.map(l => `<tr><td><input data-k="levels#${l.id}.name" data-t="text" data-rr value="${h(l.name)}" aria-label="Level name"></td>
       <td><input data-k="levels#${l.id}.code" data-t="text" value="${h(l.code)}" aria-label="Role code"></td>
       <td><input class="num" inputmode="decimal" data-k="levels#${l.id}.cost" data-t="num" value="${h(numIn(l.cost))}" aria-label="Cost per hour"></td>
+      <td><span class="sfx" data-sfx="%"><input class="num" inputmode="decimal" data-k="levels#${l.id}.margin" data-t="pct" value="${h(pctIn(l.margin))}" placeholder="default" aria-label="Margin override"></span></td>
       <td class="r">${used(l.id) || ''}</td>
       <td class="r">${used(l.id) ? '' : `<button class="btn ghost danger" data-act="delLevel" data-id="${h(l.id)}">Delete</button>`}</td></tr>`).join('')}
     </tbody></table></div><div class="toolbar"><button class="btn" data-act="addLevel">Add level</button></div></section>
+  <div class="grid2">
+  <section class="card"><header><div><h2>Expense types</h2><p class="hint">Default unit costs, from the Setup tab's setpoints.</p></div></header>
+    <div class="scroll"><table class="t"><thead><tr><th>Name</th><th>Per</th><th class="r" style="width:140px">Unit cost</th><th></th></tr></thead><tbody>
+    ${S.setpoints.map(x => `<tr><td><input data-k="setpoints#${x.id}.name" data-t="text" data-rr value="${h(x.name)}" aria-label="Expense type"></td><td><input data-k="setpoints#${x.id}.unit" data-t="text" data-rr value="${h(x.unit)}" aria-label="Per"></td>
+      <td><input class="num" inputmode="decimal" data-k="setpoints#${x.id}.cost" data-t="num" value="${h(numIn(x.cost))}" aria-label="Unit cost"></td>
+      <td class="r">${S.expenses.some(e => e.sp === x.id) ? '' : `<button class="btn ghost danger" data-act="delSp" data-id="${h(x.id)}">Delete</button>`}</td></tr>`).join('')}
+    </tbody></table></div><div class="toolbar"><button class="btn" data-act="addSp">Add expense type</button></div></section>
+  <section class="card"><header><div><h2>Approval matrix</h2><p class="hint">${a ? `From the ${h(a.source || 'workbook')}. Each test picks the first tier it passes; the highest tier is required.` : 'Not set.'}</p></div></header>
+    ${a ? `<div class="scroll"><table class="t"><thead><tr><th>Approver</th><th class="r">Price up to</th><th class="r">Labor margin at least</th><th class="r">Expense margin at least</th></tr></thead><tbody>
+      ${a.tiers.map((t, i) => `<tr${R.approval && R.approval.idx === i ? ' class="cur"' : ''}><td>${h(t)}</td><td class="r">${i < (a.priceMax || []).length && isNum(a.priceMax[i]) ? money(a.priceMax[i]) : 'Anything higher'}</td><td class="r">${isNum((a.labor || [])[i]) ? pct(a.labor[i], 0) : ''}</td><td class="r">${isNum((a.expense || [])[i]) ? pct(a.expense[i], 0) : ''}</td></tr>`).join('')}
+      </tbody></table></div>
+      <p class="note">Overall margin below ${pct((a.overall || {}).minGP, 0)} needs ${h(a.tiers[num((a.overall || {}).below)] || '')} up to ${money((a.overall || {}).splitPrice)} and ${h(a.tiers[num((a.overall || {}).above)] || '')} above. Edit the matrix on the Approval tab of a saved workbook.</p>`
+      : `<p class="hint">Open the estimator workbook to bring in its DOA tab.</p>`}</section></div>
   <section class="card"><header><h2>Your data</h2></header>
-    <p class="hint" style="margin-bottom:12px">Save as Excel writes a .xlsx with Summary, Tasks and Rates tabs and working formulas. Edit it in Excel and open it here again whenever you like. This browser also keeps a working copy. Workbooks hold rates and client details, so store them in approved GrayMatter locations and keep them out of the GitHub repository.</p>
+    <p class="hint" style="margin-bottom:12px">Save as Excel writes a .xlsx with Summary, Worksheets, Tasks, Expenses, Rates and Approval tabs, all with working formulas. Edit it in Excel and open it here again whenever you like. Workbooks hold rates and client details, so store them in approved GrayMatter locations and keep them out of the GitHub repository.</p>
     <div class="toolbar" style="margin-top:0"><button class="btn primary" data-act="saveExcel">Save as Excel</button><button class="btn" data-act="pickExcel">Open Excel</button><button class="btn danger" data-act="clear">Remove from this browser</button></div>
-    ${S.source ? `<p class="note">Opened from ${S.source.kind === 'app' ? '' : `the ${h(S.source.sheet)} tab of `}${h(S.source.file)} on ${h(new Date(S.source.importedAt).toLocaleString())}.</p>` : ''}</section>`;
+    ${S.source ? `<p class="note">Opened from ${h(S.source.file)} on ${h(new Date(S.source.importedAt).toLocaleString())}.</p>` : ''}</section>`;
 }
 
 /* ---------- Events ---------- */
@@ -992,7 +1907,8 @@ function setFrom(el) {
   const segs = el.dataset.k.split('.'); let o = S;
   for (let i = 0; i < segs.length - 1; i++) { const sg = segs[i]; const x = sg.indexOf('#'); o = x >= 0 ? (o[sg.slice(0, x)] || []).find(y => y.id === sg.slice(x + 1)) : o[sg]; if (!o) return false; }
   const key = segs[segs.length - 1]; const t = el.dataset.t; let v;
-  if (t === 'num' || t === 'pct') {
+  if (t === 'bool') v = el.checked;
+  else if (t === 'num' || t === 'pct') {
     const raw = el.value.trim();
     if (raw === '') v = null; else { v = parseNum(raw); if (!isFinite(v)) { el.classList.add('bad'); return false; } if (t === 'pct') v /= 100; }
   } else if (t === 'sel') v = el.value || null; else v = el.value;
@@ -1000,15 +1916,15 @@ function setFrom(el) {
 }
 document.addEventListener('input', e => {
   const el = e.target;
-  if (el.dataset.k && el.tagName !== 'SELECT') { if (setFrom(el)) { save(); refresh(); } }
+  if (el.dataset.k && el.tagName !== 'SELECT' && el.type !== 'checkbox') { if (setFrom(el)) { save(); refresh(); } }
   else if (el.dataset.u) { ui[el.dataset.u] = el.value; refresh(); }
 });
 document.addEventListener('change', e => {
   const el = e.target;
-  if (el.dataset.k && el.tagName === 'SELECT') { if (setFrom(el)) { save(); render(); } }
+  if (el.dataset.k && (el.tagName === 'SELECT' || el.type === 'checkbox')) { if (setFrom(el)) { save(); render(); } }
   else if (el.dataset.k && el.dataset.rr !== undefined) render();
+  else if (el.dataset.f) { ui2[el.dataset.f] = el.value; ui2.all = false; render(); }
   else if (el.id === 'xl-file' && el.files[0]) { startExcel(el.files[0]); el.value = ''; }
-  else if (el.id === 'xl-tab') previewTab();
 });
 document.addEventListener('click', e => {
   for (const d of $$('details[open]')) if (!d.contains(e.target)) d.open = false;
@@ -1017,87 +1933,134 @@ document.addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') $$('details[open]').forEach(d => { d.open = false; });
-  if (e.key === 'Enter' && e.target.closest && e.target.closest('table.tasks') && e.target.tagName === 'INPUT') {
-    const rows = $$('table.tasks tbody tr'); const tr = e.target.closest('tr');
-    if (tr === rows[rows.length - 1]) { e.preventDefault(); ACT.add(); }
+  if (e.key === 'Enter' && e.target.closest && e.target.tagName === 'INPUT') {
+    const tbl = e.target.closest('table.tasks, table.exps'); if (!tbl) return;
+    const rows = $$('tbody tr', tbl); if (e.target.closest('tr') === rows[rows.length - 1]) { e.preventDefault(); tbl.classList.contains('tasks') ? ACT.add() : ACT.addExp(); }
   }
 });
 const commit = () => { save(); render(); };
+const focusField = k => { const el = document.querySelector(`[data-k="${k}"]`); if (el) el.focus(); };
 const ACT = {
   tab: d => { tab = d.tab; render(); window.scrollTo({ top: 0 }); },
+  openWs: d => { ui.ws = d.id; tab = 'tasks'; render(); window.scrollTo({ top: 0 }); },
+  wsSel: d => { ui.ws = d.id; render(); },
+  wsAdd: () => { const w = blankWorksheet(`Worksheet ${S.worksheets.length + 1}`); S.worksheets.push(w); ui.ws = w.id; commit(); focusField(`worksheets#${w.id}.name`); },
+  wsDel: d => {
+    const w = wsById(d.id); const n = S.tasks.filter(t => t.ws === w.id).length + S.expenses.filter(x => x.ws === w.id).length;
+    if (!confirm(`Delete the ${w.name} worksheet${n ? ` and its ${n} line${n > 1 ? 's' : ''}` : ''}?`)) return;
+    S.worksheets = S.worksheets.filter(x => x.id !== w.id); S.tasks = S.tasks.filter(t => t.ws !== w.id); S.expenses = S.expenses.filter(x => x.ws !== w.id); ui.ws = null; commit();
+  },
   add: () => {
-    const last = S.tasks[S.tasks.length - 1];
-    const t = { id: uid('t'), wbs: last ? last.wbs : '', phase: last ? last.phase : '', name: '', level: last ? last.level : (S.levels.find(l => l.id !== S.settings.pmLevel) || {}).id || null, qty: 1, hours: null, notes: '' };
-    S.tasks.push(t); if (tab !== 'tasks') tab = 'tasks'; commit();
-    const el = document.querySelector(`[data-k="tasks#${t.id}.name"]`); if (el) el.focus();
+    const w = curWs(); const list = S.tasks.filter(t => t.ws === w.id); const last = list[list.length - 1];
+    const t = { id: uid('t'), ws: w.id, wbs: last ? last.wbs : '', phase: last ? last.phase : '', name: '', level: last ? last.level : (S.levels.find(l => l.id !== S.settings.pmLevel) || {}).id || null, qty: 1, hours: null, notes: '', pmBase: true };
+    S.tasks.push(t); tab = 'tasks'; commit(); focusField(`tasks#${t.id}.name`);
   },
   copy: d => { const i = S.tasks.findIndex(t => t.id === d.id); S.tasks.splice(i + 1, 0, { ...S.tasks[i], id: uid('t') }); commit(); },
   del: d => { S.tasks = S.tasks.filter(t => t.id !== d.id); commit(); },
-  move: d => { const i = S.tasks.findIndex(t => t.id === d.id); const j = i + +d.d; if (j < 0 || j >= S.tasks.length) return; [S.tasks[i], S.tasks[j]] = [S.tasks[j], S.tasks[i]]; commit(); },
-  addLevel: () => { S.levels.push({ id: uid('L'), name: 'New level', code: '', cost: 0 }); commit(); },
+  move: d => {
+    const t = S.tasks.find(x => x.id === d.id); const list = S.tasks.filter(x => x.ws === t.ws); const j = list.indexOf(t) + +d.d; if (j < 0 || j >= list.length) return;
+    const a = S.tasks.indexOf(t), b = S.tasks.indexOf(list[j]); [S.tasks[a], S.tasks[b]] = [S.tasks[b], S.tasks[a]]; commit();
+  },
+  addExp: () => { const w = curWs(); const x = { id: uid('x'), ws: w.id, sp: (S.setpoints[0] || {}).id || null, desc: (S.setpoints[0] || {}).name || '', qty: null, mult: 1, unit: null }; S.expenses.push(x); tab = 'expenses'; commit(); focusField(`expenses#${x.id}.qty`); },
+  delExp: d => { S.expenses = S.expenses.filter(x => x.id !== d.id); commit(); },
+  addLevel: () => { S.levels.push({ id: uid('L'), name: 'New level', code: '', cost: 0, margin: null }); commit(); },
   delLevel: d => { S.levels = S.levels.filter(l => l.id !== d.id); commit(); },
+  addSp: () => { S.setpoints.push({ id: uid('s'), name: 'New expense', unit: 'day', cost: 0 }); commit(); },
+  delSp: d => { S.setpoints = S.setpoints.filter(x => x.id !== d.id); commit(); },
   useMargin: d => { S.settings.margin = +(+d.m).toFixed(6); ui.target = ''; commit(); },
+  pmRule: d => { S.settings.pmRule = d.v; commit(); },
   pickExcel: () => $('#xl-file').click(),
   saveExcel: () => {
     try { downloadBlob(fileBase() + '.xlsx', buildEstimateWorkbook(S, R)); status('Saved as Excel'); }
     catch (err) { alert('Could not build the Excel file. ' + (err.message || '')); }
   },
   print: () => window.print(),
-  blank: () => { if (S && !confirm('Start a blank estimate? The current one will be removed from this browser. Save a file first if you need it.')) return; S = blankEstimate(); tab = 'settings'; commit(); },
-  clear: () => { if (!confirm('Remove this estimate from this browser? Save a file first if you need it.')) return; S = null; saveNow(); tab = 'dashboard'; render(); },
+  blank: () => { if (S && !confirm('Start a blank estimate? The current one will be removed from this browser. Use Save as Excel first if you need it.')) return; S = blankEstimate(); ui.ws = null; tab = 'settings'; commit(); },
+  clear: () => { if (!confirm('Remove this estimate from this browser? Use Save as Excel first if you need it.')) return; S = null; saveNow(); tab = 'dashboard'; render(); },
   xlImport: async () => {
-    const tabName = $('#xl-tab').value;
+    if (pending.kind === 'organized') {
+      if (!S) S = blankEstimate();
+      let wsId = $('#xl-target').value;
+      if (wsId === '__new') { const w = blankWorksheet(S.worksheets.some(x => x.name === 'HMI graphics') ? `HMI graphics ${S.worksheets.length + 1}` : 'HMI graphics'); S.worksheets.push(w); wsId = w.id; }
+      const keys = $$('.xl-grp').filter(x => x.checked).map(x => x.value);
+      applyOrganized(S, pending.data, wsId, $('#xl-replace-cx').checked, keys); S = normalize(S);
+      ui2.cxWs = wsId; ui2.cxArea = 'all'; ui2.cxType = 'all'; ui.ws = wsId; tab = 'complexity'; $('#xl-dialog').close(); commit(); status(`Loaded ${S.matrix.lines.filter(l => l.ws === wsId).length} lines from ${pending.name}`);
+      return;
+    }
     try {
-      const est = normalize(pending.kind === 'app' ? await extractAppWorkbook(pending.wb, pending.name) : await extractTab(pending.wb, tabName, pending.name));
-      S = est; tab = 'dashboard'; ui.target = ''; $('#xl-dialog').close(); commit();
-      status(pending.kind === 'app' ? `Opened ${pending.name}` : `Imported the ${tabName} tab`);
+      const est = normalize(pending.kind === 'app' ? await extractAppWorkbook(pending.wb, pending.name) : await extractEstimator(pending.wb, pending.name, pending.tabs));
+      S = est; ui.ws = null; tab = 'dashboard'; ui.target = ''; $('#xl-dialog').close(); commit(); status(`Opened ${pending.name}`);
     } catch (err) { $('#xl-msg').innerHTML = `<p class="err">${h(err.message)}</p>`; }
   },
-  xlCancel: () => $('#xl-dialog').close()
+  xlCancel: () => $('#xl-dialog').close(),
+  // Complexity matrix
+  cxOpen: d => { ui2.cxWs = d.ws || 'all'; ui2.cxArea = d.area || 'all'; ui2.cxType = d.type || 'all'; tab = 'complexity'; render(); window.scrollTo({ top: 0 }); },
+  cxArea: d => { ui2.cxArea = d.area; render(); const el = $('.cxl'); if (el) el.scrollIntoView({ block: 'start' }); },
+  cxAdd: d => {
+    const M = S.matrix; const ws = d.ws || (ui2.cxWs !== 'all' ? ui2.cxWs : curWs().id); const last = [...M.lines].reverse().find(l => l.ws === ws);
+    const l = { id: uid('c'), ws, area: ui2.cxArea !== 'all' ? ui2.cxArea : last ? last.area : '', title: '', type: ui2.cxType !== 'all' ? ui2.cxType : last ? last.type : (M.types[0] || {}).id, cx: null, qty: 1, level: 'mix', notes: '' };
+    M.lines.push(l); if (ui2.cxWs !== 'all' && ui2.cxWs !== ws) ui2.cxWs = ws; tab = 'complexity'; commit(); focusField(`matrix.lines#${l.id}.title`);
+  },
+  cxCopy: d => { const L = S.matrix.lines; const i = L.findIndex(l => l.id === d.id); L.splice(i + 1, 0, { ...L[i], id: uid('c') }); commit(); },
+  cxDel: d => { S.matrix.lines = S.matrix.lines.filter(l => l.id !== d.id); commit(); },
+  cxAll: () => { ui2.all = true; render(); },
+  stages: d => { ui2.open[d.id] = !ui2.open[d.id]; render(); },
+  addStage: d => { const t = typeById(d.id); t.stages.push({ name: 'New stage', hrs: 0 }); ui2.open[d.id] = true; commit(); },
+  delStage: d => { const t = typeById(d.id); t.stages.splice(+d.i, 1); commit(); },
+  addType: () => { S.matrix.types.push({ id: uid('k'), name: 'New type', basis: 'scale', perPoint: null, hours: [null, null, null, null, null, null, null], stages: [], fixed: null }); commit(); },
+  delType: d => { S.matrix.types = S.matrix.types.filter(t => t.id !== d.id); commit(); },
+  addMix: () => { const used = new Set(S.matrix.mix.map(p => p.level)); const L = S.levels.find(l => !used.has(l.id) && l.id !== S.settings.pmLevel) || S.levels[0]; S.matrix.mix.push({ level: L ? L.id : null, pct: 0 }); commit(); },
+  delMix: d => { S.matrix.mix.splice(+d.i, 1); commit(); }
 };
 
-/* ---------- Excel import dialog ---------- */
+/* ---------- Open Excel dialog ---------- */
 let pending = null;
 async function startExcel(file) {
   const dlg = $('#xl-dialog');
   $('#xl-name').textContent = file.name; $('#xl-msg').innerHTML = '<p class="hint">Reading the workbook…</p>';
-  $('#xl-tab').innerHTML = ''; $('#xl-go').disabled = true; $('#xl-replace').hidden = !S; $('#xl-tab-field').hidden = false;
+  $('#xl-go').disabled = true; $('#xl-replace').hidden = !S;
   if (!dlg.open) dlg.showModal();
   try {
     const wb = await readWorkbook(await file.arrayBuffer());
     if (await isAppWorkbook(wb)) {
-      pending = { wb, name: file.name, kind: 'app' }; $('#xl-tab-field').hidden = true;
-      const est = await extractAppWorkbook(wb, file.name); const r = calc(est);
-      $('#xl-msg').innerHTML = `<div class="preview">Saved from this app. <b>${est.tasks.length}</b> tasks, <b>${hrs(r.hrs)}</b> hours, <b>${est.levels.length}</b> engineer levels.<br>
-        ${isNum(est.source.price) ? `The Summary tab shows <b>${money(est.source.price)}</b>.` : ''}</div>`;
+      const est = normalize(await extractAppWorkbook(wb, file.name)); const r = calc(est);
+      pending = { wb, name: file.name, kind: 'app' };
+      $('#xl-msg').innerHTML = `<div class="preview">Saved from this app. <b>${est.worksheets.length}</b> worksheet${est.worksheets.length === 1 ? '' : 's'}, <b>${est.tasks.length}</b> tasks, <b>${est.expenses.length}</b> expenses.<br>
+        ${isNum(est.source.final.price) ? `The workbook's final total is <b>${money(est.source.final.price)}</b>; this app calculates <b>${money(r.price)}</b>.` : `Final total <b>${money(r.price)}</b>.`}</div>`;
       $('#xl-go').disabled = false; return;
     }
-    const tabs = [];
-    for (const s of wb.sheets) { if (s.state !== 'visible') continue; if (isEstimateTab(await wb.sheet(s.name))) tabs.push(s.name); }
-    if (!tabs.length) throw new Error('No estimate tabs found. The app reads its own saved workbooks, or estimator tabs laid out like SCADA with Task Description in column G.');
-    pending = { wb, name: file.name, kind: 'estimator' };
-    $('#xl-tab').innerHTML = tabs.map(t => `<option${t === 'SCADA' ? ' selected' : ''}>${h(t)}</option>`).join('');
-    await previewTab();
+    if (await isOrganizedWorkbook(wb)) {
+      const data = await extractOrganized(wb); pending = { wb, name: file.name, kind: 'organized', data };
+      $('#xl-replace').hidden = true;
+      const hp = S ? S.worksheets.find(w => /hphmi|hmi/i.test(w.name)) : null;
+      const opts = (S ? S.worksheets.map(w => `<option value="${w.id}"${hp && hp.id === w.id ? ' selected' : ''}>${h(w.name)}</option>`).join('') : '') + `<option value="__new"${hp ? '' : ' selected'}>New worksheet: HMI graphics</option>`;
+      const rows = data.report.map(x => `<li><label class="check"><input type="checkbox" class="xl-grp" value="${x.key}"${x.on ? ' checked' : ''}> <span><b>${h(x.label)}</b>: ${x.n} line${x.n === 1 ? '' : 's'}, ${hrs1(x.hrs)} hours${isNum(x.sheet) && x.sheet > 0 && Math.abs(x.sheet - x.hrs) > 0.01 ? ` <span class="tag">(the sheet's own subtotals count ${hrs1(x.sheet)})</span>` : ''}${x.differs ? ` <span class="tag">${x.differs} with different stage hours</span>` : ''}${x.on ? '' : ' <span class="tag">calibration sample, left out by default</span>'}</span></label></li>`).join('');
+      const tot = data.report.filter(x => x.on).reduce((a, x) => a + x.hrs, 0);
+      const existing = hp ? S.tasks.filter(t => t.ws === hp.id) : [];
+      $('#xl-msg').innerHTML = `<div class="preview">Organized workbook, scored by complexity. Tick what to bring in:<ul class="tablist checks-list">${rows}</ul><b>${hrs1(tot)}</b> hours in the ticked blocks. Hours per point and dashboard stages come from the workbook and replace those matrix rows.</div>
+        <label class="field">Put the lines on<select id="xl-target">${opts}</select></label>
+        <label class="check" style="margin-top:10px"><input type="checkbox" id="xl-replace-cx" checked> Replace complexity lines already on that worksheet</label>
+        ${existing.length ? `<p class="hint">${h(hp.name)} already has ${existing.length} task line${existing.length === 1 ? '' : 's'} (${hrs(existing.reduce((a, t) => a + R.tasks[t.id].hrs, 0))} hours). The complexity lines add to them, so remove those tasks if the matrix replaces them.</p>` : ''}
+        ${S && !S.matrix.mix.length ? '<p class="hint">Set the skill mix on the Complexity matrix tab afterwards, or open the estimator first to bring in its 20/30/50 HMI Breakdown split.</p>' : ''}`;
+      $('#xl-go').disabled = false; return;
+    }
+    const tabs = await listEstimatorTabs(wb);
+    if (!tabs.length) throw new Error('No estimating tabs found. The app reads its own saved workbooks, or estimator tabs laid out like SCADA with Task Description in column G.');
+    pending = { wb, name: file.name, kind: 'estimator', tabs };
+    const est = normalize(await extractEstimator(wb, file.name, tabs)); const r = calc(est); const f = est.source.final;
+    $('#xl-msg').innerHTML = `<div class="preview">Estimator workbook with <b>${tabs.length}</b> estimating tab${tabs.length === 1 ? '' : 's'}:<ul class="tablist">${tabs.map(t => `<li>${h(t.name)}${t.include ? '' : ' <span class="tag">excluded on the Financial tab</span>'}</li>`).join('')}</ul>
+      ${isNum(f.price) ? `Financial tab (T35): <b>${money(f.price)}</b> at <b>${pct(f.margin)}</b>, ${hrs(f.hours)} hours, approver <b>${h(f.approver || 'not shown')}</b>.<br>` : ''}
+      This app calculates <b>${money(r.price)}</b> at <b>${pct(r.margin)}</b>, approver <b>${h(r.approver)}</b>.</div>
+      <p class="hint">Tasks, expenses, engineer levels, rates, the expense rate list and the DOA approval matrix come across. Materials, subcontracts and time-and-materials pricing stay in the workbook for now.</p>`;
+    $('#xl-go').disabled = false;
   } catch (err) { $('#xl-msg').innerHTML = `<p class="err">${h(err.message || 'Could not read this file.')}</p>`; }
-}
-async function previewTab() {
-  const name = $('#xl-tab').value; if (!pending || !name) return;
-  try {
-    const est = await extractTab(pending.wb, name, pending.name);
-    const r = calc(est); const src = est.source;
-    const levels = [...new Set(est.tasks.map(t => (est.levels.find(l => l.id === t.level) || {}).name).filter(Boolean))];
-    $('#xl-msg').innerHTML = `<div class="preview"><b>${est.tasks.length}</b> tasks, <b>${hrs(r.taskHrs)}</b> task hours${levels.length ? ` (${h(levels.join(', '))})` : ''}.<br>
-      Margin <b>${pct(est.settings.margin)}</b>, PM <b>${pct(est.settings.pmPct)}</b>, contingency <b>${pct(est.settings.contPct)}</b>, escalation <b>${pct(est.settings.escPct, 2)}</b>.<br>
-      ${isNum(src.price) ? `The tab's own total is <b>${money(src.price)}</b> for <b>${hrs(src.hours)}</b> hours.` : ''}</div>
-      <p class="hint">Only the task rows, engineer levels, rates and settings come across. Expenses and the pricing columns stay in the workbook.</p>`;
-    $('#xl-go').disabled = !est.tasks.length;
-  } catch (err) { $('#xl-msg').innerHTML = `<p class="err">${h(err.message)}</p>`; $('#xl-go').disabled = true; }
 }
 function fileBase() { const p = S.project; return ([p.number, p.customer, p.name].filter(Boolean).join('_') || 'estimate').replace(/[^\w\-]+/g, '_').slice(0, 80); }
 function downloadBlob(name, blob) {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
   document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
 }
+
 /* ---------- Boot ---------- */
 S = load();
 render();
