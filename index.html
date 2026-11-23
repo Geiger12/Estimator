@@ -1,0 +1,1108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>GrayMatter Estimator</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='6' y='6' width='20' height='20' rx='5' transform='rotate(45 16 16)' fill='%232377A2'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;800&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0F4C75; --navy-2: #0C3F62; --blue: #2377A2; --sky: #8EC1DE; --orange: #F28C38;
+  --ink: #333333; --muted: #67737D; --paper: #F5F5F5; --card: #FFFFFF; --rule: #DCE2E7; --rule-soft: #ECEFF2;
+  --field: #FFFFFF; --field-line: #C8D1D8; --tint: #F2F7FA; --ok: #1F7A4D; --warn: #9A4A06; --warn-bg: #FFF4E8; --bad: #B42318;
+  --c1: #0F4C75; --c2: #2377A2; --c3: #8EC1DE; --c4: #5E6B75; --c5: #C9D3DA; --c6: #B7D3E6;
+  --head: "Montserrat", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --body: "Open Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --navy: #0B3A5A; --navy-2: #092F4A; --blue: #5AA9D6; --ink: #E5EAEE; --muted: #97A5B0; --paper: #10171D; --card: #172129;
+    --rule: #2A3742; --rule-soft: #212C35; --field: #0F171D; --field-line: #354552; --tint: #1A2631;
+    --ok: #5BC48D; --warn: #F5B169; --warn-bg: #2A2115; --bad: #F97066;
+    --c1: #5AA9D6; --c2: #8EC1DE; --c3: #2F6F98; --c4: #8C9AA5; --c5: #3A4955; --c6: #426A86;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--paper); color: var(--ink); font: 14px/1.5 var(--body); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--orange); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--head); font-weight: 800; margin: 0; letter-spacing: -0.01em; }
+.n { font-variant-numeric: tabular-nums; }
+
+/* Top bar */
+.top { background: var(--navy); color: #fff; position: sticky; top: 0; z-index: 20; }
+.top-in { display: flex; align-items: center; gap: 22px; padding: 0 32px; min-height: 64px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand img { height: 24px; display: block; }
+.brand span { font-family: var(--head); font-weight: 800; font-size: 15px; padding-left: 14px; border-left: 1px solid rgba(255,255,255,.3); }
+.tabs { display: flex; gap: 4px; flex: 1; overflow-x: auto; }
+.tab { background: none; border: 0; color: rgba(255,255,255,.72); padding: 20px 12px 17px; border-bottom: 3px solid transparent; cursor: pointer; font-weight: 600; white-space: nowrap; }
+.tab:hover { color: #fff; }
+.tab[aria-selected="true"] { color: #fff; border-bottom-color: #fff; }
+.actions { display: flex; gap: 8px; align-items: center; }
+.btn { border: 1px solid var(--field-line); background: var(--card); color: var(--ink); padding: 7px 14px; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; white-space: nowrap; }
+.btn:hover { border-color: var(--blue); }
+.btn.primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+.btn.ghost { background: transparent; border-color: transparent; color: var(--blue); padding: 6px 8px; }
+.btn.danger { color: var(--bad); }
+.top .btn { background: transparent; color: #fff; border-color: rgba(255,255,255,.45); }
+.top .btn:hover { background: rgba(255,255,255,.12); }
+.top .btn.primary { background: #fff; color: var(--navy); border-color: #fff; }
+.menu { position: relative; }
+.menu > summary { list-style: none; }
+.menu > summary::-webkit-details-marker { display: none; }
+.menu .pop { position: absolute; right: 0; top: 40px; background: var(--card); color: var(--ink); border: 1px solid var(--rule); border-radius: 8px; box-shadow: 0 12px 30px rgba(0,0,0,.18); padding: 6px; min-width: 240px; display: flex; flex-direction: column; z-index: 30; }
+.menu .pop button { background: none; border: 0; text-align: left; padding: 9px 12px; border-radius: 5px; cursor: pointer; color: var(--ink); }
+.menu .pop button:hover { background: var(--tint); }
+.menu .pop hr { border: 0; border-top: 1px solid var(--rule); margin: 5px 0; }
+
+/* Dashboard hero */
+.hero { background: linear-gradient(180deg, var(--navy) 0%, var(--navy-2) 100%); color: #fff; padding: 26px 32px 84px; }
+.hero-id h1 { font-size: 22px; }
+.hero-id p { margin: 2px 0 0; color: rgba(255,255,255,.72); font-size: 13.5px; }
+.hero-main { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 32px 56px; margin-top: 22px; align-items: end; }
+.price-label { font-size: 13px; color: rgba(255,255,255,.75); }
+.price { display: block; font-family: var(--head); font-weight: 800; font-size: clamp(44px, 6.4vw, 76px); line-height: 1.02; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.dial { display: grid; grid-template-columns: auto 1fr; gap: 6px 18px; align-items: center; margin-top: 18px; max-width: 560px; }
+.dial label { font-size: 13px; color: rgba(255,255,255,.75); }
+.dial output { font-family: var(--head); font-weight: 800; font-size: 30px; color: var(--orange); font-variant-numeric: tabular-nums; min-width: 3.6em; }
+.dial input[type="range"] { grid-column: 1 / -1; width: 100%; accent-color: var(--orange); height: 22px; }
+.dial .scale { grid-column: 1 / -1; display: flex; justify-content: space-between; font-size: 11.5px; color: rgba(255,255,255,.6); margin-top: -4px; }
+.target { margin-top: 16px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; font-size: 13px; color: rgba(255,255,255,.8); }
+.target input { width: 150px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.35); color: #fff; border-radius: 6px; padding: 6px 10px; }
+.target input::placeholder { color: rgba(255,255,255,.5); }
+.target b { color: #fff; }
+.target .btn { padding: 4px 10px; }
+.kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 20px 28px; margin: 0; }
+.kpis div { border-top: 1px solid rgba(255,255,255,.22); padding-top: 10px; }
+.kpis dt { font-size: 12.5px; color: rgba(255,255,255,.72); }
+.kpis dd { margin: 2px 0 0; font-family: var(--head); font-weight: 700; font-size: 24px; font-variant-numeric: tabular-nums; }
+
+main { padding: 24px 32px 40px; max-width: 1480px; }
+.hero:not([hidden]) + main { margin-top: -64px; }
+.card { background: var(--card); border: 1px solid var(--rule); border-radius: 10px; padding: 20px 22px; margin-bottom: 20px; }
+.card > header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.card h2 { font-size: 16px; color: var(--navy); }
+@media (prefers-color-scheme: dark) { .card h2 { color: var(--blue); } }
+.card .hint { color: var(--muted); font-size: 13px; margin: 0; }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); gap: 20px; margin-bottom: 20px; }
+.grid2 > .card { margin-bottom: 0; }
+.build-card { box-shadow: 0 10px 30px rgba(15,76,117,.12); }
+
+/* Price build-up */
+.stack { display: flex; height: 26px; border-radius: 6px; overflow: hidden; background: var(--rule-soft); }
+.stack i { display: block; height: 100%; }
+.stack i + i { box-shadow: -2px 0 0 var(--card); }
+.legend { display: grid; grid-template-columns: repeat(auto-fit, minmax(128px, 1fr)); gap: 14px 20px; margin-top: 16px; }
+.legend div { display: grid; grid-template-columns: 12px 1fr; gap: 2px 10px; align-items: center; }
+.legend .sw { width: 12px; height: 12px; border-radius: 3px; }
+.legend span { font-size: 12.5px; color: var(--muted); }
+.legend b { grid-column: 2; font-family: var(--head); font-weight: 700; font-size: 17px; font-variant-numeric: tabular-nums; }
+.legend .eq b { color: var(--ink); }
+.legend .eq { border-left: 2px solid var(--rule); padding-left: 14px; }
+
+/* Donut */
+.donut-wrap { display: grid; grid-template-columns: 190px 1fr; gap: 24px; align-items: center; }
+.donut-wrap svg { width: 190px; height: 190px; display: block; }
+.donut-mid { font-family: var(--head); font-weight: 800; font-size: 26px; fill: var(--ink); }
+.donut-sub { font-size: 12px; fill: var(--muted); }
+.keys { display: grid; gap: 10px; }
+.key { display: grid; grid-template-columns: 12px 1fr auto auto; gap: 10px; align-items: center; font-size: 13.5px; }
+.key .sw { width: 12px; height: 12px; border-radius: 3px; }
+.key .n { text-align: right; }
+.key .p { color: var(--muted); font-size: 12.5px; width: 48px; text-align: right; }
+
+/* Bars */
+.bars { display: grid; gap: 12px; }
+.bar { display: grid; grid-template-columns: minmax(110px, 250px) 1fr 64px; gap: 12px; align-items: center; font-size: 13.5px; }
+.bar .lbl { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bar .lbl small { display: block; color: var(--muted); font-size: 12px; }
+.bar .track { height: 12px; background: var(--rule-soft); border-radius: 6px; overflow: hidden; }
+.bar .track i { display: block; height: 100%; background: var(--c2); border-radius: 6px; }
+.bar .n { text-align: right; font-weight: 600; }
+
+/* Checks */
+.checks { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.checks li { display: grid; grid-template-columns: 10px 1fr; gap: 12px; align-items: baseline; font-size: 13.5px; }
+.checks .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--blue); }
+.checks .dot.warn { background: var(--orange); }
+.checks .dot.bad { background: var(--bad); }
+.checks .dot.ok { background: var(--ok); }
+
+/* Tables */
+.scroll { overflow-x: auto; }
+table.t { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+table.t th { text-align: left; font-size: 12.5px; font-weight: 600; color: var(--muted); padding: 8px 8px; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+table.t td { padding: 6px 8px; border-bottom: 1px solid var(--rule-soft); vertical-align: middle; }
+table.t .r { text-align: right; }
+table.t td.r { font-variant-numeric: tabular-nums; white-space: nowrap; }
+table.t input, table.t select { width: 100%; border: 1px solid var(--field-line); background: var(--field); color: var(--ink); border-radius: 6px; padding: 7px 9px; min-width: 0; }
+table.t input.num { text-align: right; }
+table.t tfoot td { border-bottom: 0; }
+table.t tr.auto td { color: var(--muted); background: var(--tint); }
+table.t tr.sum td { font-weight: 700; border-top: 2px solid var(--navy); padding-top: 10px; }
+@media (prefers-color-scheme: dark) { table.t tr.sum td { border-top-color: var(--blue); } }
+table.t tr.phase td { font-family: var(--head); font-weight: 800; color: var(--navy); padding-top: 16px; border-bottom-color: var(--rule); }
+@media (prefers-color-scheme: dark) { table.t tr.phase td { color: var(--blue); } }
+table.t tr.sub td { font-weight: 600; color: var(--muted); }
+table.t .big { font-family: var(--head); font-weight: 800; font-size: 16px; }
+.tasks .c-phase { width: 15%; min-width: 130px; } .tasks .c-task { width: 28%; min-width: 220px; } .tasks .c-level { width: 15%; min-width: 140px; }
+.tasks .c-num { width: 90px; min-width: 80px; } .tasks .c-tot { width: 100px; } .tasks .c-notes { min-width: 160px; } .tasks .c-act { width: 120px; }
+.tasks td.tot { font-weight: 700; text-align: right; font-variant-numeric: tabular-nums; }
+.row-act { display: flex; gap: 2px; justify-content: flex-end; }
+.toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-top: 14px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { background: var(--tint); border: 1px solid var(--rule); border-radius: 999px; padding: 4px 12px; font-size: 12.5px; }
+.chip b { font-variant-numeric: tabular-nums; }
+.empty { text-align: center; padding: 34px 16px; color: var(--muted); }
+.empty p { margin: 0 0 14px; }
+
+/* Forms */
+.form { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px 18px; }
+.field { display: flex; flex-direction: column; gap: 5px; font-size: 12.5px; color: var(--muted); }
+.field input, .field select, .field textarea { border: 1px solid var(--field-line); background: var(--field); color: var(--ink); border-radius: 6px; padding: 8px 10px; font-size: 14px; }
+.field textarea { min-height: 72px; resize: vertical; }
+.field .sfx { position: relative; }
+.field .sfx input { width: 100%; padding-right: 28px; }
+.field .sfx::after { content: attr(data-sfx); position: absolute; right: 10px; top: 50%; transform: translateY(-50%); color: var(--muted); font-size: 13px; }
+input.bad { border-color: var(--bad) !important; }
+.note { color: var(--muted); font-size: 13px; margin: 12px 0 0; }
+
+/* Start + dialog */
+.start { max-width: 660px; margin: 56px auto; background: var(--card); border: 1px solid var(--rule); border-radius: 12px; padding: 36px; }
+.start h1 { font-size: 28px; color: var(--navy); margin-bottom: 10px; }
+@media (prefers-color-scheme: dark) { .start h1 { color: var(--blue); } }
+.start p { margin: 0 0 12px; }
+.start .row { display: flex; gap: 10px; flex-wrap: wrap; margin: 22px 0 16px; }
+.start .fine { color: var(--muted); font-size: 13px; }
+dialog { border: 1px solid var(--rule); border-radius: 12px; padding: 26px; max-width: 520px; width: calc(100% - 32px); background: var(--card); color: var(--ink); }
+dialog::backdrop { background: rgba(8, 28, 44, .55); }
+dialog h2 { font-size: 19px; color: var(--navy); margin-bottom: 6px; }
+@media (prefers-color-scheme: dark) { dialog h2 { color: var(--blue); } }
+dialog .file { color: var(--muted); font-size: 13px; margin: 0 0 16px; word-break: break-all; }
+dialog .preview { background: var(--tint); border-radius: 8px; padding: 12px 14px; margin: 14px 0; font-size: 13.5px; }
+dialog .preview b { font-variant-numeric: tabular-nums; }
+dialog .row { display: flex; gap: 10px; justify-content: flex-end; margin-top: 18px; }
+dialog .err { color: var(--bad); font-size: 13.5px; }
+
+footer { padding: 0 32px 28px; color: var(--muted); font-size: 12.5px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+#status { font-weight: 600; }
+
+@media (max-width: 900px) {
+  .hero-main { grid-template-columns: 1fr; }
+  .donut-wrap { grid-template-columns: 1fr; justify-items: center; }
+  .donut-wrap .keys { width: 100%; }
+}
+@media (max-width: 640px) {
+  .top-in, .hero, main, footer { padding-left: 16px; padding-right: 16px; }
+  .top-in { gap: 8px 14px; padding-top: 10px; }
+  .tabs { order: 3; flex-basis: 100%; }
+  .tab { padding: 10px 10px 9px; }
+  .grid2 { grid-template-columns: 1fr; }
+  .kpis dd { font-size: 20px; }
+}
+@media print {
+  .top, .toolbar, .row-act, .target, footer #status { display: none !important; }
+  .hero { -webkit-print-color-adjust: exact; print-color-adjust: exact; padding-bottom: 24px; }
+  .hero:not([hidden]) + main { margin-top: 0; }
+  .card { break-inside: avoid; }
+  table.t input, table.t select { border: 0; padding: 0; background: transparent; }
+}
+[hidden] { display: none !important; }
+.hero[hidden] + main { margin-top: 0; }
+.field small { color: var(--muted); font-size: 12px; }
+.btn:disabled { opacity: .35; cursor: default; }
+
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="top-in">
+    <div class="brand"><img src="data:image/png;base64,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" alt="GrayMatter"><span>Estimator</span></div>
+    <nav class="tabs" id="tabs" role="tablist" aria-label="Estimate sections"></nav>
+    <div class="actions" id="actions"></div>
+  </div>
+</header>
+<section class="hero" id="hero" hidden></section>
+<main id="main"></main>
+<footer>
+  <span>Draft estimate. A qualified person reviews hours, rates and margin before anything is sent. Data stays in this browser and in the Excel files you save.</span>
+  <span id="status" role="status" aria-live="polite"></span>
+</footer>
+<dialog id="xl-dialog" aria-labelledby="xl-title">
+  <h2 id="xl-title">Open an Excel workbook</h2>
+  <p class="file" id="xl-name"></p>
+  <label class="field" id="xl-tab-field">Tab to import<select id="xl-tab"></select></label>
+  <div id="xl-msg"></div>
+  <p class="hint" id="xl-replace" hidden>Opening replaces the estimate in this browser. Use Save as Excel first if you need it.</p>
+  <div class="row"><button class="btn" data-act="xlCancel">Cancel</button><button class="btn primary" id="xl-go" data-act="xlImport" disabled>Open</button></div>
+</dialog>
+<datalist id="phase-list"></datalist>
+<input type="file" id="xl-file" accept=".xlsx,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12" hidden>
+<script>
+/* ---------- Excel writer: builds a real .xlsx with live formulas, no libraries ---------- */
+const XL = (() => {
+  const HEAD = '<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n';
+  const NS = 'xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"';
+  const xe = s => String(s ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  const colN = ref => ref.match(/^[A-Z]+/)[0].split('').reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0);
+  const rowN = ref => +ref.match(/\d+$/)[0];
+
+  /* Style index map (see styles() below) */
+  const ST = { title: 1, head: 2, headR: 3, inText: 4, inNum: 5, inPct: 6, inMoney: 7, hrs: 8, money: 9, money0: 10, pct: 11, totHrs: 12, totMoney: 13, totLabel: 14, note: 15, bold: 16, big: 17, boldPct: 18, boldMoney: 19, boldHrs: 20, sub: 21 };
+  function styles() {
+    const f = (b, sz, color, i) => `<font>${b ? '<b/>' : ''}${i ? '<i/>' : ''}<sz val="${sz}"/>${color ? `<color rgb="FF${color}"/>` : ''}<name val="Arial"/><family val="2"/></font>`;
+    const xf = (fmt, font, fill, border, align) => `<xf numFmtId="${fmt}" fontId="${font}" fillId="${fill}" borderId="${border}" xfId="0"${fmt ? ' applyNumberFormat="1"' : ''}${font ? ' applyFont="1"' : ''}${fill ? ' applyFill="1"' : ''}${border ? ' applyBorder="1"' : ''}${align ? ` applyAlignment="1"><alignment ${align}/></xf>` : '/>'}`;
+    const xfs = [
+      xf(0, 0, 0, 0), xf(0, 1, 0, 0), xf(0, 2, 2, 1, 'vertical="center"'), xf(0, 2, 2, 1, 'horizontal="right" vertical="center"'),
+      xf(49, 3, 0, 0), xf(0, 3, 0, 0), xf(166, 3, 0, 0), xf(164, 3, 0, 0),
+      xf(167, 0, 0, 0), xf(164, 0, 0, 0), xf(165, 0, 0, 0), xf(166, 0, 0, 0),
+      xf(167, 2, 0, 2), xf(165, 2, 0, 2), xf(0, 2, 0, 2), xf(0, 4, 0, 0),
+      xf(0, 2, 0, 0), xf(165, 5, 0, 0), xf(166, 2, 0, 0), xf(165, 2, 0, 0), xf(167, 2, 0, 0), xf(0, 6, 0, 0)
+    ];
+    return HEAD + `<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+<numFmts count="4"><numFmt numFmtId="164" formatCode="&quot;$&quot;#,##0.00"/><numFmt numFmtId="165" formatCode="&quot;$&quot;#,##0"/><numFmt numFmtId="166" formatCode="0.0%"/><numFmt numFmtId="167" formatCode="#,##0"/></numFmts>
+<fonts count="7">${f(0, 10)}${f(1, 14, '0F4C75')}${f(1, 10)}${f(0, 10, '0000FF')}${f(0, 9, '666666', 1)}${f(1, 18, '0F4C75')}${f(0, 10, '666666')}</fonts>
+<fills count="3"><fill><patternFill patternType="none"/></fill><fill><patternFill patternType="gray125"/></fill><fill><patternFill patternType="solid"><fgColor rgb="FFE8F1F7"/><bgColor indexed="64"/></patternFill></fill></fills>
+<borders count="3"><border><left/><right/><top/><bottom/><diagonal/></border><border><left/><right/><top/><bottom style="thin"><color rgb="FF9FB3C2"/></bottom><diagonal/></border><border><left/><right/><top style="medium"><color rgb="FF0F4C75"/></top><bottom/><diagonal/></border></borders>
+<cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+<cellXfs count="${xfs.length}">${xfs.join('')}</cellXfs>
+<cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+  }
+
+  /* A sheet is a map of cell refs: { s: style, str | n | f, cv: cached value } */
+  function cellXml(ref, c) {
+    const s = c.s ? ` s="${c.s}"` : '';
+    if (c.f != null) {
+      const f = `<f>${xe(c.f)}</f>`;
+      if (typeof c.cv === 'number' && isFinite(c.cv)) return `<c r="${ref}"${s}>${f}<v>${c.cv}</v></c>`;
+      if (typeof c.cv === 'string') return `<c r="${ref}"${s} t="str">${f}<v>${xe(c.cv)}</v></c>`;
+      return `<c r="${ref}"${s}>${f}</c>`;
+    }
+    if (typeof c.n === 'number' && isFinite(c.n)) return `<c r="${ref}"${s}><v>${c.n}</v></c>`;
+    if (c.str != null && c.str !== '') return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xe(c.str)}</t></is></c>`;
+    return `<c r="${ref}"${s}/>`;
+  }
+  function sheetXml(sh) {
+    const rows = {};
+    for (const ref of Object.keys(sh.cells)) (rows[rowN(ref)] = rows[rowN(ref)] || []).push(ref);
+    const data = Object.keys(rows).map(Number).sort((a, b) => a - b).map(r => {
+      const cells = rows[r].sort((a, b) => colN(a) - colN(b)).map(ref => cellXml(ref, sh.cells[ref])).join('');
+      const ht = sh.heights && sh.heights[r] ? ` ht="${sh.heights[r]}" customHeight="1"` : '';
+      return `<row r="${r}"${ht}>${cells}</row>`;
+    }).join('');
+    const pane = sh.freeze ? `<pane ySplit="${sh.freeze - 1}" topLeftCell="A${sh.freeze}" activePane="bottomLeft" state="frozen"/><selection pane="bottomLeft" activeCell="A${sh.freeze}" sqref="A${sh.freeze}"/>` : '';
+    const cols = sh.widths ? `<cols>${sh.widths.map((w, i) => `<col min="${i + 1}" max="${i + 1}" width="${w}" customWidth="1"/>`).join('')}</cols>` : '';
+    const dv = sh.lists && sh.lists.length ? `<dataValidations count="${sh.lists.length}">${sh.lists.map(([sq, src]) => `<dataValidation type="list" allowBlank="1" showErrorMessage="1" errorTitle="Not in the list" error="Pick a level from the Rates tab, or add it there first." sqref="${sq}"><formula1>${xe(src)}</formula1></dataValidation>`).join('')}</dataValidations>` : '';
+    return HEAD + `<worksheet ${NS}>${sh.fit ? '<sheetPr><pageSetUpPr fitToPage="1"/></sheetPr>' : ''}<sheetViews><sheetView workbookViewId="0"${sh.selected ? ' tabSelected="1"' : ''} showGridLines="${sh.grid ? 1 : 0}">${pane}</sheetView></sheetViews><sheetFormatPr defaultRowHeight="15"/>${cols}<sheetData>${data}</sheetData>${dv}<pageMargins left="0.5" right="0.5" top="0.6" bottom="0.6" header="0.3" footer="0.3"/><pageSetup orientation="landscape" fitToWidth="1" fitToHeight="0"/></worksheet>`;
+  }
+
+  /* ---------- Zip (stored entries; Excel reads these fine) ---------- */
+  const CRC = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = u8 => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  function zip(files) {
+    const enc = new TextEncoder(); const d = new Date();
+    const time = (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1);
+    const date = ((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate();
+    const parts = []; const central = []; let offset = 0;
+    for (const [name, text] of files) {
+      const nm = enc.encode(name); const data = enc.encode(text); const crc = crc32(data);
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(8, 0, true);
+      lh.setUint16(10, time, true); lh.setUint16(12, date, true); lh.setUint32(14, crc, true);
+      lh.setUint32(18, data.length, true); lh.setUint32(22, data.length, true); lh.setUint16(26, nm.length, true); lh.setUint16(28, 0, true);
+      parts.push(new Uint8Array(lh.buffer), nm, data);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(10, 0, true);
+      ch.setUint16(12, time, true); ch.setUint16(14, date, true); ch.setUint32(16, crc, true); ch.setUint32(20, data.length, true); ch.setUint32(24, data.length, true);
+      ch.setUint16(28, nm.length, true); ch.setUint32(42, offset, true);
+      central.push(new Uint8Array(ch.buffer), nm);
+      offset += 30 + nm.length + data.length;
+    }
+    const cdSize = central.reduce((s, p) => s + p.length, 0);
+    const end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true);
+    end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+    return new Blob([...parts, ...central, new Uint8Array(end.buffer)], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+  }
+  function workbook(sheets, names, title) {
+    const files = [];
+    files.push(['[Content_Types].xml', HEAD + `<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>${sheets.map((s, i) => `<Override PartName="/xl/worksheets/sheet${i + 1}.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>`).join('')}<Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`]);
+    files.push(['_rels/.rels', HEAD + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`]);
+    const now = new Date().toISOString().replace(/\.\d+Z$/, 'Z');
+    files.push(['docProps/core.xml', HEAD + `<cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"><dc:title>${xe(title)}</dc:title><dc:creator>GrayMatter Estimator</dc:creator><dcterms:created xsi:type="dcterms:W3CDTF">${now}</dcterms:created><dcterms:modified xsi:type="dcterms:W3CDTF">${now}</dcterms:modified></cp:coreProperties>`]);
+    files.push(['docProps/app.xml', HEAD + `<Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>GrayMatter Estimator</Application></Properties>`]);
+    files.push(['xl/workbook.xml', HEAD + `<workbook ${NS}><bookViews><workbookView activeTab="0"/></bookViews><sheets>${sheets.map((s, i) => `<sheet name="${xe(s.name)}" sheetId="${i + 1}" r:id="rId${i + 1}"/>`).join('')}</sheets><definedNames>${names.map(([n, ref]) => `<definedName name="${n}">${xe(ref)}</definedName>`).join('')}</definedNames><calcPr calcId="191029" fullCalcOnLoad="1"/></workbook>`]);
+    files.push(['xl/_rels/workbook.xml.rels', HEAD + `<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">${sheets.map((s, i) => `<Relationship Id="rId${i + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet${i + 1}.xml"/>`).join('')}<Relationship Id="rId${sheets.length + 1}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`]);
+    files.push(['xl/styles.xml', styles()]);
+    sheets.forEach((s, i) => files.push([`xl/worksheets/sheet${i + 1}.xml`, sheetXml(s)]));
+    return zip(files);
+  }
+  return { ST, workbook };
+})();
+
+/* Layout of the saved workbook. The reader below depends on these positions. */
+const XLL = { tasksHead: 4, task0: 5, extraTasks: 60, level0: 12, extraLevels: 10 };
+
+function buildEstimateWorkbook(est, res) {
+  const T = XL.ST; const levelName = id => ((est.levels.find(l => l.id === id) || {}).name || '');
+  const nT = est.tasks.length, nL = est.levels.length;
+  const t0 = XLL.task0, tLast = t0 + nT + XLL.extraTasks - 1;
+  const l0 = XLL.level0, lLast = l0 + nL + XLL.extraLevels - 1;
+  const s = est.settings, p = est.project, m = num(s.margin), e = num(s.escPct);
+  const gross = c => (m < 1 ? c * (1 + e) / (1 - m) : 0);
+
+  // Rates and settings
+  const rates = { name: 'Rates', widths: [44, 18, 16, 4, 18, 44], cells: {}, heights: { 1: 24 }, fit: true };
+  const rc = rates.cells;
+  rc.A1 = { s: T.title, str: 'Rates and settings' };
+  rc.A2 = { s: T.note, str: 'Blue cells are inputs. Change them here or in the Estimator app; every tab recalculates. To add an engineer level, type it in an empty row of the levels table, then pick it on the Tasks tab.' };
+  [['Margin', 'margin'], ['Project management, share of task hours', 'pmPct'], ['Contingency, share of task and PM', 'contPct'], ['Escalation', 'escPct']]
+    .forEach(([label, k], i) => { rc['A' + (4 + i)] = { s: T.bold, str: label }; rc['B' + (4 + i)] = { s: T.inPct, n: num(s[k]) }; });
+  rc.A8 = { s: T.bold, str: 'PM charged at (level)' }; rc.B8 = { s: T.inText, str: levelName(s.pmLevel) };
+  [['Project name', 'name'], ['Customer', 'customer'], ['Proposal number', 'number'], ['Revision', 'rev'], ['Prepared by', 'preparedBy'], ['Notes', 'notes']]
+    .forEach(([label, k], i) => { rc['E' + (4 + i)] = { s: T.bold, str: label }; rc['F' + (4 + i)] = { s: T.inText, str: p[k] || '' }; });
+  rc.A11 = { s: T.head, str: 'Level' }; rc.B11 = { s: T.head, str: 'Role code' }; rc.C11 = { s: T.headR, str: 'Cost per hour' };
+  for (let i = 0; i < nL + XLL.extraLevels; i++) {
+    const L = est.levels[i]; const r = l0 + i;
+    rc['A' + r] = { s: T.inText, str: L ? L.name : '' }; rc['B' + r] = { s: T.inText, str: L ? L.code : '' };
+    rc['C' + r] = L && isNum(L.cost) ? { s: T.inMoney, n: L.cost } : { s: T.inMoney };
+  }
+  rates.lists = [['B8', 'LevelNames']];
+
+  // Tasks
+  const tasks = { name: 'Tasks', widths: [18, 42, 18, 11, 11, 12, 14, 14, 14, 34], cells: {}, freeze: t0, heights: { 1: 24, 4: 22 }, fit: true };
+  const tc = tasks.cells;
+  tc.A1 = { s: T.title, str: 'Tasks' };
+  tc.A2 = { s: T.note, str: 'Blue cells are inputs. Total hours = quantity × hours each, rounded up. Use the empty rows below to add tasks; formulas are already in place.' };
+  const head = ['Phase', 'Task', 'Engineer level', 'Quantity', 'Hours each', 'Total hours', 'Rate per hour', 'Cost', 'Price', 'Notes'];
+  head.forEach((hd, i) => { tc[String.fromCharCode(65 + i) + XLL.tasksHead] = { s: i >= 3 && i <= 8 ? T.headR : T.head, str: hd }; });
+  let sumPrice = 0;
+  for (let i = 0; i < nT + XLL.extraTasks; i++) {
+    const t = est.tasks[i]; const r = t0 + i; const tr = t ? res.tasks[t.id] : null;
+    tc['A' + r] = { s: T.inText, str: t ? t.phase : '' }; tc['B' + r] = { s: T.inText, str: t ? t.name : '' };
+    tc['C' + r] = { s: T.inText, str: t ? levelName(t.level) : '' };
+    tc['D' + r] = t && isNum(t.qty) ? { s: T.inNum, n: t.qty } : { s: T.inNum };
+    tc['E' + r] = t && isNum(t.hours) ? { s: T.inNum, n: t.hours } : { s: T.inNum };
+    const live = !!t && ((t.name || '') + (isNum(t.qty) ? t.qty : '') + (isNum(t.hours) ? t.hours : '')) !== '';
+    const price = live ? gross(tr.cost) : '';
+    if (live) sumPrice += price;
+    tc['F' + r] = { s: T.hrs, f: `IF(B${r}&D${r}&E${r}="","",ROUNDUP(N(D${r})*N(E${r}),0))`, cv: live ? tr.hrs : '' };
+    tc['G' + r] = { s: T.money, f: `IF(F${r}="","",IFERROR(VLOOKUP(C${r},Levels,3,FALSE),0))`, cv: live ? tr.rate : '' };
+    tc['H' + r] = { s: T.money, f: `IF(F${r}="","",F${r}*G${r})`, cv: live ? tr.cost : '' };
+    tc['I' + r] = { s: T.money, f: `IF(F${r}="","",H${r}*(1+Escalation)/(1-Margin))`, cv: price };
+    tc['J' + r] = { s: T.inText, str: t ? t.notes || '' : '' };
+  }
+  tc.E3 = { s: T.bold, str: 'Totals' };
+  tc.F3 = { s: T.boldHrs, f: `SUM(F${t0}:F${tLast})`, cv: res.taskHrs };
+  tc.H3 = { s: T.boldMoney, f: `SUM(H${t0}:H${tLast})`, cv: res.taskCost };
+  tc.I3 = { s: T.boldMoney, f: `SUM(I${t0}:I${tLast})`, cv: sumPrice };
+  tasks.lists = [[`C${t0}:C${tLast}`, 'LevelNames']];
+
+  // Summary
+  const sum = { name: 'Summary', widths: [40, 14, 24, 16, 18], cells: {}, selected: true, heights: { 1: 24, 4: 30 }, fit: true };
+  const sc = sum.cells; const TR = c => `Tasks!$${c}$${t0}:$${c}$${tLast}`;
+  const ident = [p.customer, p.number ? `Proposal ${p.number}${p.rev !== '' && p.rev != null ? ` rev ${p.rev}` : ''}` : ''].filter(Boolean).join(', ');
+  sc.A1 = { s: T.title, f: 'IF(Rates!F4="","Estimate",Rates!F4)', cv: p.name || 'Estimate' };
+  sc.A2 = { s: T.sub, f: 'IF(Rates!F5="","",Rates!F5&IF(Rates!F6="","",", "))&IF(Rates!F6="","","Proposal "&Rates!F6&IF(Rates!F7="",""," rev "&Rates!F7))', cv: ident };
+  sc.A3 = { s: T.note, str: 'Calculated from the Tasks and Rates tabs. Draft estimate: a qualified person reviews hours, rates and margin before anything is sent.' };
+  sc.A4 = { s: T.bold, str: 'Fixed price' }; sc.B4 = { s: T.big, f: 'D13', cv: res.price };
+  sc.A5 = { s: T.bold, str: 'Margin' }; sc.B5 = { s: T.boldPct, f: 'D15', cv: res.margin || 0 };
+  sc.A6 = { s: T.bold, str: 'Total hours' }; sc.B6 = { s: T.boldHrs, f: 'B13', cv: res.hrs };
+  ['Item', 'Hours', 'Cost before escalation', 'Price'].forEach((hd, i) => { sc[String.fromCharCode(65 + i) + 8] = { s: i ? T.headR : T.head, str: hd }; });
+  const row = (r, label, b, c, d) => { sc['A' + r] = { str: label }; if (b) sc['B' + r] = b; if (c) sc['C' + r] = c; if (d) sc['D' + r] = d; };
+  row(9, 'Task labor', { s: T.hrs, f: `SUM(${TR('F')})`, cv: res.taskHrs }, { s: T.money0, f: `SUM(${TR('H')})`, cv: res.taskCost }, { s: T.money0, f: `SUM(${TR('I')})`, cv: sumPrice });
+  row(10, 'Project management', { s: T.hrs, f: 'ROUNDUP(PM_Pct*B9,0)', cv: res.pm.hrs }, { s: T.money0, f: 'B10*IFERROR(VLOOKUP(PM_Level,Levels,3,FALSE),0)', cv: res.pm.cost }, { s: T.money0, f: 'C10*(1+Escalation)/(1-Margin)', cv: gross(res.pm.cost) });
+  row(11, 'Contingency', { s: T.hrs, f: 'ROUNDDOWN(Contingency_Pct*(B9+B10),0)', cv: res.cont.hrs }, { s: T.money0, f: 'Contingency_Pct*(C9+C10)', cv: res.cont.cost }, { s: T.money0, f: 'C11*(1+Escalation)/(1-Margin)', cv: gross(res.cont.cost) });
+  row(12, 'Escalation (included in prices)', null, { s: T.money0, f: 'SUM(C9:C11)*Escalation', cv: res.esc }, null);
+  sc.A13 = { s: T.totLabel, str: 'Total' }; sc.B13 = { s: T.totHrs, f: 'SUM(B9:B11)', cv: res.hrs }; sc.C13 = { s: T.totMoney, f: 'SUM(C9:C12)', cv: res.cost }; sc.D13 = { s: T.totMoney, f: 'SUM(D9:D11)', cv: res.price };
+  row(14, 'Gross profit', null, null, { s: T.money0, f: 'D13-C13', cv: res.gp });
+  row(15, 'Margin', null, null, { s: T.pct, f: 'IF(D13=0,0,D14/D13)', cv: res.margin || 0 });
+  row(16, 'Average price per hour', null, null, { s: T.money, f: 'IF(B13=0,0,D13/B13)', cv: res.perHr || 0 });
+  ['Engineer level', 'Hours', 'Cost before escalation', 'Price', 'Share of all hours'].forEach((hd, i) => { sc[String.fromCharCode(65 + i) + 18] = { s: i ? T.headR : T.head, str: hd }; });
+  let r = 19;
+  for (let i = 0; i < nL + XLL.extraLevels; i++, r++) {
+    const L = est.levels[i]; const rr = l0 + i;
+    let hh = '', cc = '', pp = '', sh = '';
+    if (L) {
+      hh = est.tasks.filter(t => levelName(t.level) === L.name).reduce((a, t) => a + res.tasks[t.id].hrs, 0) + (L.name === levelName(s.pmLevel) ? res.pm.hrs : 0);
+      cc = est.tasks.filter(t => levelName(t.level) === L.name).reduce((a, t) => a + res.tasks[t.id].cost, 0) + (L.name === levelName(s.pmLevel) ? res.pm.cost : 0);
+      pp = gross(cc); sh = res.hrs ? hh / res.hrs : '';
+    }
+    sc['A' + r] = { f: `IF(Rates!A${rr}="","",Rates!A${rr})`, cv: L ? L.name : '' };
+    sc['B' + r] = { s: T.hrs, f: `IF(A${r}="","",SUMIF(${TR('C')},A${r},${TR('F')})+IF(A${r}=PM_Level,$B$10,0))`, cv: hh };
+    sc['C' + r] = { s: T.money0, f: `IF(A${r}="","",SUMIF(${TR('C')},A${r},${TR('H')})+IF(A${r}=PM_Level,$C$10,0))`, cv: cc };
+    sc['D' + r] = { s: T.money0, f: `IF(A${r}="","",C${r}*(1+Escalation)/(1-Margin))`, cv: pp };
+    sc['E' + r] = { s: T.pct, f: `IF(OR(A${r}="",$B$13=0),"",B${r}/$B$13)`, cv: sh };
+  }
+
+  const names = [['Contingency_Pct', 'Rates!$B$6'], ['Escalation', 'Rates!$B$7'], ['LevelNames', `Rates!$A$${l0}:$A$${lLast}`], ['Levels', `Rates!$A$${l0}:$C$${lLast}`], ['Margin', 'Rates!$B$4'], ['PM_Level', 'Rates!$B$8'], ['PM_Pct', 'Rates!$B$5']];
+  return XL.workbook([sum, tasks, rates], names, p.name || 'Estimate');
+}
+
+/* Read a workbook saved by this app (Summary, Tasks and Rates tabs) */
+async function isAppWorkbook(wb) {
+  if (!wb.sheets.some(s => s.name === 'Tasks') || !wb.sheets.some(s => s.name === 'Rates')) return false;
+  const t = await wb.sheet('Tasks'); const r = await wb.sheet('Rates');
+  return !!t && !!r && String(t['B' + XLL.tasksHead] || '').trim() === 'Task' && String(r['A' + (XLL.level0 - 1)] || '').trim() === 'Level';
+}
+async function extractAppWorkbook(wb, fileName) {
+  const T = await wb.sheet('Tasks'); const Rt = await wb.sheet('Rates'); const Sm = await wb.sheet('Summary');
+  const str = v => (v == null ? '' : String(v).trim());
+  const levels = []; const byName = {};
+  for (let r = XLL.level0; r < XLL.level0 + 500; r++) {
+    const name = str(Rt['A' + r]); if (!name) continue;
+    const code = str(Rt['B' + r]);
+    let id = code || name; while (levels.some(l => l.id === id)) id += '_';
+    const L = { id, name, code, cost: isNum(Rt['C' + r]) ? Rt['C' + r] : num(parseNum(Rt['C' + r] || 0)) };
+    levels.push(L); byName[name.toLowerCase()] = L;
+  }
+  const tasks = [];
+  for (let r = XLL.task0; r < XLL.task0 + 5000; r++) {
+    const name = str(T['B' + r]); const q = T['D' + r]; const hh = T['E' + r];
+    if (!name && q == null && hh == null && !str(T['A' + r])) continue;
+    if (!name && q == null && hh == null) continue;
+    const lname = str(T['C' + r]); let L = lname ? byName[lname.toLowerCase()] : null;
+    if (lname && !L) { L = { id: lname, name: lname, code: '', cost: 0 }; levels.push(L); byName[lname.toLowerCase()] = L; }
+    const n = v => (isNum(v) ? v : (v == null || v === '' ? null : (isFinite(parseNum(v)) ? parseNum(v) : null)));
+    tasks.push({ id: uid('t'), wbs: '', phase: str(T['A' + r]), name, level: L ? L.id : null, qty: n(q), hours: n(hh), notes: str(T['J' + r]) });
+  }
+  const pmName = str(await wb.named('PM_Level')); const pmL = byName[pmName.toLowerCase()];
+  const pick = async (nm, cell) => { const v = await wb.named(nm); return isNum(v) ? v : num(Rt[cell]); };
+  return {
+    app: 'gm-simple-estimator', version: 1,
+    project: { name: str(Rt.F4), customer: str(Rt.F5), number: str(Rt.F6), rev: str(Rt.F7), preparedBy: str(Rt.F8), notes: str(Rt.F9) },
+    settings: { margin: await pick('Margin', 'B4'), pmPct: await pick('PM_Pct', 'B5'), contPct: await pick('Contingency_Pct', 'B6'), escPct: await pick('Escalation', 'B7'), pmLevel: pmL ? pmL.id : (levels[0] || {}).id || null },
+    levels, tasks,
+    source: { kind: 'app', file: fileName, sheet: 'Summary', importedAt: new Date().toISOString(), hours: Sm && isNum(Sm.B13) ? Sm.B13 : null, price: Sm && isNum(Sm.D13) ? Sm.D13 : null }
+  };
+}
+
+'use strict';
+/* GrayMatter Estimator (simple). One file, no libraries, nothing leaves the browser. */
+const KEY = 'gm-simple-estimator:v1';
+const $ = (s, e = document) => e.querySelector(s);
+const $$ = (s, e = document) => [...e.querySelectorAll(s)];
+const isNum = v => typeof v === 'number' && isFinite(v);
+const num = v => (isNum(v) ? v : (v === '' || v == null ? 0 : (isFinite(+v) ? +v : 0)));
+const up = x => (!isNum(x) || x === 0 ? 0 : Math.sign(x) * Math.ceil(Math.abs(x) - 1e-9));     // Excel ROUNDUP(x,0)
+const down = x => (!isNum(x) || x === 0 ? 0 : Math.sign(x) * Math.floor(Math.abs(x) + 1e-9)); // Excel ROUNDDOWN(x,0)
+const uid = p => p + Math.random().toString(36).slice(2, 9);
+const h = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const parseNum = s => +String(s).replace(/[$,%\s]/g, '');
+const pctIn = v => (isNum(v) ? String(+(v * 100).toFixed(4)) : '');
+const numIn = v => (isNum(v) ? String(+v) : '');
+
+const F0 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0, minimumFractionDigits: 0 });
+const F2 = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 2, minimumFractionDigits: 2 });
+const money = (x, dp = 0) => (isNum(x) ? (dp ? F2 : F0).format(Math.abs(x) < 0.005 ? 0 : x) : '—');
+const hrs = x => (isNum(x) ? Math.round(x).toLocaleString('en-US') : '—');
+const pct = (x, dp = 1) => (isNum(x) ? (x * 100).toFixed(dp) + '%' : '—');
+function fmt(v, f) {
+  switch (f) {
+    case 'm0': return money(v, 0);
+    case 'm2': return money(v, 2);
+    case 'h': return hrs(v);
+    case 'p': return pct(v);
+    default: return v == null ? '' : String(v);
+  }
+}
+const walk = (o, p) => p.split('.').reduce((a, k) => (a == null ? undefined : a[k]), o);
+
+/* ---------- Data ---------- */
+const FRIENDLY = { IA_ENGR_I: 'Eng I', IA_ENGR_II: 'Eng II', IA_ENGR_SR: 'Eng Sr', IA_CONSULT: 'Consultant', PROJ_MGR: 'Project manager', PROJ_MGR_SR: 'Sr project manager', IOPS: 'iOPS partner' };
+function blankEstimate() {
+  return {
+    app: 'gm-simple-estimator', version: 1,
+    project: { name: '', customer: '', number: '', rev: '0', preparedBy: '', notes: '' },
+    settings: { margin: 0, pmPct: 0, contPct: 0, escPct: 0, pmLevel: 'PM' },
+    levels: [
+      { id: 'ENG_I', name: 'Eng I', code: 'ENG_I', cost: 0 },
+      { id: 'ENG_II', name: 'Eng II', code: 'ENG_II', cost: 0 },
+      { id: 'ENG_SR', name: 'Eng Sr', code: 'ENG_SR', cost: 0 },
+      { id: 'PM', name: 'Project manager', code: 'PROJ_MGR', cost: 0 }
+    ],
+    tasks: [], source: null
+  };
+}
+function normalize(q) {
+  if (!q || typeof q !== 'object' || !Array.isArray(q.tasks) || !Array.isArray(q.levels)) throw new Error('This is not an estimate file from this app.');
+  const b = blankEstimate();
+  q.app = b.app; q.version = 1;
+  q.project = Object.assign({}, b.project, q.project || {});
+  q.settings = Object.assign({}, b.settings, q.settings || {});
+  q.levels.forEach(l => { if (!l.id) l.id = uid('L'); });
+  q.tasks.forEach(t => { if (!t.id) t.id = uid('t'); });
+  if (q.source === undefined) q.source = null;
+  return q;
+}
+
+let S = null;           // the estimate
+let R = null;           // calculated results
+let tab = 'dashboard';
+const ui = { target: '' };
+
+/* ---------- Calculation (same rules as the SCADA tab) ---------- */
+function calc(st, marginOverride) {
+  const lv = {}; st.levels.forEach(l => { lv[l.id] = l; });
+  const s = st.settings;
+  const m = isNum(marginOverride) ? marginOverride : num(s.margin);
+  const e = num(s.escPct);
+  const price = c => (m < 1 ? c * (1 + e) / (1 - m) : NaN);
+  const out = { tasks: {}, m, e };
+  const byL = {}; const byP = {}; const order = [];
+  const addL = (id, name, hh, c) => { const k = id || '_none'; byL[k] = byL[k] || { id: k, name, hrs: 0, cost: 0 }; byL[k].hrs += hh; byL[k].cost += c; };
+  let th = 0, tc = 0;
+  for (const t of st.tasks) {
+    const L = lv[t.level]; const rate = L ? num(L.cost) : 0;
+    const hh = up(num(t.qty) * num(t.hours)); const c = hh * rate;
+    out.tasks[t.id] = { hrs: hh, rate, cost: c, price: price(c) };
+    th += hh; tc += c;
+    addL(t.level, L ? L.name : 'No level', hh, c);
+    const p = (t.phase || '').trim() || 'No phase';
+    if (!byP[p]) { byP[p] = { phase: p, hrs: 0, cost: 0, n: 0 }; order.push(p); }
+    byP[p].hrs += hh; byP[p].cost += c; byP[p].n++;
+  }
+  const PL = lv[s.pmLevel]; const pmRate = PL ? num(PL.cost) : 0;
+  const pmH = up(num(s.pmPct) * th); const pmC = pmH * pmRate;
+  out.pm = { pct: num(s.pmPct), base: th, hrs: pmH, rate: pmRate, cost: pmC, price: price(pmC), name: PL ? PL.name : 'No level' };
+  if (pmH) addL(s.pmLevel, out.pm.name, pmH, pmC);
+  const cp = num(s.contPct); const cH = down(cp * (th + pmH)); const cC = cp * (tc + pmC);
+  out.cont = { pct: cp, base: th + pmH, hrs: cH, cost: cC, price: price(cC) };
+  if (cH || cC) byL._cont = { id: '_cont', name: 'Contingency', hrs: cH, cost: cC };
+  out.taskHrs = th; out.taskCost = tc;
+  out.hrs = th + pmH + cH;
+  out.labor = tc + pmC + cC; out.esc = out.labor * e; out.cost = out.labor + out.esc;
+  out.price = price(out.labor); out.gp = out.price - out.cost;
+  out.margin = out.price ? out.gp / out.price : null;
+  out.perHr = out.hrs ? out.price / out.hrs : null;
+  out.byLevel = Object.values(byL).filter(x => x.hrs || x.cost).map(x => ({ ...x, price: price(x.cost) })).sort((a, b) => b.hrs - a.hrs);
+  out.byPhase = order.map(p => ({ ...byP[p], price: price(byP[p].cost) }));
+  out.taskHrsTxt = `${hrs(th)} task hours`;
+  return out;
+}
+
+/* ---------- Excel reader: unzip with the browser's own decompressor, parse the sheet XML ---------- */
+async function openZip(buf) {
+  const dv = new DataView(buf); const u8 = new Uint8Array(buf); const dec = new TextDecoder();
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65600); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('This file is not an Excel workbook (.xlsx or .xlsm).');
+  const count = dv.getUint16(eocd + 10, true); let p = dv.getUint32(eocd + 16, true);
+  const entries = {};
+  for (let n = 0; n < count; n++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) break;
+    const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+    const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+    entries[dec.decode(u8.subarray(p + 46, p + 46 + nlen))] = { method, csize, off };
+    p += 46 + nlen + xlen + clen;
+  }
+  return async name => {
+    const e = entries[name]; if (!e) return null;
+    const start = e.off + 30 + dv.getUint16(e.off + 26, true) + dv.getUint16(e.off + 28, true);
+    const data = u8.subarray(start, start + e.csize);
+    if (e.method === 0) return dec.decode(data);
+    if (e.method !== 8) throw new Error('This workbook uses a compression this page cannot read.');
+    if (typeof DecompressionStream === 'undefined') throw new Error('This browser cannot read Excel files. Use a current version of Edge, Chrome, Firefox or Safari.');
+    const stream = new Blob([data]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return dec.decode(await new Response(stream).arrayBuffer());
+  };
+}
+async function readWorkbook(buf) {
+  const file = await openZip(buf);
+  const xml = s => new DOMParser().parseFromString(s, 'application/xml');
+  const all = (node, tag) => [...node.getElementsByTagNameNS('*', tag)];
+  const wbXml = await file('xl/workbook.xml'); if (!wbXml) throw new Error('This file is not an Excel workbook.');
+  const wb = xml(wbXml); const rels = xml(await file('xl/_rels/workbook.xml.rels'));
+  const target = {}; all(rels, 'Relationship').forEach(r => { target[r.getAttribute('Id')] = r.getAttribute('Target'); });
+  const RNS = 'http://schemas.openxmlformats.org/officeDocument/2006/relationships';
+  const sheets = all(wb, 'sheet').map(s => {
+    const t = target[s.getAttributeNS(RNS, 'id') || s.getAttribute('r:id')] || '';
+    return { name: s.getAttribute('name'), state: s.getAttribute('state') || 'visible', path: t.startsWith('/') ? t.slice(1) : 'xl/' + t.replace(/^\.\//, '') };
+  });
+  const names = {}; all(wb, 'definedName').forEach(d => { if (!d.hasAttribute('localSheetId')) names[d.getAttribute('name')] = d.textContent; });
+  const sstXml = await file('xl/sharedStrings.xml');
+  const shared = sstXml ? all(xml(sstXml), 'si').map(si => all(si, 't').filter(t => t.parentNode.localName !== 'rPh').map(t => t.textContent).join('')) : [];
+  const cache = {};
+  async function sheet(name) {
+    if (cache[name]) return cache[name];
+    const sh = sheets.find(x => x.name === name); if (!sh) return null;
+    const src = await file(sh.path); if (!src) return null;
+    const cells = {};
+    for (const c of all(xml(src), 'c')) {
+      const t = c.getAttribute('t'); const v = c.getElementsByTagNameNS('*', 'v')[0];
+      let val = null;
+      if (t === 's') val = v ? shared[+v.textContent] ?? null : null;
+      else if (t === 'inlineStr') val = all(c, 't').map(x => x.textContent).join('');
+      else if (t === 'str' || t === 'e') val = v ? v.textContent : null;
+      else if (t === 'b') val = v ? v.textContent === '1' : null;
+      else val = v && v.textContent !== '' ? +v.textContent : null;
+      cells[c.getAttribute('r')] = val;
+    }
+    return (cache[name] = cells);
+  }
+  async function named(name) {
+    const ref = names[name]; if (!ref) return null;
+    const m = ref.match(/^'?(.+?)'?!\$?([A-Z]+)\$?(\d+)$/); if (!m) return null;
+    const c = await sheet(m[1]); return c ? c[m[2] + m[3]] : null;
+  }
+  return { sheets, sheet, named };
+}
+const isEstimateTab = c => c && /task description/i.test(String(c.G9 || '')) && /role/i.test(String(c.F9 || ''));
+function cleanPhase(activity, wbs) {
+  let a = String(activity || '').trim();
+  if (!a && wbs) a = String(wbs).slice(7).trim();
+  return a.replace(/^[A-Z]{2,6}-(?=[A-Za-z])/, '');
+}
+async function extractTab(wb, tabName, fileName) {
+  const c = await wb.sheet(tabName);
+  if (!isEstimateTab(c)) throw new Error(`The ${tabName} tab does not look like an estimate tab.`);
+  const setup = await wb.sheet('Setup');
+  const rates = {};
+  if (setup) for (let r = 40; r <= 120; r++) {
+    const code = setup['C' + r];
+    if (typeof code !== 'string' || !code.trim() || /role code/i.test(code)) continue;
+    const cost = isNum(setup['P' + r]) ? setup['P' + r] : setup['I' + r];
+    if (isNum(cost)) rates[code.trim()] = { desc: String(setup['D' + r] || '').trim(), cost };
+  }
+  const tasks = []; let pmRow = null;
+  for (let r = 10; r <= 500; r++) {
+    const D = c['D' + r]; const E = String(c['E' + r] ?? '');
+    if (D === 900005 || /^project management$/i.test(E.trim())) { pmRow = r; break; }
+    const name = String(c['G' + r] ?? '').trim();
+    const hours = num(c['J' + r]) + num(c['K' + r]) + num(c['L' + r]);
+    if (!name && !hours) continue;
+    const code = String(c['F' + r] ?? '').trim();
+    if (code && !rates[code] && isNum(c['P' + r]) && c['P' + r] > 0) rates[code] = { desc: '', cost: c['P' + r] };
+    const wbs = String(c['C' + r] ?? '').trim();
+    tasks.push({ id: uid('t'), wbs: wbs.slice(0, 6), phase: cleanPhase(E, wbs), name, level: code || null, qty: isNum(c['I' + r]) ? c['I' + r] : null, hours: hours || null, notes: '' });
+  }
+  if (pmRow === null) throw new Error(`Could not find the Project Management row on the ${tabName} tab.`);
+  const pmCode = String(c['F' + pmRow] || 'PROJ_MGR').trim();
+  if (!rates[pmCode] && isNum(c['P' + pmRow])) rates[pmCode] = { desc: '', cost: c['P' + pmRow] };
+  const absorbed = /yes\s*$/i.test(String(c['G' + (pmRow + 1)] || ''));
+  const pmPct = num(c['I' + pmRow]) || num(c['I' + (pmRow + 1)]) || num(await wb.named('PM_Prcnt'));
+  let contPct = 0, totalsRow = null;
+  for (let r = pmRow + 1; r <= pmRow + 15; r++) {
+    const D = c['D' + r]; const E = String(c['E' + r] || ''); const G = String(c['G' + r] || '');
+    if ((D === 900095 || /labor contingency/i.test(E)) && !/^no/i.test(G.trim())) contPct = num(c['I' + r]);
+    if (/labor totals/i.test(String(D || ''))) { totalsRow = r; break; }
+  }
+  let margin = num(await wb.named('Lbr_Mrgn')); if (!margin) margin = num(c.AG10);
+  const esc = isNum(c.R9) ? c.R9 : num(await wb.named('Lbr_Cost_Escl_Fctr'));
+  const wanted = ['IA_ENGR_I', 'IA_ENGR_II', 'IA_ENGR_SR'].filter(k => rates[k]);
+  tasks.forEach(t => { if (t.level && !wanted.includes(t.level)) wanted.push(t.level); });
+  if (!wanted.includes(pmCode)) wanted.push(pmCode);
+  const levels = wanted.map(code => ({ id: code, code, name: FRIENDLY[code] || (rates[code] && rates[code].desc) || code, cost: rates[code] ? +rates[code].cost : 0 }));
+  const proj = {
+    name: String(c.F3 ?? (setup && setup.E6) ?? '').trim(), customer: String(c.F4 ?? (setup && setup.E5) ?? '').trim(),
+    number: c.F5 != null ? String(c.F5) : '', rev: c.H5 != null ? String(c.H5) : '0',
+    preparedBy: setup && setup.E11 ? String(setup.E11) : '', notes: ''
+  };
+  return {
+    app: 'gm-simple-estimator', version: 1, project: proj,
+    settings: { margin: +margin.toFixed(6), pmPct: +pmPct.toFixed(6), contPct: +contPct.toFixed(6), escPct: +num(esc).toFixed(6), pmLevel: pmCode },
+    levels, tasks,
+    source: {
+      file: fileName, sheet: tabName, importedAt: new Date().toISOString(), absorbedPM: absorbed,
+      hours: totalsRow ? c['N' + totalsRow] : null, cost: totalsRow ? c['S' + totalsRow] : null, price: totalsRow ? c['AJ' + totalsRow] : null,
+      pmHours: c['N' + pmRow], pmBase: c['J' + (pmRow + 1)]
+    }
+  };
+}
+
+/* ---------- Persistence ---------- */
+let saveTimer = null;
+function status(msg, bad) { const el = $('#status'); if (el) { el.textContent = msg || ''; el.style.color = bad ? 'var(--bad)' : ''; } }
+function save() { clearTimeout(saveTimer); saveTimer = setTimeout(saveNow, 250); }
+function saveNow() {
+  clearTimeout(saveTimer); saveTimer = null;
+  try { if (S) localStorage.setItem(KEY, JSON.stringify(S)); else localStorage.removeItem(KEY); status(S ? 'Saved in this browser' : ''); }
+  catch (e) { status('Not kept in this browser: storage is blocked. Use Save as Excel to keep your work.', true); }
+}
+function load() { try { const s = localStorage.getItem(KEY); return s ? normalize(JSON.parse(s)) : null; } catch (e) { return null; } }
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && saveTimer) saveNow(); });
+
+/* ---------- Rendering ---------- */
+const levelById = id => S.levels.find(l => l.id === id);
+function levelOptions(sel) {
+  let o = `<option value="">Choose level</option>`;
+  for (const l of S.levels) o += `<option value="${h(l.id)}"${l.id === sel ? ' selected' : ''}>${h(l.name || l.code)}</option>`;
+  if (sel && !levelById(sel)) o += `<option value="${h(sel)}" selected>Missing level: ${h(sel)}</option>`;
+  return o;
+}
+const out = (key, f) => `<span data-o="${key}|${f}"></span>`;
+const DYN = {};
+
+function render() {
+  const a = document.activeElement; const focus = a && a.dataset && (a.dataset.k || a.dataset.u) ? { k: a.dataset.k, u: a.dataset.u, s: a.selectionStart, e: a.selectionEnd } : null;
+  if (S) R = calc(S);
+  renderTop();
+  const hero = $('#hero'); const main = $('#main');
+  if (!S) { hero.hidden = true; hero.innerHTML = ''; main.innerHTML = startView(); }
+  else {
+    hero.hidden = tab !== 'dashboard'; hero.innerHTML = tab === 'dashboard' ? heroView() : '';
+    main.innerHTML = tab === 'dashboard' ? dashboardView() : tab === 'tasks' ? tasksView() : tab === 'breakdown' ? breakdownView() : settingsView();
+    fill();
+  }
+  const dl = $('#phase-list'); if (dl) dl.innerHTML = S ? [...new Set(S.tasks.map(t => (t.phase || '').trim()).filter(Boolean))].map(p => `<option value="${h(p)}">`).join('') : '';
+  if (focus) {
+    const el = focus.k ? document.querySelector(`[data-k="${CSS.escape(focus.k)}"]`) : document.querySelector(`[data-u="${CSS.escape(focus.u)}"]`);
+    if (el) { el.focus(); try { if (focus.s != null) el.setSelectionRange(focus.s, focus.e); } catch (e) { } }
+  }
+}
+function refresh() { if (!S) return; R = calc(S); fill(); }
+function fill() {
+  for (const el of $$('[data-o]')) { const [p, f] = el.dataset.o.split('|'); const t = fmt(walk(R, p), f); if (el.textContent !== t) el.textContent = t; }
+  for (const el of $$('[data-dyn]')) { const fn = DYN[el.dataset.dyn]; if (fn) el.innerHTML = fn(el.dataset.arg); }
+  const slider = $('#margin-range'); if (slider && document.activeElement !== slider) slider.value = (num(S.settings.margin) * 100).toFixed(1);
+  document.title = (S.project.name ? S.project.name + ' | ' : '') + 'GrayMatter Estimator';
+}
+function renderTop() {
+  const t = (id, label) => `<button class="tab" role="tab" aria-selected="${tab === id}" data-act="tab" data-tab="${id}">${label}</button>`;
+  $('#tabs').innerHTML = S ? t('dashboard', 'Dashboard') + t('tasks', 'Tasks') + t('breakdown', 'Price breakdown') + t('settings', 'Rates and settings') : '';
+  $('#actions').innerHTML = S
+    ? `<button class="btn" data-act="pickExcel">Open Excel</button><button class="btn primary" data-act="saveExcel">Save as Excel</button>
+       <details class="menu"><summary class="btn">More</summary><div class="pop">
+         <button data-act="print">Print this page</button><hr>
+         <button data-act="blank">Start a blank estimate</button><button data-act="clear">Remove estimate from this browser</button></div></details>`
+    : `<button class="btn primary" data-act="pickExcel">Open Excel</button>`;
+}
+
+/* ---------- Start ---------- */
+function startView() {
+  return `<div class="start">
+    <h1>Start an estimate</h1>
+    <p>Open an Excel workbook to begin. That can be your estimate tool (.xlsm), where the app pulls the tasks, engineer levels, hours and rates from the SCADA tab, or a workbook you saved from this app.</p>
+    <div class="row"><button class="btn primary" data-act="pickExcel">Open Excel workbook</button><button class="btn" data-act="blank">Start blank</button></div>
+    <p class="fine">Save as Excel writes a normal .xlsx with working formulas, so you can keep editing in Excel and open it here again. Workbooks are read inside this browser and never uploaded. This page holds no rates or client details until you open a file.</p>
+  </div>`;
+}
+
+/* ---------- Dashboard ---------- */
+function heroView() {
+  const p = S.project;
+  const sub = [p.customer, p.number ? `Proposal ${p.number}${p.rev !== '' ? ` rev ${p.rev}` : ''}` : '', S.source && S.source.kind !== 'app' ? `from the ${S.source.sheet} tab` : ''].filter(Boolean).join(', ');
+  return `<div class="hero-id"><h1>${h(p.name || 'Untitled estimate')}</h1>${sub ? `<p>${h(sub)}</p>` : ''}</div>
+  <div class="hero-main">
+    <div>
+      <span class="price-label">Fixed price</span>
+      <b class="price" data-o="price|m0"></b>
+      <div class="dial">
+        <label for="margin-range">Margin</label><output data-o="margin|p" for="margin-range"></output>
+        <input id="margin-range" type="range" min="0" max="85" step="0.5" data-k="settings.margin" data-t="pct" value="${(num(S.settings.margin) * 100).toFixed(1)}" aria-label="Margin percent">
+        <div class="scale"><span>0%</span><span>20%</span><span>40%</span><span>60%</span><span>85%</span></div>
+      </div>
+      <div class="target"><label for="target-in">Need a specific price?</label><input id="target-in" inputmode="decimal" data-u="target" placeholder="$ target price" value="${h(ui.target)}"><span data-dyn="target"></span></div>
+    </div>
+    <dl class="kpis">
+      <div><dt>Total hours</dt><dd data-o="hrs|h"></dd></div>
+      <div><dt>Total cost</dt><dd data-o="cost|m0"></dd></div>
+      <div><dt>Gross profit</dt><dd data-o="gp|m0"></dd></div>
+      <div><dt>Average price per hour</dt><dd data-o="perHr|m2"></dd></div>
+    </dl>
+  </div>`;
+}
+DYN.target = () => {
+  const raw = String(ui.target || '').trim(); if (!raw) return '';
+  const v = parseNum(raw); if (!isFinite(v) || v <= 0) return 'Enter a dollar amount.';
+  if (v <= R.cost) return `That is below cost (${money(R.cost)}).`;
+  const m = 1 - R.cost / v;
+  return `needs a <b>${pct(m, 2)}</b> margin <button class="btn" data-act="useMargin" data-m="${m}">Use it</button>`;
+};
+function dashboardView() {
+  if (!S.tasks.length) return `<section class="card build-card"><div class="empty"><p>No tasks yet. Add them on the Tasks tab or import your workbook.</p><button class="btn primary" data-act="tab" data-tab="tasks">Add tasks</button></div></section>`;
+  return `<section class="card build-card"><header><h2>How the price builds up</h2><p class="hint">Cost of each piece, then the margin on top.</p></header><div data-dyn="build"></div></section>
+  <div class="grid2">
+    <section class="card"><header><h2>Hours by engineer level</h2></header><div data-dyn="donut"></div></section>
+    <section class="card"><header><h2>Hours by phase</h2></header><div data-dyn="phases"></div></section>
+  </div>
+  <div class="grid2">
+    <section class="card"><header><h2>Largest tasks</h2><button class="btn ghost" data-act="tab" data-tab="tasks">Edit tasks</button></header><div data-dyn="top"></div></section>
+    <section class="card"><header><h2>Checks</h2></header><div data-dyn="checks"></div></section>
+  </div>`;
+}
+const LEVEL_COLORS = ['var(--c1)', 'var(--c2)', 'var(--c3)', 'var(--c4)', 'var(--c6)', 'var(--c5)'];
+DYN.build = () => {
+  const parts = [
+    ['Task labor', R.taskCost, 'var(--c1)'], ['Project management', R.pm.cost, 'var(--c2)'],
+    ['Contingency', R.cont.cost, 'var(--c3)'], ['Escalation', R.esc, 'var(--c4)'], ['Gross profit', R.gp, 'var(--orange)']
+  ].filter(p => p[1] > 0.005);
+  const total = R.price || 0;
+  if (!(total > 0)) return '<p class="hint">Enter rates on the Rates and settings tab to see the price.</p>';
+  return `<div class="stack" role="img" aria-label="Price build-up">${parts.map(p => `<i style="width:${(p[1] / total * 100).toFixed(3)}%;background:${p[2]}" title="${h(p[0])} ${money(p[1])}"></i>`).join('')}</div>
+    <div class="legend">${parts.map(p => `<div><i class="sw" style="background:${p[2]}"></i><span>${h(p[0])}</span><b>${money(p[1])}</b></div>`).join('')}
+    <div class="eq"><i class="sw" style="background:transparent"></i><span>Fixed price</span><b>${money(R.price)}</b></div></div>`;
+};
+DYN.donut = () => {
+  const rows = R.byLevel.filter(x => x.hrs > 0); const total = rows.reduce((s, x) => s + x.hrs, 0);
+  if (!total) return '<p class="hint">No hours yet.</p>';
+  const r = 70, C = 2 * Math.PI * r; let acc = 0;
+  const segs = rows.map((x, i) => {
+    const len = x.hrs / total * C; const col = x.id === '_cont' ? 'var(--c5)' : LEVEL_COLORS[i % LEVEL_COLORS.length];
+    const s = `<circle r="${r}" cx="95" cy="95" fill="none" stroke="${col}" stroke-width="26" stroke-dasharray="${Math.max(len - 1.5, 0.5)} ${C}" stroke-dashoffset="${-acc}" transform="rotate(-90 95 95)"><title>${h(x.name)} ${hrs(x.hrs)} hrs</title></circle>`;
+    acc += len; x.col = col; return s;
+  }).join('');
+  return `<div class="donut-wrap"><svg viewBox="0 0 190 190" role="img" aria-label="Hours by engineer level">${segs}
+      <text x="95" y="96" text-anchor="middle" class="donut-mid">${hrs(total)}</text><text x="95" y="116" text-anchor="middle" class="donut-sub">hours</text></svg>
+    <div class="keys">${rows.map(x => `<div class="key"><i class="sw" style="background:${x.col}"></i><span>${h(x.name)}</span><span class="n">${hrs(x.hrs)} hrs</span><span class="p">${pct(x.hrs / total, 0)}</span></div>`).join('')}</div></div>`;
+};
+DYN.phases = () => {
+  const rows = R.byPhase.filter(x => x.hrs > 0); const max = Math.max(1, ...rows.map(x => x.hrs));
+  if (!rows.length) return '<p class="hint">No hours yet.</p>';
+  return `<div class="bars">${rows.map(x => `<div class="bar"><span class="lbl" title="${h(x.phase)}">${h(x.phase)}<small>${x.n} task${x.n === 1 ? '' : 's'}, ${money(x.price)}</small></span><span class="track"><i style="width:${(x.hrs / max * 100).toFixed(2)}%"></i></span><span class="n">${hrs(x.hrs)}</span></div>`).join('')}</div>`;
+};
+DYN.top = () => {
+  const rows = S.tasks.map(t => ({ t, r: R.tasks[t.id] })).filter(x => x.r.hrs > 0).sort((a, b) => b.r.hrs - a.r.hrs).slice(0, 6);
+  if (!rows.length) return '<p class="hint">No hours yet.</p>';
+  const max = rows[0].r.hrs;
+  return `<div class="bars">${rows.map(({ t, r }) => `<div class="bar"><span class="lbl" title="${h(t.name)}">${h(t.name || 'Untitled task')}<small>${h((levelById(t.level) || {}).name || 'No level')}, ${numIn(t.qty) || 0} × ${numIn(t.hours) || 0} hrs</small></span><span class="track"><i style="width:${(r.hrs / max * 100).toFixed(2)}%;background:var(--c1)"></i></span><span class="n">${hrs(r.hrs)}</span></div>`).join('')}</div>`;
+};
+function checks() {
+  const c = [];
+  const src = S.source;
+  if (src && src.kind === 'app' && isNum(src.price)) {
+    const diff = R.price - src.price;
+    if (Math.abs(diff) < 1) c.push(['ok', `Matches the Summary tab of ${h(src.file)}: ${hrs(src.hours)} hours, ${money(src.price)}.`]);
+    else c.push(['warn', `The Summary tab of ${h(src.file)} shows ${money(src.price)}. This estimate is ${money(R.price)}, ${diff > 0 ? 'up' : 'down'} ${money(Math.abs(diff))}, from edits made here or formulas changed in Excel. Save as Excel to bring the file up to date.`]);
+  } else if (src && isNum(src.price)) {
+    const diff = R.price - src.price;
+    if (Math.abs(diff) < 1) c.push(['ok', `Matches the ${h(src.sheet)} tab of the workbook: ${hrs(src.hours)} hours, ${money(src.price)}.`]);
+    else {
+      let why = '';
+      if (isNum(src.pmBase) && src.pmBase !== R.taskHrs && !src.absorbedPM) why = ` One known reason: the workbook's PM formula counts ${hrs(src.pmBase)} of the ${hrs(R.taskHrs)} task hours, which gives it ${hrs(src.pmHours)} PM hours instead of ${hrs(R.pm.hrs)}. This page counts every task.`;
+      if (src.absorbedPM) why = ' The workbook absorbs PM (cost only, not priced). This page prices PM.';
+      c.push(['warn', `The ${h(src.sheet)} tab shows ${money(src.price)} for ${hrs(src.hours)} hours. This estimate is ${money(R.price)}, ${diff > 0 ? 'up' : 'down'} ${money(Math.abs(diff))}.${why} Edits made here since the import also change the total.`]);
+    }
+  }
+  const zero = S.levels.filter(l => !num(l.cost) && S.tasks.some(t => t.level === l.id));
+  if (zero.length) c.push(['bad', `${zero.map(l => h(l.name)).join(', ')} ${zero.length > 1 ? 'have' : 'has'} a $0 rate. Set it on the Rates and settings tab.`]);
+  const noLevel = S.tasks.filter(t => R.tasks[t.id].hrs > 0 && !levelById(t.level)).length;
+  if (noLevel) c.push(['bad', `${noLevel} task${noLevel > 1 ? 's have' : ' has'} hours but no engineer level.`]);
+  const noHours = S.tasks.filter(t => !R.tasks[t.id].hrs).length;
+  if (noHours) c.push(['warn', `${noHours} task${noHours > 1 ? 's have' : ' has'} no hours yet.`]);
+  if (num(S.settings.margin) >= 1) c.push(['bad', 'A margin of 100% or more cannot be priced.']);
+  else if (!num(S.settings.margin)) c.push(['warn', 'Margin is 0%, so the price equals cost.']);
+  c.push(['info', 'Draft estimate. A qualified person reviews hours, rates and margin before the price is sent.']);
+  return c;
+}
+DYN.checks = () => `<ul class="checks">${checks().map(([s, m]) => `<li><i class="dot ${s}"></i><span>${m}</span></li>`).join('')}</ul>`;
+
+/* ---------- Tasks ---------- */
+function tasksView() {
+  const s = S.settings;
+  let rows = '';
+  S.tasks.forEach((t, i) => {
+    const K = `tasks#${t.id}`;
+    rows += `<tr>
+      <td><input data-k="${K}.phase" data-t="text" list="phase-list" value="${h(t.phase)}" aria-label="Phase" placeholder="Phase"></td>
+      <td><input data-k="${K}.name" data-t="text" value="${h(t.name)}" aria-label="Task" placeholder="Task"></td>
+      <td><select data-k="${K}.level" data-t="sel" aria-label="Engineer level">${levelOptions(t.level)}</select></td>
+      <td><input class="num" inputmode="decimal" data-k="${K}.qty" data-t="num" value="${h(numIn(t.qty))}" aria-label="Quantity"></td>
+      <td><input class="num" inputmode="decimal" data-k="${K}.hours" data-t="num" value="${h(numIn(t.hours))}" aria-label="Hours each"></td>
+      <td class="tot" data-o="tasks.${t.id}.hrs|h"></td>
+      <td><input data-k="${K}.notes" data-t="text" value="${h(t.notes)}" aria-label="Notes" placeholder="Optional"></td>
+      <td><div class="row-act">
+        <button class="btn ghost" data-act="move" data-id="${t.id}" data-d="-1" aria-label="Move up"${i === 0 ? ' disabled' : ''}>Up</button>
+        <button class="btn ghost" data-act="copy" data-id="${t.id}" aria-label="Duplicate task">Copy</button>
+        <button class="btn ghost danger" data-act="del" data-id="${t.id}" aria-label="Delete task">Delete</button></div></td></tr>`;
+  });
+  const pmName = (levelById(s.pmLevel) || {}).name || 'no level';
+  return `<section class="card"><header><div><h2>Tasks</h2><p class="hint">Total hours = quantity × hours each, rounded up. Project management and contingency are added below.</p></div>
+      <div class="chips"><span class="chip">Tasks <b>${S.tasks.length}</b></span><span class="chip">Task hours <b>${out('taskHrs', 'h')}</b></span><span class="chip">All hours <b>${out('hrs', 'h')}</b></span></div></header>
+    ${S.tasks.length ? `<div class="scroll"><table class="t tasks">
+      <thead><tr><th class="c-phase">Phase</th><th class="c-task">Task</th><th class="c-level">Engineer level</th><th class="c-num r">Quantity</th><th class="c-num r">Hours each</th><th class="c-tot r">Total hours</th><th class="c-notes">Notes</th><th class="c-act"></th></tr></thead>
+      <tbody>${rows}</tbody>
+      <tfoot>
+        <tr class="auto"><td colspan="5">Project management, ${pct(num(s.pmPct))} of task hours, at the ${h(pmName)} rate</td><td class="r" data-o="pm.hrs|h"></td><td colspan="2"></td></tr>
+        <tr class="auto"><td colspan="5">Contingency, ${pct(num(s.contPct))} of task and PM hours</td><td class="r" data-o="cont.hrs|h"></td><td colspan="2"></td></tr>
+        <tr class="sum"><td colspan="5">Total hours</td><td class="r big" data-o="hrs|h"></td><td colspan="2"></td></tr>
+      </tfoot></table></div>`
+      : `<div class="empty"><p>No tasks yet. Add your first one, or import the SCADA tab from your workbook.</p></div>`}
+    <div class="toolbar"><button class="btn primary" data-act="add">Add task</button><button class="btn" data-act="tab" data-tab="settings">Change PM and contingency</button></div></section>`;
+}
+
+/* ---------- Price breakdown ---------- */
+function breakdownView() {
+  let body = '';
+  const groups = {}; const order = [];
+  S.tasks.forEach(t => { const p = (t.phase || '').trim() || 'No phase'; if (!groups[p]) { groups[p] = []; order.push(p); } groups[p].push(t); });
+  for (const p of order) {
+    body += `<tr class="phase"><td colspan="6">${h(p)}</td></tr>`;
+    for (const t of groups[p]) {
+      const r = `tasks.${t.id}`;
+      body += `<tr><td>${h(t.name || 'Untitled task')}</td><td>${h((levelById(t.level) || {}).name || 'No level')}</td><td class="r" data-o="${r}.hrs|h"></td><td class="r" data-o="${r}.rate|m2"></td><td class="r" data-o="${r}.cost|m0"></td><td class="r" data-o="${r}.price|m0"></td></tr>`;
+    }
+    const ph = R.byPhase.find(x => x.phase === p) || {};
+    body += `<tr class="sub"><td colspan="2">${h(p)} subtotal</td><td class="r">${hrs(ph.hrs)}</td><td></td><td class="r">${money(ph.cost)}</td><td class="r">${money(ph.price)}</td></tr>`;
+  }
+  const lv = R.byLevel;
+  return `<section class="card"><header><div><h2>Price breakdown</h2><p class="hint">Cost is hours × rate. Price adds escalation (${pct(R.e, 2)}) and divides by (1 − margin).</p></div></header>
+    <div class="scroll"><table class="t"><thead><tr><th>Task</th><th>Level</th><th class="r">Hours</th><th class="r">Rate</th><th class="r">Cost</th><th class="r">Price</th></tr></thead>
+    <tbody>${body}
+      <tr class="phase"><td colspan="6">Added to every estimate</td></tr>
+      <tr><td>Project management, ${pct(R.pm.pct)} of task hours</td><td>${h(R.pm.name)}</td><td class="r" data-o="pm.hrs|h"></td><td class="r" data-o="pm.rate|m2"></td><td class="r" data-o="pm.cost|m0"></td><td class="r" data-o="pm.price|m0"></td></tr>
+      <tr><td>Contingency, ${pct(R.cont.pct)} of task and PM cost</td><td>Blended</td><td class="r" data-o="cont.hrs|h"></td><td></td><td class="r" data-o="cont.cost|m0"></td><td class="r" data-o="cont.price|m0"></td></tr>
+      <tr><td>Escalation, ${pct(R.e, 2)} of cost</td><td></td><td></td><td></td><td class="r" data-o="esc|m0"></td><td class="r">included above</td></tr>
+    </tbody>
+    <tfoot><tr class="sum"><td colspan="2">Total</td><td class="r" data-o="hrs|h"></td><td></td><td class="r" data-o="cost|m0"></td><td class="r big" data-o="price|m0"></td></tr>
+      <tr><td colspan="4">Gross profit and margin</td><td class="r" data-o="gp|m0"></td><td class="r" data-o="margin|p"></td></tr></tfoot></table></div></section>
+  <section class="card"><header><h2>By engineer level</h2></header><div class="scroll"><table class="t">
+    <thead><tr><th>Level</th><th class="r">Hours</th><th class="r">Share of hours</th><th class="r">Cost</th><th class="r">Price</th><th class="r">Price per hour</th></tr></thead>
+    <tbody>${lv.map(x => `<tr><td>${h(x.name)}</td><td class="r">${hrs(x.hrs)}</td><td class="r">${pct(R.hrs ? x.hrs / R.hrs : null)}</td><td class="r">${money(x.cost * (1 + R.e))}</td><td class="r">${money(x.price)}</td><td class="r">${x.hrs ? money(x.price / x.hrs, 2) : '—'}</td></tr>`).join('')}</tbody></table></div>
+    <p class="note">Cost in this table includes escalation.</p></section>`;
+}
+
+/* ---------- Rates and settings ---------- */
+function settingsView() {
+  const s = S.settings; const p = S.project;
+  const used = id => S.tasks.filter(t => t.level === id).length + (s.pmLevel === id ? 1 : 0);
+  const pctField = (k, label, hint) => `<label class="field">${label}<span class="sfx" data-sfx="%"><input inputmode="decimal" data-k="settings.${k}" data-t="pct" value="${h(pctIn(s[k]))}"></span>${hint ? `<small>${hint}</small>` : ''}</label>`;
+  return `<div class="grid2">
+  <section class="card"><header><h2>Pricing</h2><p class="hint">Price = cost × (1 + escalation) ÷ (1 − margin)</p></header>
+    <div class="form">${pctField('margin', 'Margin')}${pctField('pmPct', 'Project management', 'Share of task hours')}${pctField('contPct', 'Contingency', 'Share of task and PM')}${pctField('escPct', 'Escalation')}
+      <label class="field">PM is charged at<select data-k="settings.pmLevel" data-t="sel">${levelOptions(s.pmLevel)}</select></label></div></section>
+  <section class="card"><header><h2>Project</h2></header><div class="form">
+    ${[['name', 'Project name'], ['customer', 'Customer'], ['number', 'Proposal number'], ['rev', 'Revision'], ['preparedBy', 'Prepared by']].map(([k, l]) => `<label class="field">${l}<input data-k="project.${k}" data-t="text" value="${h(p[k])}"></label>`).join('')}</div>
+    <label class="field" style="margin-top:14px">Notes<textarea data-k="project.notes" data-t="text">${h(p.notes)}</textarea></label></section></div>
+  <section class="card"><header><div><h2>Engineer levels</h2><p class="hint">Hourly cost for each level. Tasks pick from this list.</p></div></header>
+    <div class="scroll"><table class="t"><thead><tr><th>Level name</th><th>Role code</th><th class="r" style="width:160px">Cost per hour</th><th class="r">Used by</th><th></th></tr></thead><tbody>
+    ${S.levels.map(l => `<tr><td><input data-k="levels#${l.id}.name" data-t="text" data-rr value="${h(l.name)}" aria-label="Level name"></td>
+      <td><input data-k="levels#${l.id}.code" data-t="text" value="${h(l.code)}" aria-label="Role code"></td>
+      <td><input class="num" inputmode="decimal" data-k="levels#${l.id}.cost" data-t="num" value="${h(numIn(l.cost))}" aria-label="Cost per hour"></td>
+      <td class="r">${used(l.id) || ''}</td>
+      <td class="r">${used(l.id) ? '' : `<button class="btn ghost danger" data-act="delLevel" data-id="${h(l.id)}">Delete</button>`}</td></tr>`).join('')}
+    </tbody></table></div><div class="toolbar"><button class="btn" data-act="addLevel">Add level</button></div></section>
+  <section class="card"><header><h2>Your data</h2></header>
+    <p class="hint" style="margin-bottom:12px">Save as Excel writes a .xlsx with Summary, Tasks and Rates tabs and working formulas. Edit it in Excel and open it here again whenever you like. This browser also keeps a working copy. Workbooks hold rates and client details, so store them in approved GrayMatter locations and keep them out of the GitHub repository.</p>
+    <div class="toolbar" style="margin-top:0"><button class="btn primary" data-act="saveExcel">Save as Excel</button><button class="btn" data-act="pickExcel">Open Excel</button><button class="btn danger" data-act="clear">Remove from this browser</button></div>
+    ${S.source ? `<p class="note">Opened from ${S.source.kind === 'app' ? '' : `the ${h(S.source.sheet)} tab of `}${h(S.source.file)} on ${h(new Date(S.source.importedAt).toLocaleString())}.</p>` : ''}</section>`;
+}
+
+/* ---------- Events ---------- */
+function setFrom(el) {
+  const segs = el.dataset.k.split('.'); let o = S;
+  for (let i = 0; i < segs.length - 1; i++) { const sg = segs[i]; const x = sg.indexOf('#'); o = x >= 0 ? (o[sg.slice(0, x)] || []).find(y => y.id === sg.slice(x + 1)) : o[sg]; if (!o) return false; }
+  const key = segs[segs.length - 1]; const t = el.dataset.t; let v;
+  if (t === 'num' || t === 'pct') {
+    const raw = el.value.trim();
+    if (raw === '') v = null; else { v = parseNum(raw); if (!isFinite(v)) { el.classList.add('bad'); return false; } if (t === 'pct') v /= 100; }
+  } else if (t === 'sel') v = el.value || null; else v = el.value;
+  el.classList.remove('bad'); o[key] = v; return true;
+}
+document.addEventListener('input', e => {
+  const el = e.target;
+  if (el.dataset.k && el.tagName !== 'SELECT') { if (setFrom(el)) { save(); refresh(); } }
+  else if (el.dataset.u) { ui[el.dataset.u] = el.value; refresh(); }
+});
+document.addEventListener('change', e => {
+  const el = e.target;
+  if (el.dataset.k && el.tagName === 'SELECT') { if (setFrom(el)) { save(); render(); } }
+  else if (el.dataset.k && el.dataset.rr !== undefined) render();
+  else if (el.id === 'xl-file' && el.files[0]) { startExcel(el.files[0]); el.value = ''; }
+  else if (el.id === 'xl-tab') previewTab();
+});
+document.addEventListener('click', e => {
+  for (const d of $$('details[open]')) if (!d.contains(e.target)) d.open = false;
+  const b = e.target.closest('[data-act]'); if (!b) return;
+  const fn = ACT[b.dataset.act]; if (fn) { e.preventDefault(); fn(b.dataset); }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') $$('details[open]').forEach(d => { d.open = false; });
+  if (e.key === 'Enter' && e.target.closest && e.target.closest('table.tasks') && e.target.tagName === 'INPUT') {
+    const rows = $$('table.tasks tbody tr'); const tr = e.target.closest('tr');
+    if (tr === rows[rows.length - 1]) { e.preventDefault(); ACT.add(); }
+  }
+});
+const commit = () => { save(); render(); };
+const ACT = {
+  tab: d => { tab = d.tab; render(); window.scrollTo({ top: 0 }); },
+  add: () => {
+    const last = S.tasks[S.tasks.length - 1];
+    const t = { id: uid('t'), wbs: last ? last.wbs : '', phase: last ? last.phase : '', name: '', level: last ? last.level : (S.levels.find(l => l.id !== S.settings.pmLevel) || {}).id || null, qty: 1, hours: null, notes: '' };
+    S.tasks.push(t); if (tab !== 'tasks') tab = 'tasks'; commit();
+    const el = document.querySelector(`[data-k="tasks#${t.id}.name"]`); if (el) el.focus();
+  },
+  copy: d => { const i = S.tasks.findIndex(t => t.id === d.id); S.tasks.splice(i + 1, 0, { ...S.tasks[i], id: uid('t') }); commit(); },
+  del: d => { S.tasks = S.tasks.filter(t => t.id !== d.id); commit(); },
+  move: d => { const i = S.tasks.findIndex(t => t.id === d.id); const j = i + +d.d; if (j < 0 || j >= S.tasks.length) return; [S.tasks[i], S.tasks[j]] = [S.tasks[j], S.tasks[i]]; commit(); },
+  addLevel: () => { S.levels.push({ id: uid('L'), name: 'New level', code: '', cost: 0 }); commit(); },
+  delLevel: d => { S.levels = S.levels.filter(l => l.id !== d.id); commit(); },
+  useMargin: d => { S.settings.margin = +(+d.m).toFixed(6); ui.target = ''; commit(); },
+  pickExcel: () => $('#xl-file').click(),
+  saveExcel: () => {
+    try { downloadBlob(fileBase() + '.xlsx', buildEstimateWorkbook(S, R)); status('Saved as Excel'); }
+    catch (err) { alert('Could not build the Excel file. ' + (err.message || '')); }
+  },
+  print: () => window.print(),
+  blank: () => { if (S && !confirm('Start a blank estimate? The current one will be removed from this browser. Save a file first if you need it.')) return; S = blankEstimate(); tab = 'settings'; commit(); },
+  clear: () => { if (!confirm('Remove this estimate from this browser? Save a file first if you need it.')) return; S = null; saveNow(); tab = 'dashboard'; render(); },
+  xlImport: async () => {
+    const tabName = $('#xl-tab').value;
+    try {
+      const est = normalize(pending.kind === 'app' ? await extractAppWorkbook(pending.wb, pending.name) : await extractTab(pending.wb, tabName, pending.name));
+      S = est; tab = 'dashboard'; ui.target = ''; $('#xl-dialog').close(); commit();
+      status(pending.kind === 'app' ? `Opened ${pending.name}` : `Imported the ${tabName} tab`);
+    } catch (err) { $('#xl-msg').innerHTML = `<p class="err">${h(err.message)}</p>`; }
+  },
+  xlCancel: () => $('#xl-dialog').close()
+};
+
+/* ---------- Excel import dialog ---------- */
+let pending = null;
+async function startExcel(file) {
+  const dlg = $('#xl-dialog');
+  $('#xl-name').textContent = file.name; $('#xl-msg').innerHTML = '<p class="hint">Reading the workbook…</p>';
+  $('#xl-tab').innerHTML = ''; $('#xl-go').disabled = true; $('#xl-replace').hidden = !S; $('#xl-tab-field').hidden = false;
+  if (!dlg.open) dlg.showModal();
+  try {
+    const wb = await readWorkbook(await file.arrayBuffer());
+    if (await isAppWorkbook(wb)) {
+      pending = { wb, name: file.name, kind: 'app' }; $('#xl-tab-field').hidden = true;
+      const est = await extractAppWorkbook(wb, file.name); const r = calc(est);
+      $('#xl-msg').innerHTML = `<div class="preview">Saved from this app. <b>${est.tasks.length}</b> tasks, <b>${hrs(r.hrs)}</b> hours, <b>${est.levels.length}</b> engineer levels.<br>
+        ${isNum(est.source.price) ? `The Summary tab shows <b>${money(est.source.price)}</b>.` : ''}</div>`;
+      $('#xl-go').disabled = false; return;
+    }
+    const tabs = [];
+    for (const s of wb.sheets) { if (s.state !== 'visible') continue; if (isEstimateTab(await wb.sheet(s.name))) tabs.push(s.name); }
+    if (!tabs.length) throw new Error('No estimate tabs found. The app reads its own saved workbooks, or estimator tabs laid out like SCADA with Task Description in column G.');
+    pending = { wb, name: file.name, kind: 'estimator' };
+    $('#xl-tab').innerHTML = tabs.map(t => `<option${t === 'SCADA' ? ' selected' : ''}>${h(t)}</option>`).join('');
+    await previewTab();
+  } catch (err) { $('#xl-msg').innerHTML = `<p class="err">${h(err.message || 'Could not read this file.')}</p>`; }
+}
+async function previewTab() {
+  const name = $('#xl-tab').value; if (!pending || !name) return;
+  try {
+    const est = await extractTab(pending.wb, name, pending.name);
+    const r = calc(est); const src = est.source;
+    const levels = [...new Set(est.tasks.map(t => (est.levels.find(l => l.id === t.level) || {}).name).filter(Boolean))];
+    $('#xl-msg').innerHTML = `<div class="preview"><b>${est.tasks.length}</b> tasks, <b>${hrs(r.taskHrs)}</b> task hours${levels.length ? ` (${h(levels.join(', '))})` : ''}.<br>
+      Margin <b>${pct(est.settings.margin)}</b>, PM <b>${pct(est.settings.pmPct)}</b>, contingency <b>${pct(est.settings.contPct)}</b>, escalation <b>${pct(est.settings.escPct, 2)}</b>.<br>
+      ${isNum(src.price) ? `The tab's own total is <b>${money(src.price)}</b> for <b>${hrs(src.hours)}</b> hours.` : ''}</div>
+      <p class="hint">Only the task rows, engineer levels, rates and settings come across. Expenses and the pricing columns stay in the workbook.</p>`;
+    $('#xl-go').disabled = !est.tasks.length;
+  } catch (err) { $('#xl-msg').innerHTML = `<p class="err">${h(err.message)}</p>`; $('#xl-go').disabled = true; }
+}
+function fileBase() { const p = S.project; return ([p.number, p.customer, p.name].filter(Boolean).join('_') || 'estimate').replace(/[^\w\-]+/g, '_').slice(0, 80); }
+function downloadBlob(name, blob) {
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+/* ---------- Boot ---------- */
+S = load();
+render();
+status(S ? 'Saved in this browser' : '');
+
+</script>
+</body>
+</html>
