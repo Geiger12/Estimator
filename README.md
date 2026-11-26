@@ -13,7 +13,8 @@ A simple fixed-price estimating app for SCADA and HMI work. It runs entirely in 
 - **Complexity matrix** holds hours per item by type (Graphic, Popup, Dashboard or your own) at complexity 0 to 6, a skill mix across engineer levels, and the line list (area, title, type, complexity, quantity, worksheet, level). Lines can be added, copied, deleted and filtered; they feed the Price breakdown grouped by area and type.
 - **Expenses** holds travel and living, one worksheet at a time.
 - A status line on every tab shows price, cost, margin, hours and the required approver, like the workbook's status bar.
-- **Save as Excel** writes an .xlsx with Summary, Worksheets, Tasks, Complexity, Expenses, Rates and Approval tabs, all with working formulas, so you can keep editing in Excel and reopen the file here.
+- **Save to estimator** (when the estimate came from the green estimator) writes your changes back into a copy of that same .xlsm, named with the next revision letter (Rev a becomes Rev b). The original is never changed. See below.
+- **Save as Excel** writes the app's own .xlsx with Summary, Worksheets, Tasks, Complexity, Expenses, Rates and Approval tabs, all with working formulas. Use it for complexity work and standalone quotes.
 
 ## How pricing works
 
@@ -33,6 +34,20 @@ Across worksheets, matching the Financial tab: final price, cost and hours are t
 **PM base.** On some estimator tabs the PM formula (for example `SUM(N8:N20)`) stops one row short of the last task line. On import the app follows the workbook rule so totals match T35 exactly, and marks the excluded lines. Switch PM base to All tasks in Rates and settings to count every task.
 
 **Not yet carried:** materials, subcontracts, commissioned software, time-and-materials pricing, overtime multipliers and the extended payment-terms adjustment. The dashboard warns when an included worksheet has any of these in the workbook.
+
+## Save to estimator
+
+The app keeps the original .xlsm in the browser (IndexedDB) and writes only the input cells that changed: task WBS, role, description, quantity and hours in existing rows; expense quantities on the standard expense rows; Include Yes/No on the Financial tab; labor and expense margin, PM %, contingency %, the iOPS margin, rate-card costs, expense rates and project details on Setup. Every other part of the file, including macros, formatting, the Financial and DOA tabs and all formulas, is copied byte for byte. The file is set to recalculate when Excel opens it.
+
+Before saving, a dialog lists every change, anything worth knowing (for example a typed value replacing a formula, or a new row outside the tab's PM formula) and the total the Financial tab should show once Excel recalculates.
+
+What it does not do, and what to do instead:
+- **Add rows.** New tasks fill the tab's spare rows. When there are not enough, the app says how many more are needed: add them in Excel with Copy & Replicate Rows, save, open the file here again and redo the new tasks.
+- **Add worksheets.** Use Add Worksheet in Excel, then reopen the file here.
+- **Write the complexity matrix, custom expense types, or margin overrides on levels other than iOPS.** These stay in the app; the dialog says so.
+- **Change escalation.** It is calculated from the Setup escalation table; change it there in Excel.
+
+Always open a saved file in Excel and save it once before sending it, so its stored totals are refreshed. LibreOffice cannot price this workbook (its rate lookups return 0 even on the original), so check saved files in Excel.
 
 ## Data handling
 

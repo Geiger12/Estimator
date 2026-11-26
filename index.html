@@ -291,6 +291,12 @@ table.pb .row-act .btn { padding: 6px 5px; }
 table.matrix th.c-num, table.matrix td:nth-child(3) { width: 110px; }
 table.matrix td:nth-child(3) input { max-width: 100px; }
 table.cxl .c-num { width: 90px; }
+dialog#save-dialog { max-width: 640px; }
+dialog .block { border-radius: 8px; padding: 10px 14px; margin: 12px 0; font-size: 13.5px; background: var(--warn-bg); color: var(--ink); }
+dialog .block.bad { background: #FDECEA; }
+@media (prefers-color-scheme: dark) { dialog .block.bad { background: #3a1d1b; } }
+dialog .block ul, dialog .preview ul { margin: 6px 0 0; padding-left: 18px; }
+dialog .block li, dialog .preview li { margin: 3px 0; }
 
 </style>
 </head>
@@ -317,6 +323,12 @@ table.cxl .c-num { width: 90px; }
   <p class="hint" id="xl-replace" hidden>Opening replaces the estimate in this browser. Use Save as Excel first if you need it.</p>
   <div class="row"><button class="btn" data-act="xlCancel">Cancel</button><button class="btn primary" id="xl-go" data-act="xlImport" disabled>Open</button></div>
 </dialog>
+<dialog id="save-dialog" aria-labelledby="save-title">
+  <h2 id="save-title">Save to the estimator</h2>
+  <div id="save-msg"></div>
+  <div class="row"><button class="btn" data-act="saveEstCancel">Cancel</button><button class="btn primary" id="save-go" data-act="saveEstGo" disabled>Save .xlsm</button></div>
+</dialog>
+<input type="file" id="orig-file" accept=".xlsm,.xlsx" hidden>
 <datalist id="phase-list"></datalist>
 <datalist id="area-list"></datalist>
 <input type="file" id="xl-file" accept=".xlsx,.xlsm,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel.sheet.macroEnabled.12" hidden>
@@ -610,13 +622,17 @@ async function readWorkbook(buf) {
   const names = {}; all(wb, 'definedName').forEach(d => { if (!d.hasAttribute('localSheetId')) names[d.getAttribute('name')] = d.textContent; });
   const sstXml = await file('xl/sharedStrings.xml');
   const shared = sstXml ? all(xml(sstXml), 'si').map(si => all(si, 't').filter(t => t.parentNode.localName !== 'rPh').map(t => t.textContent).join('')) : [];
-  const cache = {}, fcache = {};
+  const cache = {}, fcache = {}, vcache = {};
   async function load(name) {
     if (cache[name]) return true;
     const sh = sheets.find(x => x.name === name); if (!sh) return false;
     const src = await file(sh.path); if (!src) return false;
-    const cells = {}, formulas = {};
-    for (const c of all(xml(src), 'c')) {
+    const cells = {}, formulas = {}; const doc = xml(src);
+    vcache[name] = all(doc, 'dataValidation').map(d => {
+      const sq = d.getAttribute('sqref') || (all(d, 'sqref')[0] || {}).textContent || '';
+      const f1 = (all(d, 'formula1')[0] || {}).textContent || ''; return { sqref: sq.trim(), f1: f1.trim() };
+    });
+    for (const c of all(doc, 'c')) {
       const ref = c.getAttribute('r'); const t = c.getAttribute('t');
       const v = c.getElementsByTagNameNS('*', 'v')[0]; const f = c.getElementsByTagNameNS('*', 'f')[0];
       let val = null;
@@ -637,7 +653,9 @@ async function readWorkbook(buf) {
     const m = ref.match(/^'?(.+?)'?!\$?([A-Z]+)\$?(\d+)$/); if (!m) return null;
     const c = await sheet(m[1]); return c ? c[m[2] + m[3]] : null;
   }
-  return { sheets, sheet, formula, named, names };
+  const validations = async name => ((await load(name)) ? vcache[name] : []);
+  const needsRecalc = /<calcPr\b[^>]*fullCalcOnLoad="(1|true)"/.test(wbXml);
+  return { sheets, sheet, formula, named, names, validations, text: file, needsRecalc };
 }
 const isEstimateTab = c => c && /task description/i.test(String(c.G9 || '')) && /role/i.test(String(c.F9 || ''));
 const str = v => (v == null ? '' : String(v).trim());
@@ -676,13 +694,14 @@ async function extractTab(wb, tabName, rates, levelIds) {
     if (code && !rates[code] && isNum(c['P' + r]) && c['P' + r] > 0) rates[code] = { desc: '', cost: c['P' + r] };
     if (code) levelIds.add(code);
     const wbs = str(c['C' + r]);
-    rows.push({ r, t: { id: uid('t'), wbs: wbs.slice(0, 6), phase: cleanPhase(E, wbs), name, level: code || null, qty: isNum(c['I' + r]) ? c['I' + r] : null, hours: hours || null, notes: '', pmBase: true } });
+    rows.push({ r, t: { id: uid('t'), wbs: wbs.slice(0, 6), wbsFull: wbs, srcTab: tabName, srcRow: r, phase: cleanPhase(E, wbs), name, level: code || null, qty: isNum(c['I' + r]) ? c['I' + r] : null, hours: hours || null, notes: '', pmBase: true } });
   }
   if (pmRow === null) throw new Error(`Could not find the Project Management row on the ${tabName} tab.`);
   const pmCode = str(c['F' + pmRow]) || 'PROJ_MGR';
   if (!rates[pmCode] && isNum(c['P' + pmRow])) rates[pmCode] = { desc: '', cost: c['P' + pmRow] };
   const absorbed = /yes\s*$/i.test(str(c['G' + (pmRow + 1)]));
-  const pmPct = num(c['I' + pmRow]) || num(c['I' + (pmRow + 1)]);
+  const pmF0 = await wb.formula(tabName, 'I' + pmRow);
+  const pmPct = pmF0 && /PM_Prcnt/i.test(pmF0) ? null : (num(c['I' + pmRow]) || num(c['I' + (pmRow + 1)]));
   // Which task rows the workbook's PM formula counts, e.g. =SUM(N8:N20)
   const pmF = await wb.formula(tabName, 'J' + (pmRow + 1));
   const rng = pmF && pmF.match(/SUM\(\s*\$?N\$?(\d+)\s*:\s*\$?N\$?(\d+)\s*\)/i);
@@ -690,7 +709,7 @@ async function extractTab(wb, tabName, rates, levelIds) {
   let contPct = 0, contMode = 'none', laborTotals = null;
   for (let r = pmRow + 1; r <= pmRow + 15; r++) {
     const D = c['D' + r]; const E = str(c['E' + r]); const G = str(c['G' + r]);
-    if (D === 900095 || /labor contingency/i.test(E)) { contPct = /^no/i.test(G) ? 0 : num(c['I' + r]); contMode = /^no/i.test(G) ? 'none' : /priced$/i.test(G) && !/not priced$/i.test(G) ? 'priced' : 'cost'; }
+    if (D === 900095 || /labor contingency/i.test(E)) { const cf = await wb.formula(tabName, 'I' + r); contPct = /^no/i.test(G) ? 0 : cf && /Lbr_Cntngcy/i.test(cf) ? null : num(c['I' + r]); contMode = /^no/i.test(G) ? 'none' : /priced$/i.test(G) && !/not priced$/i.test(G) ? 'priced' : 'cost'; }
     if (/labor totals/i.test(str(D))) { laborTotals = r; break; }
   }
   // Expenses: lines until "Expense Totals"
@@ -702,22 +721,28 @@ async function extractTab(wb, tabName, rates, levelIds) {
     if (D !== 910005) continue;
     const q = c['I' + r]; if (!isNum(q) || !q) continue;
     const kf = await wb.formula(tabName, 'K' + r); const m = kf && kf.match(/^\s*=?\s*([A-Za-z_]+_SP)\s*$/);
-    expenses.push({ id: uid('x'), sp: m ? m[1] : null, desc: str(c['G' + r]), qty: q, mult: isNum(c['J' + r]) ? c['J' + r] : 1, unit: m ? null : (isNum(c['N' + r]) ? c['N' + r] : num(c['K' + r])) });
+    expenses.push({ id: uid('x'), srcRow: r, sp: m ? m[1] : null, desc: str(c['G' + r]), qty: q, mult: isNum(c['J' + r]) ? c['J' + r] : 1, unit: m ? null : (isNum(c['N' + r]) ? c['N' + r] : num(c['K' + r])) });
   }
+  const wbsOptions = [];
+  const dvC = (await wb.validations(tabName)).find(d => d.sqref.split(/\s+/).some(rg => { const m = rg.match(/^C(\d+)(?::C(\d+))?$/); return m && 10 >= +m[1] && 10 <= +(m[2] || m[1]); }));
+  const src = dvC && dvC.f1.match(/\$?([A-Z]+)\$?(\d+)/);
+  if (src) for (let r = +src[2]; r < +src[2] + 80; r++) { const v = str(c[src[1] + r]); if (!v) break; wbsOptions.push(v); }
+  rows.forEach(x => { if (x.t.wbsFull && !wbsOptions.includes(x.t.wbsFull)) wbsOptions.push(x.t.wbsFull); });
   const laborPrice = laborTotals ? num(c['AJ' + laborTotals]) : 0;
   const expPrice = expTotals ? num(c['AJ' + expTotals]) : 0;
   return {
-    tasks: rows.map(x => x.t), expenses, pmCode, pmPct, contPct, contMode, expContPct, absorbed,
+    tasks: rows.map(x => x.t), expenses, pmCode, pmPct, contPct, contMode, expContPct, absorbed, wbsOptions,
     tab: { price: num(c.AJ5), cost: num(c.S5), hours: num(c.N5), other: num(c.AJ5) - laborPrice - expPrice, pmHours: num(c['N' + pmRow]) }
   };
 }
 async function extractEstimator(wb, fileName, picks) {
   const setup = await wb.sheet('Setup'); const fin = await wb.sheet('Financial');
   const rates = {};
+  const usd = String((await wb.named('Currency')) || 'USD').trim().toUpperCase() === 'USD';
   if (setup) for (let r = 40; r <= 120; r++) {
     const code = setup['C' + r];
     if (typeof code !== 'string' || !code.trim() || /role code/i.test(code)) continue;
-    const cost = isNum(setup['P' + r]) ? setup['P' + r] : setup['I' + r];
+    const cost = usd && isNum(setup['I' + r]) ? setup['I' + r] : isNum(setup['P' + r]) ? setup['P' + r] : setup['I' + r];
     if (isNum(cost)) rates[code.trim()] = { desc: str(setup['D' + r]), cost };
   }
   const g = async (n, fb) => { const v = await wb.named(n); return isNum(v) ? v : fb; };
@@ -728,9 +753,9 @@ async function extractEstimator(wb, fileName, picks) {
   const worksheets = [], tasks = [], expenses = [], tabs = {}; let pmCode = 'PROJ_MGR'; const notes = [];
   for (const p of picks) {
     const x = await extractTab(wb, p.name, rates, levelIds);
-    const w = blankWorksheet(p.name); w.include = p.include;
-    if (Math.abs(x.pmPct - pmPct) > 1e-9) w.pmPct = x.pmPct;
-    if (Math.abs(x.contPct - contPct) > 1e-9) w.contPct = x.contPct;
+    const w = blankWorksheet(p.name); w.include = p.include; w.srcTab = p.name; w.wbsOptions = x.wbsOptions;
+    if (isNum(x.pmPct) && Math.abs(x.pmPct - pmPct) > 1e-9) w.pmPct = x.pmPct;
+    if (isNum(x.contPct) && Math.abs(x.contPct - contPct) > 1e-9) w.contPct = x.contPct;
     if (x.expContPct) w.expContPct = x.expContPct;
     worksheets.push(w); pmCode = x.pmCode;
     x.tasks.forEach(t => { t.ws = w.id; tasks.push(t); });
@@ -760,14 +785,14 @@ async function extractEstimator(wb, fileName, picks) {
   return {
     app: 'gm-simple-estimator', version: 2,
     project: {
-      name: str(first && first.F3) || str(setup && setup.E6), customer: str(first && first.F4) || str(setup && setup.E5),
-      number: first && first.F5 != null ? String(first.F5) : str(setup && setup.E7), rev: first && first.H5 != null ? String(first.H5) : '0',
+      name: str(setup && setup.E6) || str(first && first.F3), customer: str(setup && setup.E5) || str(first && first.F4),
+      number: setup && setup.E7 != null ? String(setup.E7) : first && first.F5 != null ? String(first.F5) : '', rev: setup && setup.G7 != null ? String(setup.G7) : first && first.H5 != null ? String(first.H5) : '0',
       preparedBy: str(setup && setup.E11), notes: ''
     },
     settings: { margin, pmPct, contPct, escPct: +escPct.toFixed(8), pmLevel: pmCode, expMargin, expEscPct: +expEscPct.toFixed(8), pmRule: 'workbook' },
     levels, setpoints, approval, worksheets, tasks, expenses, matrix: { ...blankMatrix(), mix },
     source: {
-      kind: 'estimator', file: fileName, importedAt: new Date().toISOString(), tabs, notes,
+      kind: 'estimator', file: fileName, importedAt: new Date().toISOString(), tabs, notes, stale: !!wb.needsRecalc,
       final: { price: await fn('Final_Total_Price'), cost: await fn('Final_Total_Cost'), margin: await fn('Final_Total_Margin'), hours: await fn('Total_Hours'), approver: doa ? str(doa.Q6) : '' }
     }
   };
@@ -1436,6 +1461,308 @@ function buildEstimateWorkbook(est, R) {
 }
 function XL_ROW0() { return XLL.row0; }
 
+/* ---------- Save back to the green estimator: same file, new values ---------- */
+
+/* The original .xlsm stays in this browser (IndexedDB) so saving still works after a reload */
+const ORIG = {
+  mem: null,
+  db() {
+    return new Promise((res, rej) => {
+      const r = indexedDB.open('gm-estimator', 1);
+      r.onupgradeneeded = () => r.result.createObjectStore('files');
+      r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+    });
+  },
+  async put(name, buf) {
+    this.mem = { name, size: buf.byteLength, buf };
+    try { const db = await this.db(); await new Promise((res, rej) => { const tx = db.transaction('files', 'readwrite'); tx.objectStore('files').put({ name, size: buf.byteLength, buf }, 'original'); tx.oncomplete = res; tx.onerror = () => rej(tx.error); }); } catch (e) { /* memory copy still works this session */ }
+  },
+  async get() {
+    if (this.mem) return this.mem;
+    try { const db = await this.db(); return await new Promise((res, rej) => { const tx = db.transaction('files', 'readonly'); const q = tx.objectStore('files').get('original'); q.onsuccess = () => { this.mem = q.result || null; res(this.mem); }; q.onerror = () => rej(q.error); }); } catch (e) { return null; }
+  },
+  async clear() { this.mem = null; try { const db = await this.db(); const tx = db.transaction('files', 'readwrite'); tx.objectStore('files').delete('original'); } catch (e) { } }
+};
+
+/* ---------- Raw zip: copy untouched parts byte for byte, recompress only what changed ---------- */
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+const crc32b = u8 => { let c = 0xFFFFFFFF; for (let i = 0; i < u8.length; i++) c = CRC_T[(c ^ u8[i]) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+function zipEntries(buf) {
+  const dv = new DataView(buf); const u8 = new Uint8Array(buf); const dec = new TextDecoder();
+  let eocd = -1;
+  for (let i = buf.byteLength - 22; i >= Math.max(0, buf.byteLength - 65600); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+  if (eocd < 0) throw new Error('The original file is not a valid Excel workbook.');
+  const count = dv.getUint16(eocd + 10, true); let p = dv.getUint32(eocd + 16, true); const out = [];
+  for (let n = 0; n < count; n++) {
+    if (dv.getUint32(p, true) !== 0x02014b50) throw new Error('The original workbook could not be read.');
+    const e = {
+      flags: dv.getUint16(p + 8, true), method: dv.getUint16(p + 10, true), time: dv.getUint16(p + 12, true), date: dv.getUint16(p + 14, true),
+      crc: dv.getUint32(p + 16, true), csize: dv.getUint32(p + 20, true), usize: dv.getUint32(p + 24, true)
+    };
+    const nlen = dv.getUint16(p + 28, true), xlen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true), off = dv.getUint32(p + 42, true);
+    e.nameBytes = u8.slice(p + 46, p + 46 + nlen); e.name = dec.decode(e.nameBytes);
+    const start = off + 30 + dv.getUint16(off + 26, true) + dv.getUint16(off + 28, true);
+    e.data = u8.subarray(start, start + e.csize);
+    out.push(e); p += 46 + nlen + xlen + clen;
+  }
+  return out;
+}
+const pipeBytes = async (u8, stream) => new Uint8Array(await new Response(new Blob([u8]).stream().pipeThrough(stream)).arrayBuffer());
+async function entryText(e) {
+  if (e.method === 0) return new TextDecoder().decode(e.data);
+  return new TextDecoder().decode(await pipeBytes(e.data, new DecompressionStream('deflate-raw')));
+}
+async function rebuildZip(entries, changed, drop) {
+  if (typeof CompressionStream === 'undefined') throw new Error('This browser cannot write Excel files. Use a current version of Edge, Chrome, Firefox or Safari.');
+  const parts = [], central = []; let offset = 0; let n = 0;
+  for (const e of entries) {
+    if (drop.has(e.name)) continue;
+    let data = e.data, crc = e.crc, csize = e.csize, usize = e.usize, method = e.method;
+    if (changed.has(e.name)) {
+      const raw = new TextEncoder().encode(changed.get(e.name));
+      crc = crc32b(raw); usize = raw.length; method = 8; data = await pipeBytes(raw, new CompressionStream('deflate-raw')); csize = data.length;
+    }
+    const flags = e.flags & 0x0800; // keep UTF-8 names, drop data descriptors
+    const lh = new DataView(new ArrayBuffer(30));
+    lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, flags, true); lh.setUint16(8, method, true);
+    lh.setUint16(10, e.time, true); lh.setUint16(12, e.date, true); lh.setUint32(14, crc, true); lh.setUint32(18, csize, true); lh.setUint32(22, usize, true);
+    lh.setUint16(26, e.nameBytes.length, true); lh.setUint16(28, 0, true);
+    parts.push(new Uint8Array(lh.buffer), e.nameBytes, data);
+    const ch = new DataView(new ArrayBuffer(46));
+    ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, flags, true); ch.setUint16(10, method, true);
+    ch.setUint16(12, e.time, true); ch.setUint16(14, e.date, true); ch.setUint32(16, crc, true); ch.setUint32(20, csize, true); ch.setUint32(24, usize, true);
+    ch.setUint16(28, e.nameBytes.length, true); ch.setUint32(42, offset, true);
+    central.push(new Uint8Array(ch.buffer), e.nameBytes);
+    offset += 30 + e.nameBytes.length + csize; n++;
+  }
+  const cdSize = central.reduce((a, x) => a + x.length, 0);
+  const end = new DataView(new ArrayBuffer(22));
+  end.setUint32(0, 0x06054b50, true); end.setUint16(8, n, true); end.setUint16(10, n, true); end.setUint32(12, cdSize, true); end.setUint32(16, offset, true);
+  return new Blob([...parts, ...central, new Uint8Array(end.buffer)], { type: 'application/vnd.ms-excel.sheet.macroEnabled.12' });
+}
+
+/* ---------- Write values into existing cells, keeping each cell's formatting ---------- */
+const xmlEsc = s => String(s ?? '').replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+const colIdx = ref => ref.match(/^[A-Z]+/)[0].split('').reduce((n, ch) => n * 26 + ch.charCodeAt(0) - 64, 0);
+function cellXmlFor(ref, style, spec) {
+  const s = style ? ` s="${style}"` : '';
+  if (spec.clear) return `<c r="${ref}"${s}/>`;
+  if (isNum(spec.n)) return `<c r="${ref}"${s}><v>${spec.n}</v></c>`;
+  return `<c r="${ref}"${s} t="inlineStr"><is><t xml:space="preserve">${xmlEsc(spec.str)}</t></is></c>`;
+}
+function patchSheet(xml, edits) {
+  const skipped = [];
+  const byRow = {};
+  for (const ref of Object.keys(edits)) (byRow[+ref.match(/\d+$/)[0]] = byRow[+ref.match(/\d+$/)[0]] || []).push(ref);
+  for (const r of Object.keys(byRow)) {
+    const rowRe = new RegExp(`<row r="${r}"([^>]*?)(/>|>([\\s\\S]*?)</row>)`);
+    const m = xml.match(rowRe);
+    let inner, open;
+    if (m) { open = `<row r="${r}"${m[1]}>`; inner = m[3] || ''; }
+    else { // a row with no cells yet: insert it in order
+      open = `<row r="${r}">`; inner = '';
+    }
+    for (const ref of byRow[r]) {
+      const cRe = new RegExp(`<c r="${ref}"(\\s[^>]*?)?(/>|>[\\s\\S]*?</c>)`);
+      const cm = inner.match(cRe);
+      if (cm) {
+        if (/<f[^>]*t="shared"[^>]*ref="/.test(cm[0])) { skipped.push(ref); continue; } // a shared-formula master: leave it alone
+        const st = (cm[1] || '').match(/\ss="(\d+)"/);
+        inner = inner.replace(cm[0], cellXmlFor(ref, st ? st[1] : null, edits[ref]));
+      } else {
+        const ci = colIdx(ref); const cells = [...inner.matchAll(/<c r="([A-Z]+)\d+"/g)];
+        const after = cells.find(x => colIdx(x[1]) > ci);
+        const nc = cellXmlFor(ref, null, edits[ref]);
+        inner = after ? inner.slice(0, after.index) + nc + inner.slice(after.index) : inner + nc;
+      }
+    }
+    const rowXml = open + inner + '</row>';
+    if (m) xml = xml.replace(m[0], rowXml);
+    else {
+      const rows = [...xml.matchAll(/<row r="(\d+)"/g)]; const nxt = rows.find(x => +x[1] > +r);
+      if (nxt) xml = xml.slice(0, nxt.index) + rowXml + xml.slice(nxt.index);
+      else xml = xml.replace('</sheetData>', rowXml + '</sheetData>');
+    }
+  }
+  return { xml, skipped };
+}
+
+/* ---------- Work out what to write, and what cannot go in without changes in Excel ---------- */
+const sameVal = (a, b) => {
+  const blank = v => v == null || v === '';
+  if (blank(a) && blank(b)) return true;
+  if (isNum(a) || isNum(b)) return isNum(+a) && isNum(+b) && Math.abs(+a - +b) < 1e-9 && !blank(a) && !blank(b);
+  return String(a).trim() === String(b).trim();
+};
+function nextRevName(name) {
+  const m = name.match(/^(.*?Rev[\s_-]*)([A-Za-z])(\b.*)$/i);
+  if (m && /[a-y]/i.test(m[2])) return m[1] + String.fromCharCode(m[2].charCodeAt(0) + 1) + m[3];
+  return name.replace(/(\.xlsm|\.xlsx)?$/i, ' (edited)$1');
+}
+async function planEstimatorSave(S, wb) {
+  const edits = {}, changes = [], notes = [], blockers = [], assign = [];
+  const put = (sheet, ref, spec, label) => { (edits[sheet] = edits[sheet] || {})[ref] = spec; if (label) changes.push(label); };
+  const val = (c, ref) => (c ? c[ref] : null);
+  const lvl = id => S.levels.find(l => l.id === id);
+  const fin = await wb.sheet('Financial');
+  const finRow = {}; if (fin) for (let r = 9; r <= 40; r++) { const nm = str(fin['B' + r]); if (nm && !(nm in finRow)) finRow[nm] = r; }
+  const pmCode = (lvl(S.settings.pmLevel) || {}).code;
+  const setupC = await wb.sheet('Setup'); const codes = new Set(); if (setupC) for (let r = 40; r <= 120; r++) { const v = str(setupC['C' + r]); if (v) codes.add(v); }
+
+  for (const w of S.worksheets) {
+    const tab = w.srcTab || w.name; const c = await wb.sheet(tab);
+    const tasks = S.tasks.filter(t => t.ws === w.id); const exps = S.expenses.filter(x => x.ws === w.id);
+    if (!c || !isEstimateTab(c)) {
+      if (tasks.length || exps.length) blockers.push(`${w.name} is not a tab in the estimator. Add it in Excel with Add Worksheet, or move its ${tasks.length + exps.length} line${tasks.length + exps.length === 1 ? '' : 's'} to an existing worksheet.`);
+      else if (S.matrix.lines.some(l => l.ws === w.id)) notes.push(`${w.name} only holds complexity lines, which stay in the app.`);
+      continue;
+    }
+    if (w.srcTab && w.name !== w.srcTab) notes.push(`${w.name} is still called ${w.srcTab} in the estimator; tabs are not renamed.`);
+    let pmRow = null; for (let r = 10; r <= 500; r++) if (c['D' + r] === 900005) { pmRow = r; break; }
+    if (!pmRow) { blockers.push(`Could not find the Project Management row on the ${tab} tab.`); continue; }
+    const rows = []; for (let r = 10; r <= pmRow - 2; r++) rows.push(r);
+    const pmF = await wb.formula(tab, 'J' + (pmRow + 1)); const rg = pmF && pmF.match(/SUM\(\s*\$?N\$?(\d+)\s*:\s*\$?N\$?(\d+)\s*\)/i);
+    const inPm = r => (rg ? r >= +rg[1] && r <= +rg[2] : true);
+    const mine = t => t.srcTab === tab && rows.includes(t.srcRow);
+    const claimed = new Set(tasks.filter(mine).map(t => t.srcRow));
+    const wasTask = r => !!str(val(c, 'G' + r)) || num(val(c, 'J' + r)) + num(val(c, 'K' + r)) + num(val(c, 'L' + r)) > 0;
+    const free = rows.filter(r => !claimed.has(r) && !wasTask(r)).concat(rows.filter(r => !claimed.has(r) && wasTask(r)));
+    const fresh = tasks.filter(t => !mine(t));
+    if (fresh.length > free.length) { blockers.push(`${tab} needs ${fresh.length - free.length} more task row${fresh.length - free.length === 1 ? '' : 's'}. In Excel, use Copy & Replicate Rows on ${tab}, save, then open the file here again and redo the new tasks.`); continue; }
+    const wbsOpts = w.wbsOptions || [];
+    const wbsFor = t => {
+      if (t.wbsFull) return t.wbsFull;
+      const ph = (t.phase || '').trim().toLowerCase(); if (!ph) return '';
+      const same = tasks.find(x => x.wbsFull && (x.phase || '').trim().toLowerCase() === ph); if (same) return same.wbsFull;
+      const o = wbsOpts.find(x => cleanPhase(String(x).slice(7), x).toLowerCase() === ph); return o || '';
+    };
+    let added = 0, changed = 0, cleared = 0;
+    const writeTask = (t, r, isOwn) => {
+      const L = lvl(t.level); const code = L && L.code;
+      const keepF = !code && isOwn && sameVal(val(c, 'F' + r), null); // untouched row that never had a role
+      if (!code && !keepF) { blockers.push(`"${t.name || 'Untitled task'}" on ${w.name} needs an engineer level with a role code.`); return; }
+      if (code && codes.size && !codes.has(code)) { blockers.push(`${L.name} (${code}) is not in the estimator's rate table on Setup. Use an existing level or add the role in Excel.`); return; }
+      let n = 0; const ed = (ref, spec, cur) => { if (!sameVal(spec.clear ? null : spec.str ?? spec.n, cur)) { put(tab, ref, spec); n++; } };
+      const wbs = wbsFor(t); if (!wbs) notes.push(`No WBS code matches phase "${t.phase || ''}" for "${t.name}" on ${tab}; pick one in Excel.`);
+      ed('C' + r, wbs ? { str: wbs } : { clear: true }, val(c, 'C' + r));
+      if (!keepF) ed('F' + r, { str: code }, val(c, 'F' + r));
+      ed('G' + r, t.name ? { str: t.name } : { clear: true }, val(c, 'G' + r));
+      ed('I' + r, isNum(t.qty) ? { n: t.qty } : { clear: true }, val(c, 'I' + r));
+      const J = num(val(c, 'J' + r)), K = num(val(c, 'K' + r)), Lh = num(val(c, 'L' + r));
+      const want = num(t.hours);
+      if (!(isOwn && Math.abs(J + K + Lh - want) < 1e-9)) {
+        const ot = isOwn ? K + Lh : 0;
+        if (want - ot >= 0 && isOwn) ed('J' + r, { n: want - ot }, val(c, 'J' + r));
+        else { ed('J' + r, { n: want }, val(c, 'J' + r)); if (K) ed('K' + r, { clear: true }, K); if (Lh) ed('L' + r, { clear: true }, Lh); }
+      }
+      return n;
+    };
+    for (const t of tasks.filter(mine)) { const n = writeTask(t, t.srcRow, true); if (n) changed++; }
+    for (const [i, t] of fresh.entries()) {
+      const r = free[i]; writeTask(t, r, false); assign.push({ id: t.id, tab, row: r, pmBase: inPm(r) }); added++;
+      if (!inPm(r) && rg) notes.push(`${tab} row ${r} is outside the tab's PM formula (rows ${rg[1]} to ${rg[2]}), so the estimator adds no PM hours for "${t.name || 'the new task'}". Widen the PM formula in Excel if it should count.`);
+    }
+    for (const r of free.slice(fresh.length)) {
+      if (wasTask(r)) { ['C', 'F', 'G', 'I', 'J', 'K', 'L'].forEach(k => { if (!sameVal(val(c, k + r), null)) put(tab, k + r, { clear: true }); }); cleared++; }
+    }
+    for (const t of tasks.filter(mine)) { const jf = await wb.formula(tab, 'J' + t.srcRow); if (jf && edits[tab] && edits[tab]['J' + t.srcRow]) notes.push(`${tab} row ${t.srcRow}: hours were a formula (${jf.slice(0, 40)}); the new value replaces it.`); }
+    if (added) changes.push(`${tab}: ${added} new task${added === 1 ? '' : 's'} in row${added === 1 ? '' : 's'} ${free.slice(0, added).join(', ')}`);
+    if (changed) changes.push(`${tab}: ${changed} task${changed === 1 ? '' : 's'} changed`);
+    if (cleared) changes.push(`${tab}: ${cleared} deleted task${cleared === 1 ? '' : 's'} cleared`);
+    // Include on the Financial tab
+    if (fin && finRow[tab]) { const want = w.include !== false ? 'Yes' : 'No'; if (!sameVal(fin['C' + finRow[tab]], want)) put('Financial', 'C' + finRow[tab], { str: want }, `Financial: ${tab} included ${want}`); }
+    // PM role, PM % and contingency % overrides on the tab
+    if (pmCode) for (const r of [pmRow, pmRow + 1]) if (!sameVal(val(c, 'F' + r), pmCode)) put(tab, 'F' + r, { str: pmCode }, r === pmRow ? `${tab}: PM charged at ${pmCode}` : null);
+    if (isNum(w.pmPct) && !sameVal(val(c, 'I' + pmRow), w.pmPct)) { put(tab, 'I' + pmRow, { n: w.pmPct }, `${tab}: PM ${pct(w.pmPct)} (replaces the link to Setup)`); }
+    let contRow = null; for (let r = pmRow + 1; r <= pmRow + 10; r++) if (c['D' + r] === 900095) { contRow = r; break; }
+    if (isNum(w.contPct) && contRow && !sameVal(val(c, 'I' + contRow), w.contPct)) put(tab, 'I' + contRow, { n: w.contPct }, `${tab}: contingency ${pct(w.contPct)} (replaces the link to Setup)`);
+    if (isNum(w.expContPct) && w.expContPct) notes.push(`${tab}: expense contingency is not written; set it on the tab in Excel.`);
+    // Expenses: one standard row per expense type
+    const spRow = {}; let expTot = null;
+    for (let r = pmRow + 1; r <= pmRow + 60; r++) {
+      if (/expense totals/i.test(str(c['D' + r]))) { expTot = r; break; }
+      if (c['D' + r] !== 910005) continue;
+      const kf = await wb.formula(tab, 'K' + r); const m = kf && kf.match(/^\s*=?\s*([A-Za-z_]+_SP)\s*$/); if (m) spRow[m[1]] = r;
+    }
+    const used = {}; let expChanged = 0;
+    for (const x of exps) {
+      if (!x.sp || !spRow[x.sp]) { blockers.push(`Expense "${x.desc || 'Custom'}" on ${w.name} has no matching standard row on ${tab}. Use one of the standard expense types, or add the row in Excel.`); continue; }
+      if (used[x.sp]) { blockers.push(`${w.name} has two ${x.desc || x.sp} expenses; the estimator has one row per type. Combine them into one line.`); continue; }
+      used[x.sp] = x;
+    }
+    for (const [sp, r] of Object.entries(spRow)) {
+      const x = used[sp]; let n = 0;
+      const ed = (ref, spec, cur) => { if (!sameVal(spec.clear ? null : spec.n ?? spec.str, cur)) { put(tab, ref, spec); n++; } };
+      ed('I' + r, x && isNum(x.qty) ? { n: x.qty } : { clear: true }, val(c, 'I' + r));
+      if (x && isNum(x.mult)) ed('J' + r, { n: x.mult }, val(c, 'J' + r));
+      if (x && isNum(x.unit)) { ed('K' + r, { n: x.unit }, val(c, 'K' + r)); if (n) notes.push(`${tab}: ${x.desc} unit cost typed in, replacing the link to Setup.`); }
+      if (n) expChanged++;
+    }
+    if (expChanged) changes.push(`${tab}: ${expChanged} expense row${expChanged === 1 ? '' : 's'} updated`);
+  }
+  // Setup: margins, PM %, contingency, rates, expense rates, project details
+  const setName = async (name, want, label) => {
+    const ref = wb.names[name]; const m = ref && ref.match(/^'?(.+?)'?!\$?([A-Z]+)\$?(\d+)$/); if (!m || !isNum(want)) return;
+    const cur = await wb.named(name); if (!sameVal(cur, want)) put(m[1], m[2] + m[3], { n: want }, label);
+  };
+  const s = S.settings;
+  await setName('Lbr_Mrgn', s.margin, `Setup: labor margin ${pct(s.margin)}`);
+  await setName('PM_Prcnt', s.pmPct, `Setup: PM ${pct(s.pmPct)}`);
+  await setName('Lbr_Cntngcy', s.contPct, `Setup: contingency ${pct(s.contPct)}`);
+  await setName('Exp_Mrgn', s.expMargin, `Setup: expense margin ${pct(s.expMargin)}`);
+  const iops = S.levels.find(l => l.code === 'IOPS'); if (iops && isNum(iops.margin)) await setName('IOPS_Lbr_Mrgn', iops.margin, `Setup: iOPS margin ${pct(iops.margin)}`);
+  if (S.levels.some(l => isNum(l.margin) && l.code !== 'IOPS')) notes.push('Margin overrides on levels other than iOPS have no place in the estimator and are not written.');
+  const escF = await wb.named('Lbr_Cost_Escl_Fctr'), expF = await wb.named('Exp_Cost_Escl_Fctr');
+  if (isNum(escF) && !sameVal(+escF.toFixed(8), +num(s.escPct).toFixed(8))) notes.push('Labor escalation is calculated from the Setup escalation table; change it there in Excel.');
+  if (isNum(expF) && !sameVal(+expF.toFixed(8), +num(s.expEscPct).toFixed(8))) notes.push('Expense escalation is calculated from the Setup escalation table; change it there in Excel.');
+  for (const x of S.setpoints) if (/_SP$/.test(x.id)) await setName(x.id, x.cost, `Setup: ${x.name} ${money(x.cost, 2)} per ${x.unit}`);
+  const setup = await wb.sheet('Setup');
+  if (setup) {
+    for (let r = 40; r <= 120; r++) {
+      const code = str(setup['C' + r]); const L = code && S.levels.find(l => l.code === code); if (!L || !isNum(L.cost)) continue;
+      const cur = isNum(setup['P' + r]) ? setup['P' + r] : setup['I' + r];
+      if (!sameVal(cur, L.cost)) { if (isNum(setup['P' + r]) && isNum(setup['I' + r]) && Math.abs(setup['P' + r] - setup['I' + r]) > 1e-9) notes.push(`${L.name}: the estimator converts currency, so its rate is not written.`); else put('Setup', 'I' + r, { n: L.cost }, `Setup: ${L.name} cost ${money(L.cost, 2)}/hr`); }
+    }
+    const p = S.project; const asNum = v => (/^\d+$/.test(String(v || '').trim()) ? { n: +v } : v ? { str: v } : { clear: true });
+    for (const [ref, v, label] of [['E6', p.name, 'project name'], ['E5', p.customer, 'customer'], ['E7', p.number, 'proposal number'], ['G7', p.rev, 'revision'], ['E11', p.preparedBy, 'estimator']]) {
+      const spec = ref === 'E7' || ref === 'G7' ? asNum(v) : v ? { str: v } : { clear: true };
+      if (!sameVal(setup[ref], spec.clear ? null : spec.n ?? spec.str)) put('Setup', ref, spec, `Setup: ${label}`);
+    }
+  }
+  if (s.pmRule !== 'workbook') notes.push('"Count every task" only applies in the app. The estimator keeps its own PM formula.');
+  const cxL = S.matrix.lines.filter(l => (S.worksheets.find(w => w.id === l.ws) || {}).include !== false);
+  if (cxL.length) notes.push(`${cxL.length} complexity line${cxL.length === 1 ? '' : 's'} stay in the app; the estimator has no place for them.`);
+  // What the estimator should show once Excel recalculates
+  const E = JSON.parse(JSON.stringify(S));
+  E.matrix.lines = []; E.settings.pmRule = 'workbook';
+  if (isNum(escF)) E.settings.escPct = escF; if (isNum(expF)) E.settings.expEscPct = expF;
+  E.levels.forEach(l => { if (l.code !== 'IOPS') l.margin = null; });
+  assign.forEach(a => { const t = E.tasks.find(x => x.id === a.id); if (t) t.pmBase = a.pmBase; });
+  const keep = new Set(); for (const w of E.worksheets) { const c = await wb.sheet(w.srcTab || w.name); if (c && isEstimateTab(c)) keep.add(w.id); }
+  E.worksheets = E.worksheets.filter(w => keep.has(w.id)); E.tasks = E.tasks.filter(t => keep.has(t.ws)); E.expenses = E.expenses.filter(x => keep.has(x.ws));
+  const expected = calc(normalize(E)).price;
+  return { edits, changes, notes: [...new Set(notes)], blockers: [...new Set(blockers)], assign, expected };
+}
+async function writeEstimator(buf, wb, plan) {
+  const entries = zipEntries(buf); const byName = {}; entries.forEach(e => { byName[e.name] = e; });
+  const changed = new Map(); const skipped = [];
+  for (const [sheet, ed] of Object.entries(plan.edits)) {
+    const sh = wb.sheets.find(x => x.name === sheet); if (!sh || !byName[sh.path]) throw new Error(`The ${sheet} tab could not be found in the original file.`);
+    const res = patchSheet(await entryText(byName[sh.path]), ed); changed.set(sh.path, res.xml); res.skipped.forEach(r => skipped.push(`${sheet}!${r}`));
+  }
+  // Excel recalculates everything on open; its calculation chain is rebuilt automatically
+  let wbx = await entryText(byName['xl/workbook.xml']);
+  wbx = /<calcPr\b/.test(wbx) ? wbx.replace(/<calcPr\b([^>]*?)(\/?)>/, (m, a, sl) => `<calcPr${a.replace(/\sfullCalcOnLoad="[^"]*"/, '')} fullCalcOnLoad="1"${sl}>`) : wbx.replace('</workbook>', '<calcPr fullCalcOnLoad="1"/></workbook>');
+  changed.set('xl/workbook.xml', wbx);
+  const drop = new Set();
+  if (byName['xl/calcChain.xml']) {
+    drop.add('xl/calcChain.xml');
+    changed.set('[Content_Types].xml', (await entryText(byName['[Content_Types].xml'])).replace(/<Override[^>]*PartName="\/xl\/calcChain\.xml"[^>]*\/>/, ''));
+    changed.set('xl/_rels/workbook.xml.rels', (await entryText(byName['xl/_rels/workbook.xml.rels'])).replace(/<Relationship[^>]*Target="[^"]*calcChain\.xml"[^>]*\/>/, ''));
+  }
+  return { blob: await rebuildZip(entries, changed, drop), skipped };
+}
+
 /* ---------- State ---------- */
 let S = null, R = null, tab = 'dashboard';
 const ui = { target: '', ws: null };
@@ -1476,7 +1803,8 @@ function render() {
     sl.hidden = false; sl.innerHTML = statusLine();
     fill();
   }
-  const dl = $('#phase-list'); if (dl) dl.innerHTML = S ? [...new Set(S.tasks.map(t => (t.phase || '').trim()).filter(Boolean))].map(p => `<option value="${h(p)}">`).join('') : '';
+  const wsW = S ? wsById(ui.ws) : null; const wbsPh = wsW && wsW.wbsOptions ? wsW.wbsOptions.map(x => cleanPhase(String(x).slice(7), x)) : [];
+  const dl = $('#phase-list'); if (dl) dl.innerHTML = S ? [...new Set([...wbsPh, ...S.tasks.map(t => (t.phase || '').trim())].filter(Boolean))].map(p => `<option value="${h(p)}">`).join('') : '';
   const al = $('#area-list'); if (al) al.innerHTML = S ? [...new Set(S.matrix.lines.map(l => (l.area || '').trim()).filter(Boolean))].map(p => `<option value="${h(p)}">`).join('') : '';
   if (focus) {
     const el = focus.k ? document.querySelector(`[data-k="${CSS.escape(focus.k)}"]`) : document.querySelector(`[data-u="${CSS.escape(focus.u)}"]`);
@@ -1497,10 +1825,11 @@ function fill() {
 function renderTop() {
   const t = (id, label) => `<button class="tab" role="tab" aria-selected="${tab === id}" data-act="tab" data-tab="${id}">${label}</button>`;
   $('#tabs').innerHTML = S ? t('dashboard', 'Dashboard') + t('tasks', 'Price breakdown') + t('complexity', 'Complexity matrix') + t('expenses', 'Expenses') + t('settings', 'Rates and settings') : '';
+  const linked = S && S.source && S.source.kind === 'estimator';
   $('#actions').innerHTML = S
-    ? `<button class="btn" data-act="pickExcel">Open Excel</button><button class="btn primary" data-act="saveExcel">Save as Excel</button>
+    ? `<button class="btn" data-act="pickExcel">Open Excel</button>${linked ? '<button class="btn primary" data-act="saveEst">Save to estimator</button>' : '<button class="btn primary" data-act="saveExcel">Save as Excel</button>'}
        <details class="menu"><summary class="btn">More</summary><div class="pop">
-         <button data-act="print">Print this page</button><hr>
+         ${linked ? '<button data-act="saveExcel">Save as app workbook (.xlsx)</button>' : ''}<button data-act="print">Print this page</button><hr>
          <button data-act="blank">Start a blank estimate</button><button data-act="clear">Remove estimate from this browser</button></div></details>`
     : `<button class="btn primary" data-act="pickExcel">Open Excel</button>`;
 }
@@ -1612,7 +1941,8 @@ DYN.top = () => {
 };
 function checks() {
   const c = []; const src = S.source;
-  if (src && src.final && isNum(src.final.price)) {
+  if (src && src.stale) c.push(['info', `${h(src.file)} was saved by this app and has not been recalculated in Excel yet, so the totals stored in it are out of date. Open it in Excel (it recalculates on open) and save it before sending.`]);
+  if (src && src.final && isNum(src.final.price) && !src.stale) {
     const diff = R.price - src.final.price;
     const where = src.kind === 'app' ? `the Summary tab of ${h(src.file)}` : `the workbook's Financial tab (T35)`;
     if (Math.abs(diff) < 1) c.push(['ok', `Matches ${where}: ${pct(src.final.margin ?? R.margin)} margin on ${money(src.final.price)}${isNum(src.final.hours) ? `, ${hrs(src.final.hours)} hours` : ''}.`]);
@@ -1925,6 +2255,7 @@ document.addEventListener('change', e => {
   else if (el.dataset.k && el.dataset.rr !== undefined) render();
   else if (el.dataset.f) { ui2[el.dataset.f] = el.value; ui2.all = false; render(); }
   else if (el.id === 'xl-file' && el.files[0]) { startExcel(el.files[0]); el.value = ''; }
+  else if (el.id === 'orig-file' && el.files[0]) { useOrigFile(el.files[0]); el.value = ''; }
 });
 document.addEventListener('click', e => {
   for (const d of $$('details[open]')) if (!d.contains(e.target)) d.open = false;
@@ -1976,7 +2307,11 @@ const ACT = {
   },
   print: () => window.print(),
   blank: () => { if (S && !confirm('Start a blank estimate? The current one will be removed from this browser. Use Save as Excel first if you need it.')) return; S = blankEstimate(); ui.ws = null; tab = 'settings'; commit(); },
-  clear: () => { if (!confirm('Remove this estimate from this browser? Use Save as Excel first if you need it.')) return; S = null; saveNow(); tab = 'dashboard'; render(); },
+  clear: () => { if (!confirm('Remove this estimate from this browser? Save it first if you need it.')) return; S = null; ORIG.clear(); saveNow(); tab = 'dashboard'; render(); },
+  saveEst: () => startSaveEst(),
+  saveEstGo: () => finishSaveEst(),
+  saveEstCancel: () => $('#save-dialog').close(),
+  pickOrig: () => $('#orig-file').click(),
   xlImport: async () => {
     if (pending.kind === 'organized') {
       if (!S) S = blankEstimate();
@@ -1989,6 +2324,7 @@ const ACT = {
     }
     try {
       const est = normalize(pending.kind === 'app' ? await extractAppWorkbook(pending.wb, pending.name) : await extractEstimator(pending.wb, pending.name, pending.tabs));
+      if (pending.kind === 'estimator') await ORIG.put(pending.name, pending.buf);
       S = est; ui.ws = null; tab = 'dashboard'; ui.target = ''; $('#xl-dialog').close(); commit(); status(`Opened ${pending.name}`);
     } catch (err) { $('#xl-msg').innerHTML = `<p class="err">${h(err.message)}</p>`; }
   },
@@ -2021,7 +2357,8 @@ async function startExcel(file) {
   $('#xl-go').disabled = true; $('#xl-replace').hidden = !S;
   if (!dlg.open) dlg.showModal();
   try {
-    const wb = await readWorkbook(await file.arrayBuffer());
+    const buf = await file.arrayBuffer();
+    const wb = await readWorkbook(buf);
     if (await isAppWorkbook(wb)) {
       const est = normalize(await extractAppWorkbook(wb, file.name)); const r = calc(est);
       pending = { wb, name: file.name, kind: 'app' };
@@ -2046,7 +2383,7 @@ async function startExcel(file) {
     }
     const tabs = await listEstimatorTabs(wb);
     if (!tabs.length) throw new Error('No estimating tabs found. The app reads its own saved workbooks, or estimator tabs laid out like SCADA with Task Description in column G.');
-    pending = { wb, name: file.name, kind: 'estimator', tabs };
+    pending = { wb, name: file.name, kind: 'estimator', tabs, buf };
     const est = normalize(await extractEstimator(wb, file.name, tabs)); const r = calc(est); const f = est.source.final;
     $('#xl-msg').innerHTML = `<div class="preview">Estimator workbook with <b>${tabs.length}</b> estimating tab${tabs.length === 1 ? '' : 's'}:<ul class="tablist">${tabs.map(t => `<li>${h(t.name)}${t.include ? '' : ' <span class="tag">excluded on the Financial tab</span>'}</li>`).join('')}</ul>
       ${isNum(f.price) ? `Financial tab (T35): <b>${money(f.price)}</b> at <b>${pct(f.margin)}</b>, ${hrs(f.hours)} hours, approver <b>${h(f.approver || 'not shown')}</b>.<br>` : ''}
@@ -2065,6 +2402,50 @@ function downloadBlob(name, blob) {
 S = load();
 render();
 status(S ? 'Saved in this browser' : '');
+
+/* ---------- Save to estimator dialog ---------- */
+let savePlan = null;
+async function startSaveEst() {
+  const dlg = $('#save-dialog'); $('#save-go').disabled = true; savePlan = null;
+  $('#save-msg').innerHTML = '<p class="hint">Checking the estimator…</p>'; if (!dlg.open) dlg.showModal();
+  const orig = await ORIG.get();
+  if (!orig) {
+    $('#save-msg').innerHTML = `<p>The original estimator file is not stored in this browser any more. Pick <b>${h(S.source.file)}</b> again and the app will write your changes into it.</p>
+      <div class="row" style="justify-content:flex-start"><button class="btn primary" data-act="pickOrig">Choose the original file</button></div>`;
+    return;
+  }
+  try {
+    const wb = await readWorkbook(orig.buf);
+    const plan = await planEstimatorSave(S, wb); savePlan = { plan, wb, orig };
+    const outName = nextRevName(orig.name);
+    const li = a => a.map(x => `<li>${h(x)}</li>`).join('');
+    const appP = R.price, diff = appP - plan.expected;
+    $('#save-msg').innerHTML = `<p class="file">From ${h(orig.name)}, saved as <b>${h(outName)}</b>. The original is not changed.</p>
+      ${plan.blockers.length ? `<div class="block bad"><b>Fix these first</b><ul>${li(plan.blockers)}</ul></div>` : ''}
+      <div class="preview"><b>${plan.changes.length ? 'Changes' : 'No value changes'}</b>${plan.changes.length ? `<ul>${li(plan.changes)}</ul>` : '<p class="hint" style="margin:4px 0 0">The file will be saved as it is, set to recalculate when Excel opens it.</p>'}</div>
+      ${plan.notes.length ? `<div class="block"><b>Good to know</b><ul>${li(plan.notes)}</ul></div>` : ''}
+      ${plan.blockers.length ? '' : `<p>Once Excel recalculates, the Financial tab should show about <b>${money(plan.expected)}</b>${Math.abs(diff) >= 1 ? `; the app shows ${money(appP)} because it also counts what is listed under Good to know` : ', the same as the app'}.</p>`}
+      <p class="hint">Excel recalculates when it opens the file and asks to save on close. Macros, formatting and every other tab are kept as they are.</p>`;
+    $('#save-go').disabled = !!plan.blockers.length; savePlan.outName = outName;
+  } catch (err) { $('#save-msg').innerHTML = `<p class="err">${h(err.message || 'Could not read the original file.')}</p>`; }
+}
+async function useOrigFile(file) {
+  const buf = await file.arrayBuffer();
+  if (file.name !== S.source.file && !confirm(`This estimate came from ${S.source.file}. Use ${file.name} instead? Rows are matched by position, so it must be the same workbook.`)) return;
+  await ORIG.put(file.name, buf); startSaveEst();
+}
+async function finishSaveEst() {
+  if (!savePlan || savePlan.plan.blockers.length) return;
+  $('#save-go').disabled = true; $('#save-msg').insertAdjacentHTML('beforeend', '<p class="hint">Writing the file…</p>');
+  try {
+    const { blob, skipped } = await writeEstimator(savePlan.orig.buf, savePlan.wb, savePlan.plan);
+    downloadBlob(savePlan.outName, blob);
+    savePlan.plan.assign.forEach(a => { const t = S.tasks.find(x => x.id === a.id); if (t) { t.srcTab = a.tab; t.srcRow = a.row; t.pmBase = a.pmBase; } });
+    $('#save-dialog').close(); commit();
+    status(`Saved ${savePlan.outName}${skipped.length ? `; ${skipped.length} cell${skipped.length === 1 ? '' : 's'} left as they were` : ''}`);
+    if (skipped.length) alert(`These cells hold shared formulas and were left as they were: ${skipped.join(', ')}`);
+  } catch (err) { $('#save-msg').insertAdjacentHTML('beforeend', `<p class="err">${h(err.message || 'Could not write the file.')}</p>`); }
+}
 
 </script>
 </body>
