@@ -297,6 +297,7 @@ dialog .block.bad { background: #FDECEA; }
 @media (prefers-color-scheme: dark) { dialog .block.bad { background: #3a1d1b; } }
 dialog .block ul, dialog .preview ul { margin: 6px 0 0; padding-left: 18px; }
 dialog .block li, dialog .preview li { margin: 3px 0; }
+footer .ver { margin-left: 14px; opacity: .8; }
 
 </style>
 </head>
@@ -313,7 +314,7 @@ dialog .block li, dialog .preview li { margin: 3px 0; }
 <div class="statusline" id="statusline" role="status" aria-label="Estimate totals" hidden></div>
 <footer>
   <span>Draft estimate. A qualified person reviews hours, rates and margin before anything is sent. Data stays in this browser and in the Excel files you save.</span>
-  <span id="status" role="status" aria-live="polite"></span>
+  <span><span id="status" role="status" aria-live="polite"></span> <span class="ver">Version 26 Nov 2026</span></span>
 </footer>
 <dialog id="xl-dialog" aria-labelledby="xl-title">
   <h2 id="xl-title">Open an Excel workbook</h2>
@@ -424,6 +425,7 @@ function normalize(q) {
   q.tasks.forEach(t => { if (!t.id) t.id = uid('t'); if (!ids.has(t.ws)) t.ws = first; if (t.pmBase === undefined) t.pmBase = true; });
   q.expenses.forEach(x => { if (!x.id) x.id = uid('x'); if (!ids.has(x.ws)) x.ws = first; });
   if (q.source === undefined) q.source = null;
+  if (q.link === undefined) q.link = q.source && q.source.kind === 'estimator' ? { file: q.source.file } : null;
   if (!q.matrix || typeof q.matrix !== 'object') q.matrix = blankMatrix();
   const M = q.matrix; if (!Array.isArray(M.types)) M.types = blankMatrix().types; if (!Array.isArray(M.mix)) M.mix = []; if (!Array.isArray(M.lines)) M.lines = [];
   M.types.forEach(t => { if (!t.id) t.id = uid('k'); if (!Array.isArray(t.hours)) t.hours = []; while (t.hours.length < 7) t.hours.push(null); if (!Array.isArray(t.stages)) t.stages = []; if (!t.basis) t.basis = 'scale'; });
@@ -776,10 +778,18 @@ async function extractEstimator(wb, fileName, picks) {
   expenses.forEach(e => { if (e.sp && !setpoints.some(s => s.id === e.sp)) { e.unit = num(e.unit); e.sp = null; } });
   const approval = await readDOA(wb);
   const first = picks[0] ? (await wb.sheet(picks[0].name)) : null;
-  const payOn = fin && /^on$/i.test(str(fin.H33));
-  const commissioned = fin ? num(fin.R28) + num(fin.S29) + num(fin.R37) : 0;
-  if (payOn) notes.push(`Extended payment terms are on in the workbook and add ${money(num(fin.R33))}. The app does not apply them yet.`);
-  if (Math.abs(commissioned) > 1) notes.push(`The workbook has ${money(commissioned)} of commissioned software, which the app does not carry yet.`);
+  // Find these rows by their labels: their row numbers differ between template versions
+  let payOn = false, payAmt = 0, commissioned = 0;
+  const picked = new Set(picks.map(p => p.name));
+  if (fin) for (let r = 9; r <= 80; r++) {
+    const B = str(fin['B' + r]), E = str(fin['E' + r]);
+    if (/commissioned/i.test(B) || /commissioned/i.test(E)) commissioned += num(fin['R' + r]);
+    else if (/price adjustment/i.test(E)) { payOn = /^on$/i.test(str(fin['H' + r])); payAmt = num(fin['R' + r]); }
+    else if (B && !/^template/i.test(B) && !picked.has(B) && !/^no/i.test(str(fin['C' + r])) && Math.abs(num(fin['R' + r])) > 1)
+      notes.push(`${B} on the Financial tab adds ${money(num(fin['R' + r]))}, but it is not an estimating tab the app can read.`);
+  }
+  if (payOn) notes.push(`Extended payment terms are on in the workbook and add ${money(payAmt)}. The app does not apply them yet.`);
+  if (Math.abs(commissioned) > 1) notes.push(`The workbook has ${money(commissioned)} of commissioned software on the Commissioned_Software tab, which the app does not carry yet.`);
   const fn = async n => { const v = await wb.named(n); return isNum(v) ? v : null; };
   const doa = await wb.sheet('DOA');
   return {
@@ -1599,8 +1609,21 @@ function nextRevName(name) {
   if (m && /[a-y]/i.test(m[2])) return m[1] + String.fromCharCode(m[2].charCodeAt(0) + 1) + m[3];
   return name.replace(/(\.xlsm|\.xlsx)?$/i, ' (edited)$1');
 }
+async function tabWbsList(wb, tab, c) {
+  const out = [];
+  const dvC = (await wb.validations(tab)).find(d => d.sqref.split(/\s+/).some(rg => { const m = rg.match(/^C(\d+)(?::C(\d+))?$/); return m && 10 >= +m[1] && 10 <= +(m[2] || m[1]); }));
+  const src = dvC && dvC.f1.match(/\$?([A-Z]+)\$?(\d+)/);
+  if (src) for (let r = +src[2]; r < +src[2] + 80; r++) { const v = str(c[src[1] + r]); if (!v) break; out.push(v); }
+  return out;
+}
+const spName = (S, id) => {
+  if (/_SP$/.test(id || '')) return id;
+  const sp = S.setpoints.find(x => x.id === id); if (!sp) return null;
+  const m = SETPOINT_NAMES.find(([, label]) => label.toLowerCase() === String(sp.name).trim().toLowerCase()); return m ? m[0] : null;
+};
 async function planEstimatorSave(S, wb) {
   const edits = {}, changes = [], notes = [], blockers = [], assign = [];
+  let kept = 0; // amounts the estimator keeps that the app does not model (materials, subcontracts, commissioned software)
   const put = (sheet, ref, spec, label) => { (edits[sheet] = edits[sheet] || {})[ref] = spec; if (label) changes.push(label); };
   const val = (c, ref) => (c ? c[ref] : null);
   const lvl = id => S.levels.find(l => l.id === id);
@@ -1621,19 +1644,33 @@ async function planEstimatorSave(S, wb) {
     let pmRow = null; for (let r = 10; r <= 500; r++) if (c['D' + r] === 900005) { pmRow = r; break; }
     if (!pmRow) { blockers.push(`Could not find the Project Management row on the ${tab} tab.`); continue; }
     const rows = []; for (let r = 10; r <= pmRow - 2; r++) rows.push(r);
+    if (w.include !== false) {
+      let lab = 0, exp = 0; for (let r = pmRow; r <= pmRow + 80; r++) { const d = str(c['D' + r]); if (/^labor totals$/i.test(d)) lab = num(c['AJ' + r]); if (/^expense totals$/i.test(d)) { exp = num(c['AJ' + r]); break; } }
+      const other = num(c.AJ5) - lab - exp; if (Math.abs(other) > 1) { kept += other; notes.push(`${tab} keeps ${money(other)} of materials or subcontracts, which the app does not edit.`); }
+    }
     const pmF = await wb.formula(tab, 'J' + (pmRow + 1)); const rg = pmF && pmF.match(/SUM\(\s*\$?N\$?(\d+)\s*:\s*\$?N\$?(\d+)\s*\)/i);
     const inPm = r => (rg ? r >= +rg[1] && r <= +rg[2] : true);
-    const mine = t => t.srcTab === tab && rows.includes(t.srcRow);
-    const claimed = new Set(tasks.filter(mine).map(t => t.srcRow));
     const wasTask = r => !!str(val(c, 'G' + r)) || num(val(c, 'J' + r)) + num(val(c, 'K' + r)) + num(val(c, 'L' + r)) > 0;
+    const linkedTask = t => t.srcTab === tab && rows.includes(t.srcRow);
+    // Tasks without a remembered row (an app workbook, or a newer estimate) are matched by description and role
+    const matchRow = {}; const taken = new Set(tasks.filter(linkedTask).map(t => t.srcRow));
+    for (const t of tasks.filter(t => !linkedTask(t))) {
+      const code = (lvl(t.level) || {}).code || '';
+      const r = rows.find(r => !taken.has(r) && wasTask(r) && str(val(c, 'G' + r)).toLowerCase() === str(t.name).toLowerCase() && str(val(c, 'F' + r)) === code);
+      if (r) { matchRow[t.id] = r; taken.add(r); }
+    }
+    const rowOf = t => (linkedTask(t) ? t.srcRow : matchRow[t.id]);
+    const mine = t => !!rowOf(t);
+    const claimed = new Set(tasks.filter(mine).map(rowOf));
     const free = rows.filter(r => !claimed.has(r) && !wasTask(r)).concat(rows.filter(r => !claimed.has(r) && wasTask(r)));
     const fresh = tasks.filter(t => !mine(t));
     if (fresh.length > free.length) { blockers.push(`${tab} needs ${fresh.length - free.length} more task row${fresh.length - free.length === 1 ? '' : 's'}. In Excel, use Copy & Replicate Rows on ${tab}, save, then open the file here again and redo the new tasks.`); continue; }
-    const wbsOpts = w.wbsOptions || [];
+    const wbsOpts = (await tabWbsList(wb, tab, c)).concat(w.wbsOptions || []);
     const wbsFor = t => {
       if (t.wbsFull) return t.wbsFull;
       const ph = (t.phase || '').trim().toLowerCase(); if (!ph) return '';
       const same = tasks.find(x => x.wbsFull && (x.phase || '').trim().toLowerCase() === ph); if (same) return same.wbsFull;
+      const r0 = rowOf(t); const curC = r0 ? str(val(c, 'C' + r0)) : ''; if (curC && cleanPhase(curC.slice(7), curC).toLowerCase() === ph) return curC;
       const o = wbsOpts.find(x => cleanPhase(String(x).slice(7), x).toLowerCase() === ph); return o || '';
     };
     let added = 0, changed = 0, cleared = 0;
@@ -1657,7 +1694,19 @@ async function planEstimatorSave(S, wb) {
       }
       return n;
     };
-    for (const t of tasks.filter(mine)) { const n = writeTask(t, t.srcRow, true); if (n) changed++; }
+    for (const t of tasks.filter(mine)) { const n = writeTask(t, rowOf(t), true); if (n) changed++; if (!linkedTask(t)) assign.push({ id: t.id, tab, row: rowOf(t), pmBase: inPm(rowOf(t)) }); }
+    // Place each new task in the first blank row after the last task of the same phase, so related work stays together
+    const phaseAt = r => { const own = tasks.find(t => rowOf(t) === r); if (own) return (own.phase || '').trim().toLowerCase(); const cc = str(val(c, 'C' + r)); return wasTask(r) && cc ? cleanPhase(cc.slice(7), cc).toLowerCase() : ''; };
+    const pool = free.slice(); const placed = [];
+    for (const t of fresh) {
+      const ph = (t.phase || '').trim().toLowerCase();
+      const anchors = rows.filter(r => (claimed.has(r) || placed.includes(r)) && ph && (phaseAt(r) === ph || (placed.includes(r) && fresh[placed.indexOf(r)] && (fresh[placed.indexOf(r)].phase || '').trim().toLowerCase() === ph)));
+      const last = anchors.length ? Math.max(...anchors) : Math.max(0, ...rows.filter(r => claimed.has(r) || placed.includes(r)));
+      const empties = pool.filter(r => !wasTask(r));
+      const pick = [...pool].sort((x, y) => x - y).find(r => r > last) ?? empties[0] ?? pool[0]; // a row freed by a deleted task is fine; it gets overwritten
+      pool.splice(pool.indexOf(pick), 1); placed.push(pick);
+    }
+    free.length = 0; free.push(...placed, ...pool);
     for (const [i, t] of fresh.entries()) {
       const r = free[i]; writeTask(t, r, false); assign.push({ id: t.id, tab, row: r, pmBase: inPm(r) }); added++;
       if (!inPm(r) && rg) notes.push(`${tab} row ${r} is outside the tab's PM formula (rows ${rg[1]} to ${rg[2]}), so the estimator adds no PM hours for "${t.name || 'the new task'}". Widen the PM formula in Excel if it should count.`);
@@ -1665,7 +1714,7 @@ async function planEstimatorSave(S, wb) {
     for (const r of free.slice(fresh.length)) {
       if (wasTask(r)) { ['C', 'F', 'G', 'I', 'J', 'K', 'L'].forEach(k => { if (!sameVal(val(c, k + r), null)) put(tab, k + r, { clear: true }); }); cleared++; }
     }
-    for (const t of tasks.filter(mine)) { const jf = await wb.formula(tab, 'J' + t.srcRow); if (jf && edits[tab] && edits[tab]['J' + t.srcRow]) notes.push(`${tab} row ${t.srcRow}: hours were a formula (${jf.slice(0, 40)}); the new value replaces it.`); }
+    for (const t of tasks.filter(mine)) { const jf = await wb.formula(tab, 'J' + rowOf(t)); if (jf && edits[tab] && edits[tab]['J' + rowOf(t)]) notes.push(`${tab} row ${t.srcRow}: hours were a formula (${jf.slice(0, 40)}); the new value replaces it.`); }
     if (added) changes.push(`${tab}: ${added} new task${added === 1 ? '' : 's'} in row${added === 1 ? '' : 's'} ${free.slice(0, added).join(', ')}`);
     if (changed) changes.push(`${tab}: ${changed} task${changed === 1 ? '' : 's'} changed`);
     if (cleared) changes.push(`${tab}: ${cleared} deleted task${cleared === 1 ? '' : 's'} cleared`);
@@ -1686,9 +1735,10 @@ async function planEstimatorSave(S, wb) {
     }
     const used = {}; let expChanged = 0;
     for (const x of exps) {
-      if (!x.sp || !spRow[x.sp]) { blockers.push(`Expense "${x.desc || 'Custom'}" on ${w.name} has no matching standard row on ${tab}. Use one of the standard expense types, or add the row in Excel.`); continue; }
-      if (used[x.sp]) { blockers.push(`${w.name} has two ${x.desc || x.sp} expenses; the estimator has one row per type. Combine them into one line.`); continue; }
-      used[x.sp] = x;
+      const key = spName(S, x.sp);
+      if (!key || !spRow[key]) { blockers.push(`Expense "${x.desc || 'Custom'}" on ${w.name} has no matching standard row on ${tab}. Use one of the standard expense types, or add the row in Excel.`); continue; }
+      if (used[key]) { blockers.push(`${w.name} has two ${x.desc || x.sp} expenses; the estimator has one row per type. Combine them into one line.`); continue; }
+      used[key] = x;
     }
     for (const [sp, r] of Object.entries(spRow)) {
       const x = used[sp]; let n = 0;
@@ -1715,7 +1765,7 @@ async function planEstimatorSave(S, wb) {
   const escF = await wb.named('Lbr_Cost_Escl_Fctr'), expF = await wb.named('Exp_Cost_Escl_Fctr');
   if (isNum(escF) && !sameVal(+escF.toFixed(8), +num(s.escPct).toFixed(8))) notes.push('Labor escalation is calculated from the Setup escalation table; change it there in Excel.');
   if (isNum(expF) && !sameVal(+expF.toFixed(8), +num(s.expEscPct).toFixed(8))) notes.push('Expense escalation is calculated from the Setup escalation table; change it there in Excel.');
-  for (const x of S.setpoints) if (/_SP$/.test(x.id)) await setName(x.id, x.cost, `Setup: ${x.name} ${money(x.cost, 2)} per ${x.unit}`);
+  for (const x of S.setpoints) { const k = spName(S, x.id); if (k) await setName(k, x.cost, `Setup: ${x.name} ${money(x.cost, 2)} per ${x.unit}`); }
   const setup = await wb.sheet('Setup');
   if (setup) {
     for (let r = 40; r <= 120; r++) {
@@ -1740,7 +1790,14 @@ async function planEstimatorSave(S, wb) {
   assign.forEach(a => { const t = E.tasks.find(x => x.id === a.id); if (t) t.pmBase = a.pmBase; });
   const keep = new Set(); for (const w of E.worksheets) { const c = await wb.sheet(w.srcTab || w.name); if (c && isEstimateTab(c)) keep.add(w.id); }
   E.worksheets = E.worksheets.filter(w => keep.has(w.id)); E.tasks = E.tasks.filter(t => keep.has(t.ws)); E.expenses = E.expenses.filter(x => keep.has(x.ws));
-  const expected = calc(normalize(E)).price;
+  if (fin) for (let r = 9; r <= 80; r++) {
+    const B = str(fin['B' + r]), Ex = str(fin['E' + r]);
+    if (/commissioned/i.test(B) || /commissioned/i.test(Ex)) kept += num(fin['R' + r]);
+    else if (/price adjustment/i.test(Ex) && /^on$/i.test(str(fin['H' + r]))) { kept += num(fin['R' + r]); notes.push('Extended payment terms are on; their adjustment is taken from the file as it stands.'); }
+  }
+  const comm = fin ? [...Array(72).keys()].map(i => i + 9).filter(r => /commissioned/i.test(str(fin['B' + r]))).reduce((a, r) => a + num(fin['R' + r]), 0) : 0;
+  if (Math.abs(comm) > 1) notes.push(`The Commissioned_Software tab keeps ${money(comm)}, which the app does not edit.`);
+  const expected = calc(normalize(E)).price + kept;
   return { edits, changes, notes: [...new Set(notes)], blockers: [...new Set(blockers)], assign, expected };
 }
 async function writeEstimator(buf, wb, plan) {
@@ -1825,11 +1882,10 @@ function fill() {
 function renderTop() {
   const t = (id, label) => `<button class="tab" role="tab" aria-selected="${tab === id}" data-act="tab" data-tab="${id}">${label}</button>`;
   $('#tabs').innerHTML = S ? t('dashboard', 'Dashboard') + t('tasks', 'Price breakdown') + t('complexity', 'Complexity matrix') + t('expenses', 'Expenses') + t('settings', 'Rates and settings') : '';
-  const linked = S && S.source && S.source.kind === 'estimator';
   $('#actions').innerHTML = S
-    ? `<button class="btn" data-act="pickExcel">Open Excel</button>${linked ? '<button class="btn primary" data-act="saveEst">Save to estimator</button>' : '<button class="btn primary" data-act="saveExcel">Save as Excel</button>'}
+    ? `<button class="btn" data-act="pickExcel">Open Excel</button><button class="btn primary" data-act="saveEst">Save to estimator</button>
        <details class="menu"><summary class="btn">More</summary><div class="pop">
-         ${linked ? '<button data-act="saveExcel">Save as app workbook (.xlsx)</button>' : ''}<button data-act="print">Print this page</button><hr>
+         <button data-act="saveExcel">Save as app workbook (.xlsx)</button><button data-act="print">Print this page</button><hr>
          <button data-act="blank">Start a blank estimate</button><button data-act="clear">Remove estimate from this browser</button></div></details>`
     : `<button class="btn primary" data-act="pickExcel">Open Excel</button>`;
 }
@@ -1944,10 +2000,10 @@ function checks() {
   if (src && src.stale) c.push(['info', `${h(src.file)} was saved by this app and has not been recalculated in Excel yet, so the totals stored in it are out of date. Open it in Excel (it recalculates on open) and save it before sending.`]);
   if (src && src.final && isNum(src.final.price) && !src.stale) {
     const diff = R.price - src.final.price;
-    const where = src.kind === 'app' ? `the Summary tab of ${h(src.file)}` : `the workbook's Financial tab (T35)`;
+    const where = src.kind === 'app' ? `the Summary tab of ${h(src.file)}` : `the workbook's Financial tab total`;
     if (Math.abs(diff) < 1) c.push(['ok', `Matches ${where}: ${pct(src.final.margin ?? R.margin)} margin on ${money(src.final.price)}${isNum(src.final.hours) ? `, ${hrs(src.final.hours)} hours` : ''}.`]);
     else {
-      let msg = `${src.kind === 'app' ? `The Summary tab of ${h(src.file)}` : `The workbook's Financial tab (T35)`} shows ${money(src.final.price)}${isNum(src.final.margin) ? ` at ${pct(src.final.margin)}` : ''}. This estimate is ${money(R.price)}, ${diff > 0 ? 'up' : 'down'} ${money(Math.abs(diff))}.`;
+      let msg = `${src.kind === 'app' ? `The Summary tab of ${h(src.file)}` : `The workbook's Financial tab total`} shows ${money(src.final.price)}${isNum(src.final.margin) ? ` at ${pct(src.final.margin)}` : ''}. This estimate is ${money(R.price)}, ${diff > 0 ? 'up' : 'down'} ${money(Math.abs(diff))}.`;
       if (src.kind === 'estimator' && src.tabs) {
         const parts = S.worksheets.filter(w => w.include !== false && src.tabs[w.id]).map(w => ({ w, d: R.ws[w.id].price - src.tabs[w.id].price })).filter(x => Math.abs(x.d) >= 1);
         if (parts.length) msg += ' By worksheet: ' + parts.map(x => `${h(x.w.name)} ${x.d > 0 ? '+' : '−'}${money(Math.abs(x.d))}`).join(', ') + '.';
@@ -1965,8 +2021,9 @@ function checks() {
   }
   if (S.settings.pmRule === 'workbook') {
     const outT = S.tasks.filter(t => t.pmBase === false && (wsById(t.ws) || {}).include !== false);
-    if (outT.length) {
-      const alt = calc({ ...S, settings: { ...S.settings, pmRule: 'all' } });
+    const altP = outT.length ? calc({ ...S, settings: { ...S.settings, pmRule: 'all' } }).price : R.price;
+    if (outT.length && Math.abs(altP - R.price) >= 1) {
+      const alt = { price: altP };
       c.push(['info', `PM follows the workbook rule, which leaves ${outT.length} task line${outT.length > 1 ? 's' : ''} out of the PM base (${outT.slice(0, 3).map(t => h(t.name)).join(', ')}${outT.length > 3 ? ', …' : ''}). Counting them adds ${money(alt.price - R.price)}. <button class="linkish" data-act="pmRule" data-v="all">Count every task</button>`]);
     }
   }
@@ -2227,8 +2284,8 @@ function settingsView() {
       <p class="note">Overall margin below ${pct((a.overall || {}).minGP, 0)} needs ${h(a.tiers[num((a.overall || {}).below)] || '')} up to ${money((a.overall || {}).splitPrice)} and ${h(a.tiers[num((a.overall || {}).above)] || '')} above. Edit the matrix on the Approval tab of a saved workbook.</p>`
       : `<p class="hint">Open the estimator workbook to bring in its DOA tab.</p>`}</section></div>
   <section class="card"><header><h2>Your data</h2></header>
-    <p class="hint" style="margin-bottom:12px">Save as Excel writes a .xlsx with Summary, Worksheets, Tasks, Expenses, Rates and Approval tabs, all with working formulas. Edit it in Excel and open it here again whenever you like. Workbooks hold rates and client details, so store them in approved GrayMatter locations and keep them out of the GitHub repository.</p>
-    <div class="toolbar" style="margin-top:0"><button class="btn primary" data-act="saveExcel">Save as Excel</button><button class="btn" data-act="pickExcel">Open Excel</button><button class="btn danger" data-act="clear">Remove from this browser</button></div>
+    <p class="hint" style="margin-bottom:12px">Save to estimator writes your changes into a copy of the green estimator (.xlsm), keeping its macros and formatting. Save as app workbook writes the app's own .xlsx, which also holds the complexity matrix. Workbooks hold rates and client details, so store them in approved GrayMatter locations and keep them out of the GitHub repository.</p>
+    <div class="toolbar" style="margin-top:0"><button class="btn primary" data-act="saveEst">Save to estimator</button><button class="btn" data-act="saveExcel">Save as app workbook (.xlsx)</button><button class="btn" data-act="pickExcel">Open Excel</button><button class="btn danger" data-act="clear">Remove from this browser</button></div>
     ${S.source ? `<p class="note">Opened from ${h(S.source.file)} on ${h(new Date(S.source.importedAt).toLocaleString())}.</p>` : ''}</section>`;
 }
 
@@ -2324,7 +2381,7 @@ const ACT = {
     }
     try {
       const est = normalize(pending.kind === 'app' ? await extractAppWorkbook(pending.wb, pending.name) : await extractEstimator(pending.wb, pending.name, pending.tabs));
-      if (pending.kind === 'estimator') await ORIG.put(pending.name, pending.buf);
+      if (pending.kind === 'estimator') { await ORIG.put(pending.name, pending.buf); est.link = { file: pending.name }; }
       S = est; ui.ws = null; tab = 'dashboard'; ui.target = ''; $('#xl-dialog').close(); commit(); status(`Opened ${pending.name}`);
     } catch (err) { $('#xl-msg').innerHTML = `<p class="err">${h(err.message)}</p>`; }
   },
@@ -2386,7 +2443,7 @@ async function startExcel(file) {
     pending = { wb, name: file.name, kind: 'estimator', tabs, buf };
     const est = normalize(await extractEstimator(wb, file.name, tabs)); const r = calc(est); const f = est.source.final;
     $('#xl-msg').innerHTML = `<div class="preview">Estimator workbook with <b>${tabs.length}</b> estimating tab${tabs.length === 1 ? '' : 's'}:<ul class="tablist">${tabs.map(t => `<li>${h(t.name)}${t.include ? '' : ' <span class="tag">excluded on the Financial tab</span>'}</li>`).join('')}</ul>
-      ${isNum(f.price) ? `Financial tab (T35): <b>${money(f.price)}</b> at <b>${pct(f.margin)}</b>, ${hrs(f.hours)} hours, approver <b>${h(f.approver || 'not shown')}</b>.<br>` : ''}
+      ${isNum(f.price) ? `Financial tab total: <b>${money(f.price)}</b> at <b>${pct(f.margin)}</b>, ${hrs(f.hours)} hours, approver <b>${h(f.approver || 'not shown')}</b>.<br>` : ''}
       This app calculates <b>${money(r.price)}</b> at <b>${pct(r.margin)}</b>, approver <b>${h(r.approver)}</b>.</div>
       <p class="hint">Tasks, expenses, engineer levels, rates, the expense rate list and the DOA approval matrix come across. Materials, subcontracts and time-and-materials pricing stay in the workbook for now.</p>`;
     $('#xl-go').disabled = false;
@@ -2408,10 +2465,13 @@ let savePlan = null;
 async function startSaveEst() {
   const dlg = $('#save-dialog'); $('#save-go').disabled = true; savePlan = null;
   $('#save-msg').innerHTML = '<p class="hint">Checking the estimator…</p>'; if (!dlg.open) dlg.showModal();
-  const orig = await ORIG.get();
+  let orig = await ORIG.get();
+  if (orig && (!S.link || S.link.file !== orig.name)) orig = null; // stored file belongs to another estimate
   if (!orig) {
-    $('#save-msg').innerHTML = `<p>The original estimator file is not stored in this browser any more. Pick <b>${h(S.source.file)}</b> again and the app will write your changes into it.</p>
-      <div class="row" style="justify-content:flex-start"><button class="btn primary" data-act="pickOrig">Choose the original file</button></div>`;
+    $('#save-msg').innerHTML = (S.link
+      ? `<p>This estimate came from <b>${h(S.link.file)}</b>, but that file is not stored in this browser any more. Choose it again and the app will write your changes into a copy of it.</p>`
+      : `<p>Choose the green estimator (.xlsm) to write this estimate into. Worksheets are matched to tabs by name, and tasks to rows by description and role; new tasks go into spare rows.</p>`) +
+      `<div class="row" style="justify-content:flex-start"><button class="btn primary" data-act="pickOrig">Choose the estimator file</button></div>`;
     return;
   }
   try {
@@ -2422,17 +2482,19 @@ async function startSaveEst() {
     const appP = R.price, diff = appP - plan.expected;
     $('#save-msg').innerHTML = `<p class="file">From ${h(orig.name)}, saved as <b>${h(outName)}</b>. The original is not changed.</p>
       ${plan.blockers.length ? `<div class="block bad"><b>Fix these first</b><ul>${li(plan.blockers)}</ul></div>` : ''}
+      ${S.source && S.source.kind === 'estimator' && S.source.file === orig.name ? '' : `<div class="block"><b>This estimate was not opened from this file.</b> Its rates, margins and project details replace the file's wherever they differ, so check the Setup lines below.</div>`}
       <div class="preview"><b>${plan.changes.length ? 'Changes' : 'No value changes'}</b>${plan.changes.length ? `<ul>${li(plan.changes)}</ul>` : '<p class="hint" style="margin:4px 0 0">The file will be saved as it is, set to recalculate when Excel opens it.</p>'}</div>
       ${plan.notes.length ? `<div class="block"><b>Good to know</b><ul>${li(plan.notes)}</ul></div>` : ''}
-      ${plan.blockers.length ? '' : `<p>Once Excel recalculates, the Financial tab should show about <b>${money(plan.expected)}</b>${Math.abs(diff) >= 1 ? `; the app shows ${money(appP)} because it also counts what is listed under Good to know` : ', the same as the app'}.</p>`}
+      ${plan.blockers.length ? '' : `<p>Once Excel recalculates, the Financial tab should show about <b>${money(plan.expected)}</b>${Math.abs(diff) >= 1 ? `; the app shows ${money(appP)}, and the difference is what is listed under Good to know` : ', the same as the app'}.</p>`}
       <p class="hint">Excel recalculates when it opens the file and asks to save on close. Macros, formatting and every other tab are kept as they are.</p>`;
     $('#save-go').disabled = !!plan.blockers.length; savePlan.outName = outName;
   } catch (err) { $('#save-msg').innerHTML = `<p class="err">${h(err.message || 'Could not read the original file.')}</p>`; }
 }
 async function useOrigFile(file) {
   const buf = await file.arrayBuffer();
-  if (file.name !== S.source.file && !confirm(`This estimate came from ${S.source.file}. Use ${file.name} instead? Rows are matched by position, so it must be the same workbook.`)) return;
-  await ORIG.put(file.name, buf); startSaveEst();
+  if (S.link && file.name !== S.link.file && !confirm(`This estimate came from ${S.link.file}. Write it into ${file.name} instead? Tasks are matched to rows by description and role.`)) return;
+  if (S.link && file.name !== S.link.file) S.tasks.forEach(t => { delete t.srcRow; delete t.srcTab; });
+  await ORIG.put(file.name, buf); S.link = { file: file.name }; save(); startSaveEst();
 }
 async function finishSaveEst() {
   if (!savePlan || savePlan.plan.blockers.length) return;
